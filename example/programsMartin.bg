@@ -2,12 +2,24 @@
 // These programs will not represent the final syntax of BookishGoogles.
 // The file extension '.bg' is just short for BookishGoogles.
 // My idea is to use these '//' for a single line comment and '/* ------ */' for multiline comment.
+// When stating variable types i've chosen ':-' .. Because Excel uses ':' for stating ranges.
 
 
-//If-then-else statements.
-myNumberVar = A2 : Number;;
-myStringVar = B2 : String;;
+// If-then-else statements.
+GLOBAL myNumberVar = A2 :- Number;;
+GLOBAL myStringVar = B2 :- String;;
 
+
+form IFTHENELSE () :-> String
 IF myNumberVar = 10
     THEN myStringVar === "The number was 10"
 ELSE myStringVar === "The number wasn't 10" ;;
+
+
+// Multiplication function (formula ?)
+PRIVATE aValue = A1 :- Number;;
+PRIVATE anotherValue = A2 :- Number;;
+PRIVATE aThirdValue => A3 = MULTIPLICATION(aValue, anotherValue) :- Number;;
+
+form MULTIPLICATION (parameter1, parameter2) :-> Number
+    returns parameter1 * parameter2;;
