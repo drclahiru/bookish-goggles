@@ -1,4 +1,13 @@
-// These programs will not represent the final syntax of BookishGoogles.
 // These are lastly updated 26 Feb. 2021
+// These programs will not represent the final syntax of BookishGoogles.
+// The file extension '.bg' is just short for BookishGoogles.
+// My idea is to use these '//' for a single line comment and '/* ------ */' for multiline comment.
 
 
+//If-then-else statements.
+myNumberVar = A2 : Number;;
+myStringVar = B2 : String;;
+
+IF myNumberVar = 10
+    THEN myStringVar === "The number was 10"
+ELSE myStringVar === "The number wasn't 10" ;;
