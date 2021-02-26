@@ -23,3 +23,9 @@ PRIVATE aThirdValue => A3 = MULTIPLICATION(aValue, anotherValue) :- Number;;
 
 form MULTIPLICATION (parameter1, parameter2) :-> Number
     returns parameter1 * parameter2;;
+
+//Factorial - Recursion
+
+form FACTORIAL => n * FACTORIAL (n - 1) :- Number;;
+
+GLOBAL aFactorialVar = FACTORIAL (5) :- Number;; // This returns 120
