@@ -1,0 +1,41 @@
+// Lets keep this file as a blueprint 
+
+// This is a single line comment
+
+/* This is
+    a multiline
+    comment
+*/
+
+/*
+emptyList = []
+listOfNumbers = [5, 9, 8, 5]
+booleanTrue = True
+booleanFalse = False
+andOperator = &&
+orOperator = ||
+*/
+
+// Get a list of data from the spreadsheet
+// We can consider reading data from spredsheet is always stored in a list
+// We have to define getDataList function
+getDataList listOfNumbers = [5, 6, 8, 4]
+
+// SUM function
+// Using recursion and pattern matching
+SUM [] = 0
+SUM (x:xs) = x + SUM xs
+
+// GREATERTHAN function
+// We use boolean True or False
+GREATERTHAN [] = True
+GREATERTHAN [x] = True
+GREATERTHAN (x:y:xs) = x <= y && GREATERTHAN (y:xs)
+
+/*
+Problems so far
+  Do we allow multitype lists?
+  If so how we plan to ommit unnessasary data when we use lists in functions
+  In spredsheet when we start typing the function name it decides how many data entries it needs.
+  For example minimum two for GREATERTHAN function. How do we implement it in our language
+*/
