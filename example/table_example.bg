@@ -1,0 +1,142 @@
+// the language should have some special feature/s useful for spreadsheet programming language, else it will be quite general purpose
+// both VBA and xlwings include predefined functions such as GetCell/GetCellRange/GetWorkbook/GetWorkSheet GetCell(A1).value
+// GetCellRange(A1:A4).list. It seems really important in order for the language to be usable
+// but how can we do that since we only import data and consider no established connection with the spreadsheet?
+
+
+
+
+
+
+//a  datatype structure that is to be bound with tables
+// version one
+struct Product{
+    id: Number,
+    quantity: Number,
+    onStock: Bool
+    price: Number
+}
+// version 2. maybe it would make sence to call it table rather than struct - typically this structure will be used to group together columns that represent one table
+table Product{
+    id: Number;
+    quantity: Number;
+    onStock: Bool;
+    price: Number;
+}
+
+//data imported from the spreadsheet in a form of list of key/value lists - JSON?
+// this would give the advantage of knowing which columns together form a table, and maybe a better readability and easier manipulation?
+//     data representation Version 1
+list tableProduct = [ [A1:5632145895, A2:8547412565, A3:5478521456, A4:5632587412, A5:5698254695],
+           [B1:10, B2:20, B3:5, B4:4, B5:2] ,
+           [C1:0, C2:1, C3:0, C4:1, C5:0],
+           [D1:0, D2:1, D3:0, D4:1, D5:0]
+]
+//this is maybe not so good afterall. It will be better to not consider columns as lists/key/value lists as default, but as individual cells. However there should be an option to
+// define a group of cells/column as a list.
+
+//     data representation Version 2
+
+Range(A1:A5) = (5632145895, 8547412565, 5478521456, 5632587412, 5698254695 );
+Range(B1:B5) = (10,20,5,4,2);
+Range(C1:C5) = (0,1,0,1,0);
+Range(D1:D5) = (1,0,0,1,1);
+
+Cell(E8) = 5;
+Range(E8) = (5);
+
+//VBA and xlwings use spreadsheet-specific keywords such as Cell and Range. Maybe we could also use these terms in order to make the language more relatable to the spreadsheet?
+//in VBA it is also possible to specify a Range of a rectangular shape: Range("A1:C4"). It looks like a good feature that could be reused.
+
+Range(A1:B2) = ((1, 8), (3, 4));
+
+//data binding Version 1
+Product p <- tableProduct {
+    id:A,
+    quantity:B,
+    onStock:C
+    price:D
+}
+
+//data binding Version 2
+Products p <- Range(A1:D5) {
+    id: Range(A1:A5);
+    quantity: Range(B1:B5);
+    onStock: Range(C1:C5);
+    price: Range(D1:D5);
+}
+
+
+//even if the data is in the form of key/value lists, by default only values will be accessed
+
+//Range is a data type that can represent a single value, or a list
+Range discountedList <- (p.price * 0.90);
+Range stockAndQuantity <- WHERE (p.onStock AND p.price <= 95);
+
+// here a location is assigned. a function will only be computed if it is invoked by assigning location for the result.
+Range(F1:F5) = discountedList;
+Range(G1:?) = stockAndQuantity;
+
+form GetQuantity is Number <- p.quantity;
+   
+Range(H1) = GetQuantity(B5);
+
+form SORT_ZtoA is Range
+    | SORT_ZtoA [] -> []
+    | SORT_ZtoA [a:bz] -> SORT_ZtoA bz CONC [a];
+
+Range(X1:?) = SORT_ZtoA(p.price);
+
+
+
+
+//a summary of Version 2
+
+//data representation
+Range(A1:A5) = (5632145895, 8547412565, 5478521456, 5632587412, 5698254695 );
+Range(B1:B5) = (10,20,5,4,2);
+Range(C1:C5) = (0,1,0,1,0);
+Range(D1:D5) = (1,0,0,1,1);
+
+Cell(E8) = 5;
+Range(E8) = (5);
+
+//defining data structure
+table Product{
+    id: Number;
+    quantity: Number;
+    onStock: Bool;
+    price: Number;
+}
+
+//data binding Version 2
+Products p <- Range(A1:D5) {
+    id: Range(A1:A5);
+    quantity: Range(B1:B5);
+    onStock: Range(C1:C5);
+    price: Range(D1:D5);
+}
+
+// Functions and their assignment to a spreadsheet location
+
+//Range is a data type that can represent a single value, or a list
+Range discountedList <- (p.price * 0.90);
+Range stockAndQuantity <- WHERE (p.onStock AND p.price <= 95);
+
+// here a location is assigned. a function will only be computed if it is invoked by assigning location for the result.
+Range(F1:F5) = discountedList;
+Range(G1:?) = stockAndQuantity;
+
+form GetQuantity is Number <- p.quantity;
+   
+Range(H1) = GetQuantity(B5);
+
+form SORT_ZtoA is Range
+    | SORT_ZtoA [] -> []
+    | SORT_ZtoA [a:bz] -> SORT_ZtoA bz CONC [a];
+
+Range(X1:?) = SORT_ZtoA(p.price);
+
+
+
+

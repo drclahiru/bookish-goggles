@@ -1,0 +1,61 @@
+import "file.xlsx"
+
+--- VARS are represented as functions with returns, basis of functional praradigm
+name: $A5$;
+list: [$A2$:$B15$];
+*/ 
+this is Multiline comment
+Using ; in the end of a function to avoid ambiguity (optional)
+if's end in end-if
+Might want to use brackets to avoid ambiguity when functions are called e.g.
+(fun1 param1) + (fun2 param2)
+Recursion done using pattern matching.
+Operators 
++ , - , * , / , ++ (concat) 
+might want to replace the : with = 
+or some other sign but i use : to avoid ambiguity
+also the ; can be replaced/removed too
+using parantheses like in lisp is also understandable by me.
+/*
+
+--- this is comment
+--- SUM
+sum []: 
+	0
+;
+sum (head:tail):
+	head + sum(tail)
+;
+---call=>
+sum list;
+--- PRINT
+func:
+  print('hello world')
+;
+--- AVERAGE 
+average [] length accum:
+	accum/length
+;
+average (head:tail) length accum:
+	average tail length (accum+head)
+;
+--- Length
+length [] = 0
+;
+length (head:tail):
+ 1+ (length tail)
+;
+--- AVERAGE USING SUM AND LENGTH
+
+average (head:tail):
+	(sum (head:tail))/ length (head:tail)
+;
+--- if statement
+if x<y then something else something endif
+--- list reverse
+reverse [] accum:
+	accum
+;
+reverse (head:tail) accum:
+	reverse tail (head:accum)
+;
