@@ -35,7 +35,7 @@ list tableProduct = [ [A1:5632145895, A2:8547412565, A3:5478521456, A4:563258741
 //this is maybe not so good afterall. It will be better to not consider columns as lists/key/value lists as default, but as individual cells. However there should be an option to
 // define a group of cells/column as a list.
 
-//     data representation Version 1
+//     data representation Version 2
 
 Range(A1:A5) = (5632145895, 8547412565, 5478521456, 5632587412, 5698254695 );
 Range(B1:B5) = (10,20,5,4,2);
@@ -86,3 +86,57 @@ form SORT_ZtoA is Range
     | SORT_ZtoA [a:bz] -> SORT_ZtoA bz CONC [a];
 
 Range(X1:?) = SORT_ZtoA(p.price);
+
+
+
+
+//a summary of Version 2
+
+//data representation
+Range(A1:A5) = (5632145895, 8547412565, 5478521456, 5632587412, 5698254695 );
+Range(B1:B5) = (10,20,5,4,2);
+Range(C1:C5) = (0,1,0,1,0);
+Range(D1:D5) = (1,0,0,1,1);
+
+Cell(E8) = 5;
+Range(E8) = (5);
+
+//defining data structure
+table Product{
+    id: Number;
+    quantity: Number;
+    onStock: Bool;
+    price: Number;
+}
+
+//data binding Version 2
+Products p <- Range(A1:D5) {
+    id: Range(A1:A5);
+    quantity: Range(B1:B5);
+    onStock: Range(C1:C5);
+    price: Range(D1:D5);
+}
+
+// Functions and their assignment to a spreadsheet location
+
+//Range is a data type that can represent a single value, or a list
+Range discountedList <- (p.price * 0.90);
+Range stockAndQuantity <- WHERE (p.onStock AND p.price <= 95);
+
+// here a location is assigned. a function will only be computed if it is invoked by assigning location for the result.
+Range(F1:F5) = discountedList;
+Range(G1:?) = stockAndQuantity;
+
+form GetQuantity is Number <- p.quantity;
+   
+Range(H1) = GetQuantity(B5);
+
+form SORT_ZtoA is Range
+    | SORT_ZtoA [] -> []
+    | SORT_ZtoA [a:bz] -> SORT_ZtoA bz CONC [a];
+
+Range(X1:?) = SORT_ZtoA(p.price);
+
+
+
+
