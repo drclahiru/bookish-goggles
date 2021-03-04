@@ -1,6 +1,6 @@
 // An interface could be reusable across multiple files to ensure
 // that things "interface" correctly 
-interface Person {
+struct Person {
     name: String,
     age: Number
 }
@@ -9,20 +9,34 @@ interface Person {
 A1..4 = ["a", "b", "c", "d"]
 B1..4 = [20, 24, 28, 32]
 
+// the above is shorthand for the following
+A1 = "a"
+A2 = "b"
+A3 = "c"
+A4 = "d"
+B1 = 20
+B2 = 24
+B3 = 28
+B4 = 32
+
 // Create a binding to the table using the Person interface and specifying the begining and end.
 table Persons = Person[1..4] {
     name: A,
     age: B,
 }
 
-let get_age = \x -> x.age
+// Bind a lambda to the identifier `get_age`
+let get_age = \x -> {
+    x.age
+}
 
 // Do some calculations using the table we defined. Functions such 
 // as map, reduce, filter, etc. would be built-in for tables.
 // (and lists too I suppose).
 let average_age = Persons
     .map(get_age)
-    .reduce(\sum x -> sum + x, 0) / Persons.length()
+    .reduce(\sum x -> {sum + x}, 0) / Persons.length()
+
 
 // Maybe we have a print function that works for all types?
 average_age.print()
