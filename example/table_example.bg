@@ -1,0 +1,36 @@
+//a  datatype structure that is to be bound with tables
+struct Product{
+    id: Number,
+    quantity: Number,
+    onStock: Bool
+    price: Number
+}
+
+//data imported from the spreadsheet in a form of list of key/value lists - JSON?
+// this would give the advantage of knowing which columns together form a table, and maybe a better readability and easier manipulation?
+list tableProduct = [ [A1:5632145895, A2:8547412565, A3:5478521456, A4:5632587412, A5:5698254695],
+           [B1:10, B2:20, B3:5, B4:4, B5:2] ,
+           [C1:0, C2:1, C3:0, C4:1, C5:0],
+           [D1:0, D2:1, D3:0, D4:1, D5:0]
+]
+
+//data binding
+Product p <- tableProduct {
+    id:A, 
+    quantity:B,
+    onStock:C
+    price:D
+}
+
+//even though the data is in the form of key/value lists, by default only values will be accessed
+
+list discountedList <- (p.price * 0.90)
+list stockAndQuantity <- WHERE (p.onStock AND p.price <= 95)
+
+form GETQUANTITY :-> Number
+    returns p.quantity;;  
+
+
+form SORT_ZtoA :-> List
+    SORT_ZtoA [] => []
+    SORT_ZtoA [a:bz] => SORT_ZtoA bz CONC [a];;
