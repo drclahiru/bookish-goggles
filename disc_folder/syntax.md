@@ -2,9 +2,14 @@
 
 _Trying to be minimalist – just to get things started_
 
+## Data importing
+
+Data will be kept in an excel sheet and our programming language will be used to do computations and stuff from the sheet and output reports or whatever.
+
 ### Types
 
-- Integers
+- String
+- Numbers (doubles under the hood)
 - Lists
 - Boolean
 - Language Features
@@ -12,28 +17,121 @@ _Trying to be minimalist – just to get things started_
 - Recursion
 - Pattern Matching
 
-# Syntax Discussion
-
-- Use names from spreadsheet language
-- UPPERCASE
-
-## Working with tables.
+## If & else
 
 ```
-struct Person[1..30] {
-    Id: A,
-    name: B,
-    age: D
+if x > 90 {
+    "You got a A"
+} elseif x > 80 {
+    "You did not get a B”
+} else {
+    "You did not get a A”
 }
 ```
 
-## IF & ELSE
+## Pattern matching
 
-IF x > 90 THEN "You got a A" ELSE "You did not get a A”
+Default case at the end is required if the pattern is not complete
+
+```
+match x {
+| [] -> []
+| [a:bz] -> concat(bz, [a])
+| _ -> []
+};
+```
+
+## Recursion
+
+```
+let ztoa = (x) {
+    return match x {
+    | [] -> []
+    | [a:bz] -> concat(ztoa(bz), [a])
+    };
+};
+```
+
+## Bindings
+
+```
+let x = 4;
+```
 
 ## Lambda Expression
 
-We’re all kinda fond of Haskell way of handling Lambda Expressions. (\x - > x + 1)
+```
+let get_age = (x) {
+    let age = x.age;
+    return age;
+};
+```
+
+## Type representation
+
+Optional for bindings
+
+```
+let x = 4;
+let x: Number = "4"; // error
+```
+
+Lambda expression type signatures
+
+```
+(Number) -> Number
+```
+
+```
+(Number, Number) -> Number
+```
+
+maybe this?
+
+```
+let f = (x: Number) {
+    return x * x;
+};
+```
+
+## Data representation
+
+```
+Range(sheet1!A1:A5) = (5632145895,8547412565,5478521456,5632587412,5698254695);
+Range(B1:B5) = (10,20,5,4,2);
+Range(C1:C5) = (0,1,0,1,0);
+Range(D1:D5) = (1,0,0,1,1);
+```
+
+```
+Input(sheet1);
+Output(sheet2);
+Range(sheet2!A1:A5) = f(Range(A1:A5));
+```
+
+## Operator precedence
+
+`4 + x * 2` = 4 + (x \* 2)
+multiply and division have higher precedence than addition and subtraction
+
+`a || b && c || d` = ((a || b) && c) || d
+
+`a < 4`
+
+## Structs
+
+```
+struct Person {
+    name: String,
+    age: Number
+}
+
+// Create a binding to the table using the Person struct and specifying the begining and end rows.
+table Persons = Person[1:4] {
+    name: A,
+    age: B,
+}
+```
 
 # Implementation Language
 
@@ -43,10 +141,3 @@ For being able to write some example programs.. It’s agreed upon that the synt
 
 Large programs vs. smaller programs.
 Lisp vs. Haskell.
-
-### Discussion
-
-How do we make the program useful? It has to get data from the outside world, and it also has to output something.
-Do we read from stdin? Read from file? What format?
-Do we output to stdout? Write to file?
-How does input data get used? Does it have to be bound to a table first?
