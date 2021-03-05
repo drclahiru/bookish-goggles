@@ -1,4 +1,4 @@
-# Discussion about syntax and paradigms.
+# Discussion about the language design
 
 _Trying to be minimalist – just to get things started_
 
@@ -8,14 +8,10 @@ Data will be kept in an excel sheet and our programming language will be used to
 
 ### Types
 
-- String
-- Numbers (doubles under the hood)
-- Lists
 - Boolean
-- Language Features
-- Lambda Expressions
-- Recursion
-- Pattern Matching
+- Numbers (doubles under the hood)
+- String
+- Lists(Ranges?)
 
 ## If & else
 
@@ -29,19 +25,9 @@ if x > 90 {
 }
 ```
 
-## Pattern matching
-
-Default case at the end is required if the pattern is not complete
-
-```
-match x {
-| [] -> []
-| [a:bz] -> concat(bz, [a])
-| _ -> []
-};
-```
-
 ## Recursion
+
+Pattern matching is difficult to implement, so maybe it should be postponed for v0.2.
 
 ```
 let ztoa = (x) {
@@ -72,8 +58,9 @@ let get_age = (x) {
 Optional for bindings
 
 ```
-let x = 4;
-let x: Number = "4"; // error
+let x = 4; // x inferred to be Number
+let x: Number = 4; // ok
+let x: Number = "4"; // error because type-mismatch
 ```
 
 Lambda expression type signatures
@@ -86,7 +73,7 @@ Lambda expression type signatures
 (Number, Number) -> Number
 ```
 
-maybe this?
+Nice to have, but not essential:
 
 ```
 let f = (x: Number) {
@@ -106,19 +93,36 @@ Range(D1:D5) = (1,0,0,1,1);
 ```
 Input(sheet1);
 Output(sheet2);
-Range(sheet2!A1:A5) = f(Range(A1:A5));
+Range(sheet2!A1:A5) = f(Range(sheet1!A1:A5));
 ```
 
 ## Operator precedence
 
-`4 + x * 2` = 4 + (x \* 2)
-multiply and division have higher precedence than addition and subtraction
+We should try to match the precedence rules that already exist in excel.
 
-`a || b && c || d` = ((a || b) && c) || d
+TODO: What are the precedence rules in excel?
+
+`4 + x * 2` = `4 + (x \* 2)`
+
+`a || b && c || d` = `((a || b) && c) || d`
 
 `a < 4`
 
+## Pattern matching
+
+Default case at the end is required if the pattern is not complete
+
+```
+match x {
+| [] -> []
+| [a:bz] -> concat(bz, [a])
+| _ -> []
+};
+```
+
 ## Structs
+
+Structs would be nice to have, and should be considered for v0.2.
 
 ```
 struct Person {
@@ -135,9 +139,4 @@ table Persons = Person[1:4] {
 
 # Implementation Language
 
-We’ll use Java. Because it’s the language being used in the CC Course.
-
-For being able to write some example programs.. It’s agreed upon that the syntax will be “haskell like”.. Go nuts!
-
-Large programs vs. smaller programs.
-Lisp vs. Haskell.
+We’ll use Java because it’s the language being used in the CC Course and so the exercises from the course will be more relevant to our compiler work.
