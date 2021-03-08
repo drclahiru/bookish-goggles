@@ -17,9 +17,7 @@ class App {
             .setTrueCase(AST.string("A"))
             .setElseCase(AST.string("B"));
         var aBind = AST.binding("a", a);
-        var b = AST.ifElse(AST.unOp(Operator.Not, AST.binOp(AST.bool(false), Operator.Or, AST.bool(true))))
-            .setTrueCase(AST.number(1))
-            .setElseCase(AST.number(-1.4));
+        var b = AST.unOp(Operator.Not, AST.binOp(AST.bool(false), Operator.Or, AST.bool(true)));
         var bBind = AST.binding("b", b);
 
         var globalScope = AST.program()
