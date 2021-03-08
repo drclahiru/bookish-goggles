@@ -5,7 +5,7 @@ import java.util.stream.*;
 public abstract class AbstractNode {
     public abstract void accept(Visitor v);
 
-    public Stream<BindingNode> children() {
+    public Stream<AbstractNode> children() {
         return Stream.empty();
     }
 }

@@ -16,33 +16,36 @@ public class ReflectiveVisitor implements Visitor {
     // https://www.cse.wustl.edu/~cytron/cacweb/Tutorial/Visitor/
     final void dispatch(Object o) {
         Method method = null;
-        var objectClass = new Object().getClass();
         var nodeClass = o.getClass();
-
+        var c = nodeClass;
+        
         // Try the superclasses
-        for (var c = nodeClass; c != objectClass && method == null; c = c.getSuperclass()) {
+        while (c != Object.class && method == null) {
             try {
                 method = getClass().getMethod("visit", new Class[] { c });
             } catch (NoSuchMethodException e) {
             }
+            c = c.getSuperclass();
         }
 
         // Try the interfaces
-        var class_ = nodeClass;
-        while (method == null && class_ != objectClass) {
-            for (var interface_ : class_.getInterfaces()) {
+        c = nodeClass;
+        while (method == null && c != Object.class) {
+            for (var interface_ : c.getInterfaces()) {
                 try {
                     method = getClass().getMethod("visit", new Class[] { interface_ });
                 } catch (NoSuchMethodException e) {
                 }
             }
-            class_ = class_.getSuperclass();
+            c = c.getSuperclass();
         }
 
         // Otherwise use the defaultVisit method
         if (method == null) {
+            System.out.println(getClass());
+            System.out.println(getClass().getMethods());
             try {
-                method = getClass().getMethod("defaultVisit", new Class[] { objectClass });
+                method = getClass().getMethod("defaultVisit", new Class[] { AbstractNode.class });
             } catch (NoSuchMethodException e) {
                 e.printStackTrace(System.err);
                 System.exit(-1);
@@ -51,11 +54,9 @@ public class ReflectiveVisitor implements Visitor {
         try {
             method.invoke(this, new Object[] { o });
         } catch (IllegalAccessException ex) {
-            ex.printStackTrace(System.err);
             throw new Error("Method " + method + " aborting, bad access: " + ex);
         } catch (InvocationTargetException ex) {
-            ex.printStackTrace(System.err);
-            throw new Error("Method " + method + " aborting: " + ex);
+            throw new Error("Method \"" + method + "\" aborting: " + ex);
         }
     }
 }

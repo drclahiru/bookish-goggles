@@ -43,18 +43,22 @@ public class PrettyPrintVisitor extends ReflectiveVisitor {
         println();
     }
 
-    public void visit(AdditionNode node) {
-        visit(node.left);
-        print(" + ");
-        visit(node.right);
-    }
-
     public void visit(BoolNode node) {
         print("" + node.value);
     }
 
     public void visit(NumberNode node) {
-        print("" + node.value);
+        if (node.value == Math.round(node.value)) {
+            print("" + (long)node.value);
+        } else {
+            print("" + node.value);
+        }
+    }
+
+    public void visit(StringNode node) {
+        print("\"");
+        print(node.value.replace("\\", "\\\\").replace("\"", "\\\""));
+        print("\"");
     }
 
     public void visit(IdentifierNode node) {
@@ -90,6 +94,39 @@ public class PrettyPrintVisitor extends ReflectiveVisitor {
             visit(arg);
         });
         print(")");
+    }
+
+    public void visit(IfElseNode node) {
+        print("if ");
+        visit(node.boolExpr);
+        print(" { ");
+        indentLevel++;
+        visit(node.trueCase);
+        indentLevel--;
+        print(" } else { ");
+        indentLevel++;
+        visit(node.elseCase);
+        indentLevel--;
+        print(" }");
+    }
+
+    public void visit(UnaryOperatorNode node) {
+        print(Utility.operatorToString(node.operator));
+        if (node.expr.getClass() == BinaryOperatorNode.class) {
+            print("(");
+            visit(node.expr);
+            print(")");
+        } else {
+            visit(node.expr);
+        }
+    }
+
+    public void visit(BinaryOperatorNode node) {
+        visit(node.left);
+        print(" ");
+        print(Utility.operatorToString(node.operator));
+        print(" ");
+        visit(node.right);
     }
 
     public void visit(ProgramNode node) {

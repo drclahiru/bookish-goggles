@@ -12,12 +12,20 @@ public class AST {
         return new FunctionInvocationNode(ident(identifier), new ArrayList<Expression>());
     }
 
+    public static BoolNode bool(Boolean value) {
+        return new BoolNode(value);
+    }
+
     public static NumberNode number(double value) {
         return new NumberNode(value);
     }
 
-    public static Expression add(Expression left, Expression right) {
-        return new AdditionNode(left, right);
+    public static StringNode string(String value) {
+        return new StringNode(value);
+    }
+
+    public static BinaryOperatorNode add(Expression left, Expression right) {
+        return new BinaryOperatorNode(left, Operator.Add, right);
     }
 
     public static IdentifierNode ident(String value) {
@@ -46,5 +54,25 @@ public class AST {
 
     public static ProgramNode program() {
         return new ProgramNode(new ArrayList<BindingNode>());
+    }
+
+    public static IfElseNode ifElse(Expression boolExpr) {
+        return new IfElseNode(boolExpr, null, null);
+    }
+
+    public static BinaryOperatorNode binOp(Operator op) {
+        return new BinaryOperatorNode(null, op, null);
+    }
+
+    public static BinaryOperatorNode binOp(Expression left, Operator op, Expression right) {
+        return new BinaryOperatorNode(left, op, right);
+    }
+
+    public static UnaryOperatorNode unOp(Operator op) {
+        return new UnaryOperatorNode(op, null);
+    }
+
+    public static UnaryOperatorNode unOp(Operator op, Expression expr) {
+        return new UnaryOperatorNode(op, expr);
     }
 }
