@@ -15,16 +15,13 @@ public class PrettyPrintVisitor extends ReflectiveVisitor {
             print(", ");
             visit(arg);
         });
-        print(") ");
-        print("{");
+        print(") {");
         println();
         indentLevel++;
         for (var binding : node.body) {
             visit(binding);
         }
-        print("return ");
         visit(node.return_);
-        print(";");
         println();
         indentLevel--;
         print("}");
@@ -34,12 +31,11 @@ public class PrettyPrintVisitor extends ReflectiveVisitor {
         print("let ");
         visit(node.identifier);
         if (node.type != null) {
-            print(": ");
+            print(" ");
             visit(node.type);
         }
         print(" = ");
         visit(node.expr);
-        print(";");
         println();
     }
 
@@ -78,8 +74,7 @@ public class PrettyPrintVisitor extends ReflectiveVisitor {
             print(", ");
             visit(arg);
         });
-        print(")");
-        print(" -> ");
+        print(") -> ");
         visit(node.return_);
     }
 
