@@ -27,8 +27,6 @@ if x > 90 {
 
 ## Recursion
 
-Pattern matching is difficult to implement, so maybe it should be postponed for v0.2.
-
 ```
 let ztoa = (x) {
     return match x {
@@ -109,6 +107,8 @@ TODO: What are the precedence rules in excel?
 `a < 4`
 
 ## Pattern matching
+
+Pattern matching is difficult to implement, so maybe it should be postponed for v0.2.
 
 Default case at the end is required if the pattern is not complete
 
