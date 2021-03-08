@@ -1,6 +1,5 @@
 <ws> ::= " " | "\n" | "\r"
 <ws0> ::= <ws>*
-<ws1> ::= <ws>+
 <character> ::= [a-z] | [A-Z] | [0-9] | <ws>
 <identifier> ::= ([a-z] | "_")+ ([a-z] | [0-9] | "_")*
 <bool> ::= "true" | "false"
@@ -9,13 +8,13 @@
 <positive_number> ::= [0-9]+ | [0-9]+ "." [0-9]+
 <number> ::= "-"? <positive_number>
 <expression> ::= <number> | <bool> | <identifier> | <if_else> | <range> | <operator_expression>
-<binding> ::= "let " <identifier> " = " <expression> ";"
+<binding> ::= "let " <identifier> " = " <expression> "\n"
 <if_else> ::= "if " <expression> " {" <ws0> <expression> <ws0> (("} else {" <ws0> <expression> <ws0> "}") | ("} else " <if_else>))
-<basic_type> ::= "Null" | "String" | "Number" | "Bool"
+<basic_type> ::= "String" | "Number" | "Bool"
 <lambda_type> ::= "(" (<basic_type> (", " <basic_type>)*)? ") -> " <basic_type>
 <cell_identifier> ::= [A-Z]+ [1-9] [0-9]*
 <range> ::= "(" <cell_identifier> ":" <cell_identifier> ")"
 <operator> ::= "+" | "-" | "*" | "/" | "%" | "&&" | "||" | "==" | "<" | "<=" | ">=" | ">"
 <operator_expression> ::= <expression> " " <operator> " " <expression>
-<lambda> ::= "(" (<identifier> (", " <identifier>)*)? ") {" <ws0> (<binding> <ws0>)* "return" <ws1> <expression> ";" <ws0> "}"
+<lambda> ::= "(" (<identifier> (", " <identifier>)*)? ") {" <ws0> (<binding> <ws0>)* <expression> <ws0> "}"
 <global_scope> ::= <ws0> <binding> ("\n" <ws0> <binding>)* <ws0>
