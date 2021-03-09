@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import java.util.ArrayList;
+import java.util.stream.*;
 
 public class FunctionInvocationNode extends Expression {
     IdentifierNode identifier;
@@ -13,6 +14,10 @@ public class FunctionInvocationNode extends Expression {
 
     public void accept(Visitor v) {
         v.visit(this);
+    }
+
+    public Stream<AbstractNode> children() {
+        return Stream.concat(Stream.of(this.identifier), this.arguments.stream());
     }
 
     public FunctionInvocationNode addArgument(Expression arg) {

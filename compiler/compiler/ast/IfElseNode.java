@@ -1,5 +1,7 @@
 package compiler.ast;
 
+import java.util.stream.*;
+
 public class IfElseNode extends Expression {
     Expression boolExpr;
     Expression trueCase;
@@ -13,6 +15,10 @@ public class IfElseNode extends Expression {
 
     public void accept(Visitor v) {
         v.visit(this);
+    }
+
+    public Stream<AbstractNode> children() {
+        return Stream.of(boolExpr, trueCase, elseCase);
     }
 
     public IfElseNode setBoolExpr(Expression boolExpr) {

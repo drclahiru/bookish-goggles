@@ -1,7 +1,8 @@
 package compiler.ast;
 
-public class BinaryOperatorNode extends Expression {
+import java.util.stream.*;
 
+public class BinaryOperatorNode extends Expression {
     Expression left;
     Expression right;
     Operator operator;
@@ -14,6 +15,10 @@ public class BinaryOperatorNode extends Expression {
 
     public void accept(Visitor v) {
         v.visit(this);
+    }
+
+    public Stream<AbstractNode> children() {
+        return Stream.of(this.left, this.right);
     }
 
     public BinaryOperatorNode setLeft(Expression left) {

@@ -1,5 +1,7 @@
 package compiler.ast;
 
+import java.util.stream.*;
+
 public class BindingNode extends AbstractNode {
     IdentifierNode identifier;
     TypeNode type;
@@ -13,5 +15,9 @@ public class BindingNode extends AbstractNode {
 
     public void accept(Visitor v) {
         v.visit(this);
+    }
+
+    public Stream<AbstractNode> children() {
+        return Stream.of(this.identifier, this.type, this.expr);
     }
 }

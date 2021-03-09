@@ -1,5 +1,7 @@
 package compiler.ast;
 
+import java.util.stream.*;
+
 public class BoolNode extends Expression {
     boolean value;
 
@@ -9,5 +11,9 @@ public class BoolNode extends Expression {
 
     public void accept(Visitor v) {
         v.visit(this);
+    }
+
+    public Stream<AbstractNode> children() {
+        return Stream.empty();
     }
 }

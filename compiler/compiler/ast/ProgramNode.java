@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import java.util.ArrayList;
+import java.util.stream.*;
 
 public class ProgramNode extends AbstractNode {
     ArrayList<BindingNode> bindings;
@@ -11,6 +12,10 @@ public class ProgramNode extends AbstractNode {
 
     public void accept(Visitor v) {
         v.visit(this);
+    }
+
+    public Stream<AbstractNode> children() {
+        return this.bindings.stream().map((x) -> (AbstractNode)x);
     }
 
     public ProgramNode addBinding(BindingNode binding) {

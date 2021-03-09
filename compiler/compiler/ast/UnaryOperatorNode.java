@@ -16,6 +16,10 @@ public class UnaryOperatorNode extends Expression {
         v.visit(this);
     }
 
+    public Stream<AbstractNode> children() {
+        return Stream.of(this.expr);
+    }
+
     public UnaryOperatorNode setExpr(Expression expr) {
         this.expr = expr;
         return this;

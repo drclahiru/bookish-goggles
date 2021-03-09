@@ -2,7 +2,7 @@ package compiler.ast;
 
 import java.util.*;
 
-public class PrettyPrintVisitor extends ReflectiveVisitor {
+public class PrettyPrintVisitor implements Visitor {
     Integer indentLevel = 0;
     Boolean isNewline = true;
 

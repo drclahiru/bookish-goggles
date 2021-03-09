@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import java.util.ArrayList;
+import java.util.stream.*;
 
 public class FunctionNode extends Expression {
     ArrayList<IdentifierNode> parameters;
@@ -15,6 +16,10 @@ public class FunctionNode extends Expression {
 
     public void accept(Visitor v) {
         v.visit(this);
+    }
+
+    public Stream<AbstractNode> children() {
+        return Stream.concat(Stream.concat(this.parameters.stream(), this.body.stream()), Stream.of(this.return_));
     }
 
     public FunctionNode addParameter(IdentifierNode arg) {
