@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.stream.*;
 
 public class ProgramNode extends AbstractNode {
-    ArrayList<BindingNode> bindings;
+    ArrayList<LetBindingNode> bindings;
 
-    public ProgramNode(ArrayList<BindingNode> bindings) {
+    public ProgramNode(ArrayList<LetBindingNode> bindings) {
         this.bindings = bindings;
     }
 
@@ -18,7 +18,7 @@ public class ProgramNode extends AbstractNode {
         return this.bindings.stream().map((x) -> (AbstractNode)x);
     }
 
-    public ProgramNode addBinding(BindingNode binding) {
+    public ProgramNode addBinding(LetBindingNode binding) {
         this.bindings.add(binding);
         return this;
     }

@@ -13,8 +13,8 @@ public interface Visitor {
             visit((Expression)n);
         } else if (n instanceof TypeNode) {
             visit((TypeNode)n);
-        } else if (n instanceof BindingNode) {
-            visit((BindingNode)n);
+        } else if (n instanceof LetBindingNode) {
+            visit((LetBindingNode)n);
         } else if (n instanceof ProgramNode) {
             visit((ProgramNode)n);
         } else {
@@ -24,7 +24,7 @@ public interface Visitor {
     default void visit(BinaryOperatorNode n) {
         defaultVisit(n);
     };
-    default void visit(BindingNode n) {
+    default void visit(LetBindingNode n) {
         defaultVisit(n);
     };
     default void visit(BoolNode n) {

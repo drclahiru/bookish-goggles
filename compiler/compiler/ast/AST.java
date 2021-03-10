@@ -5,7 +5,7 @@ import java.util.ArrayList;
 // shorter/simpler methods of constructing nodes
 public class AST {
     public static FunctionNode function() {
-        return new FunctionNode(new ArrayList<IdentifierNode>(), new ArrayList<BindingNode>(), null);
+        return new FunctionNode(new ArrayList<IdentifierNode>(), new ArrayList<LetBindingNode>(), null);
     }
 
     public static FunctionInvocationNode invoke(String identifier) {
@@ -32,16 +32,16 @@ public class AST {
         return new IdentifierNode(value);
     }
 
-    public static BindingNode binding(String identifier, Expression expr) {
-        return new BindingNode(ident(identifier), null, expr);
+    public static LetBindingNode binding(String identifier, Expression expr) {
+        return new LetBindingNode(ident(identifier), null, expr);
     }
 
-    public static BindingNode binding(String identifier, String type, Expression expr) {
-        return new BindingNode(ident(identifier), type(type), expr);
+    public static LetBindingNode binding(String identifier, String type, Expression expr) {
+        return new LetBindingNode(ident(identifier), type(type), expr);
     }
 
-    public static BindingNode binding(String identifier, TypeNode type, Expression expr) {
-        return new BindingNode(ident(identifier), type, expr);
+    public static LetBindingNode binding(String identifier, TypeNode type, Expression expr) {
+        return new LetBindingNode(ident(identifier), type, expr);
     }
 
     public static SimpleTypeNode type(String identifier) {
@@ -53,7 +53,7 @@ public class AST {
     }
 
     public static ProgramNode program() {
-        return new ProgramNode(new ArrayList<BindingNode>());
+        return new ProgramNode(new ArrayList<LetBindingNode>());
     }
 
     public static IfElseNode ifElse(Expression boolExpr) {

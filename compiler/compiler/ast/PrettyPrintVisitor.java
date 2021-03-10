@@ -27,7 +27,7 @@ public class PrettyPrintVisitor implements Visitor {
         print("}");
     }
 
-    public void visit(BindingNode node) {
+    public void visit(LetBindingNode node) {
         print("let ");
         visit(node.identifier);
         if (node.type != null) {

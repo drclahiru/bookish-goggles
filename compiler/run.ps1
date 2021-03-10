@@ -1,4 +1,10 @@
-iex "javac compiler/*.java compiler/ast/*.java -d bin"
+
+iex "javac compiler/*.java compiler/ast/*.java -d bin" -ErrorVariable CompilerOutput
+if (-Not [string]::IsNullOrWhitespace($CompilerOutput)) {
+    Write-host "$CompilerOutput"
+    Write-host "Compilation failed"
+    exit
+}
 cd bin
-iex "java compiler.App"
+Invoke-Expression "java compiler.App"
 cd ..

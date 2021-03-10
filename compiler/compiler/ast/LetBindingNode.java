@@ -2,12 +2,12 @@ package compiler.ast;
 
 import java.util.stream.*;
 
-public class BindingNode extends AbstractNode {
+public class LetBindingNode extends AbstractNode {
     IdentifierNode identifier;
     TypeNode type;
     Expression expr;
 
-    public BindingNode(IdentifierNode identifier, TypeNode type, Expression expr) {
+    public LetBindingNode(IdentifierNode identifier, TypeNode type, Expression expr) {
         this.identifier = identifier;
         this.type = type;
         this.expr = expr;

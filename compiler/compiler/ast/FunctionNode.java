@@ -5,10 +5,10 @@ import java.util.stream.*;
 
 public class FunctionNode extends Expression {
     ArrayList<IdentifierNode> parameters;
-    ArrayList<BindingNode> body;
+    ArrayList<LetBindingNode> body;
     Expression return_;
 
-    public FunctionNode(ArrayList<IdentifierNode> parameters, ArrayList<BindingNode> body, Expression return_) {
+    public FunctionNode(ArrayList<IdentifierNode> parameters, ArrayList<LetBindingNode> body, Expression return_) {
         this.parameters = parameters;
         this.body = body;
         this.return_ = return_;
@@ -27,7 +27,7 @@ public class FunctionNode extends Expression {
         return this;
     }
 
-    public FunctionNode addBinding(BindingNode binding) {
+    public FunctionNode addBinding(LetBindingNode binding) {
         this.body.add(binding);
         return this;
     }
