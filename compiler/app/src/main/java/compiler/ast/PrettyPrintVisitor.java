@@ -58,7 +58,7 @@ public class PrettyPrintVisitor implements Visitor {
     }
 
     public void visit(IdentifierNode node) {
-        print("" + node.value);
+        print("" + node.identifier.scopedValue());
     }
 
     public void visit(SimpleTypeNode node) {

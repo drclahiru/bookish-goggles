@@ -7,9 +7,9 @@ class App {
     public void printExampleProgram() {
         var f = AST.function()
             .addParameter(AST.ident("a"))
-            .addBinding(AST.binding("b", AST.number(2)))
-            .addBinding(AST.binding("c", AST.add(AST.ident("a"), AST.ident("b"))))
-            .setReturn(AST.ident("c"));
+            .addBinding(AST.binding("b", AST.add(AST.ident("x"), AST.number(2))))
+            .addBinding(AST.binding("x", AST.add(AST.ident("a"), AST.ident("b"))))
+            .setReturn(AST.ident("x"));
         var fBind = AST.binding("f", f);
         var xBind = AST.binding("x", "Number", AST.invoke("f").addArgument(AST.number(4.5)));
         var gBind = AST.binding("g", AST.funcType("Number").addParameter(AST.ident("Number")), AST.ident("f"));
@@ -26,7 +26,7 @@ class App {
             .addBinding(gBind)
             .addBinding(aBind)
             .addBinding(bBind);
-
+            
         (new PrettyPrintVisitor()).visit(globalScope);
     }
 
