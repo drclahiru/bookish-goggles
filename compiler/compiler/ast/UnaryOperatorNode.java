@@ -12,10 +12,6 @@ public class UnaryOperatorNode extends Expression {
         this.expr = expr;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.of(this.expr);
     }

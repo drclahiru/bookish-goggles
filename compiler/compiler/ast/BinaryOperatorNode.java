@@ -13,10 +13,6 @@ public class BinaryOperatorNode extends Expression {
         this.right = right;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.of(this.left, this.right);
     }

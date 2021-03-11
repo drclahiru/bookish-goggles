@@ -9,10 +9,6 @@ public class SimpleTypeNode extends TypeNode {
         this.identifier = identifier;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.of(identifier);
     }

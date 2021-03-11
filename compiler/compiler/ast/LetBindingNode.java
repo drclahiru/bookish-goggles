@@ -13,10 +13,6 @@ public class LetBindingNode extends AbstractNode {
         this.expr = expr;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.of(this.identifier, this.type, this.expr);
     }

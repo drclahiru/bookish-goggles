@@ -14,10 +14,6 @@ public class FunctionNode extends Expression {
         this.return_ = return_;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.concat(Stream.concat(this.parameters.stream(), this.body.stream()), Stream.of(this.return_));
     }

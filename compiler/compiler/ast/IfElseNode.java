@@ -13,10 +13,6 @@ public class IfElseNode extends Expression {
         this.elseCase = elseCase;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.of(boolExpr, trueCase, elseCase);
     }

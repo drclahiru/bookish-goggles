@@ -12,10 +12,6 @@ public class FunctionInvocationNode extends Expression {
         this.arguments = arguments;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.concat(Stream.of(this.identifier), this.arguments.stream());
     }

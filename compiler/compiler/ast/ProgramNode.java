@@ -10,10 +10,6 @@ public class ProgramNode extends AbstractNode {
         this.bindings = bindings;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return this.bindings.stream().map((x) -> (AbstractNode)x);
     }

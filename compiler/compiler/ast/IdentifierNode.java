@@ -12,8 +12,4 @@ public class IdentifierNode extends Expression {
     public Stream<AbstractNode> children() {
         return Stream.empty();
     }
-
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
 }

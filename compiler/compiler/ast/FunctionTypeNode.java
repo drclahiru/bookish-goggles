@@ -12,10 +12,6 @@ public class FunctionTypeNode extends TypeNode {
         this.return_ = return_;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.concat(this.parameters.stream(), Stream.of(return_));
     }

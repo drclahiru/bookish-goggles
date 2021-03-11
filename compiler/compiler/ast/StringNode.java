@@ -9,10 +9,6 @@ public class StringNode extends Expression {
         this.value = value;
     }
 
-    public void accept(Visitor v) {
-        v.visit(this);
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.empty();
     }
