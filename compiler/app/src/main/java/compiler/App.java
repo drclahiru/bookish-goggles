@@ -57,6 +57,7 @@ class App {
             .let(aBind)
             .let(bBind);
             
+        (new SetScopeIdsVisitor()).visit(globalScope);
         (new PrettyPrintVisitor(out)).visit(globalScope);
     }
 
