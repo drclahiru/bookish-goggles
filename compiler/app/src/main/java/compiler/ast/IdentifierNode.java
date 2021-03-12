@@ -3,10 +3,10 @@ package compiler.ast;
 import java.util.stream.*;
 
 public class IdentifierNode extends Expression {
-    Identifier identifier;
+    Identifier value;
 
-    public IdentifierNode(String value) {
-        this.identifier = new Identifier(value);
+    public IdentifierNode(String name) {
+        this.value = new Identifier(name);
     }
 
     public Stream<AbstractNode> children() {

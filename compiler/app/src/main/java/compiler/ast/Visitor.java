@@ -1,9 +1,5 @@
 package compiler.ast;
 
-// public interface Visitor {
-//     void visit(AbstractNode n);
-// }
-
 public interface Visitor {
     default void defaultVisit(AbstractNode n) {
         n.children().filter((x) -> x != null).forEach((x) -> visit(x));
@@ -15,6 +11,8 @@ public interface Visitor {
             visit((TypeNode)n);
         } else if (n instanceof LetBindingNode) {
             visit((LetBindingNode)n);
+        } else if (n instanceof IdentifierDeclarationNode) {
+            visit((IdentifierDeclarationNode)n);
         } else if (n instanceof ProgramNode) {
             visit((ProgramNode)n);
         } else {
@@ -63,6 +61,9 @@ public interface Visitor {
         defaultVisit(n);
     };
     default void visit(IdentifierNode n) {
+        defaultVisit(n);
+    };
+    default void visit(IdentifierDeclarationNode n) {
         defaultVisit(n);
     };
     default void visit(IfElseNode n) {

@@ -1,16 +1,16 @@
 package compiler.ast;
 
 public class Identifier {
-    String value;
-    Integer scopeLevel;
+    String name;
+    Integer scopeId;
 
-    public Identifier(String value) {
-        this.value = value;
-        this.scopeLevel = null;
+    public Identifier(String name) {
+        this.name = name;
+        this.scopeId = null;
     }
-    public Identifier(String value, Integer scopeLevel) {
-        this.value = value;
-        this.scopeLevel = scopeLevel;
+    public Identifier(String name, Integer scopeId) {
+        this.name = name;
+        this.scopeId = scopeId;
     }
     
     @Override
@@ -20,25 +20,14 @@ public class Identifier {
         }
 
         var other = (Identifier)o;
-        return this.scopeLevel == other.scopeLevel
-            && this.value == other.value;
+        return this.scopeId == other.scopeId
+            && this.name == other.name;
     }
 
-    public String scopedValue() {
-        if (this.scopeLevel == null) {
-            return this.value;
+    public String scopedName() {
+        if (this.scopeId == null) {
+            return this.name;
         }
-        return value + "@" + scopeLevelToString(scopeLevel);
-    }
-
-    static String scopeLevelToString(int code) {
-        var s = "";
-        for (var n = code; n > 0; n /= 26)
-        {
-            var c = (char)(96 + (n % 26));
-            s += c;
-            n /= 26;
-        }
-        return s;
+        return name + "@" + Utility.intToAlphabetic(scopeId);
     }
 }

@@ -7,27 +7,21 @@ public class BinaryOperatorNode extends Expression {
     Expression right;
     Operator operator;
 
-    public BinaryOperatorNode(Expression left, Operator operator, Expression right) {
-        this.left = left;
-        this.operator = operator;
-        this.right = right;
-    }
-
     public Stream<AbstractNode> children() {
         return Stream.of(this.left, this.right);
     }
 
-    public BinaryOperatorNode setLeft(Expression left) {
+    public BinaryOperatorNode left(Expression left) {
         this.left = left;
         return this;
     }
 
-    public BinaryOperatorNode setOperator(Operator operator) {
+    public BinaryOperatorNode operator(Operator operator) {
         this.operator = operator;
         return this;
     }
 
-    public BinaryOperatorNode setRight(Expression right) {
+    public BinaryOperatorNode right(Expression right) {
         this.right = right;
         return this;
     }

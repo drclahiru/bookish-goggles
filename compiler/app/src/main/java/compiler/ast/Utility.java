@@ -22,4 +22,15 @@ public class Utility {
                 return "";
         }
     }
+
+    public static String intToAlphabetic(int code) {
+        var s = "";
+        for (var n = code; n > 0; n /= 26)
+        {
+            var c = (char)(96 + (n % 26));
+            s += c;
+            n /= 26;
+        }
+        return s;
+    }
 }

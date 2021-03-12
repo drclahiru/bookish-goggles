@@ -1,15 +1,22 @@
 package compiler.ast;
 
 import java.util.*;
+import java.io.OutputStream;
 
 public class PrettyPrintVisitor implements Visitor {
     Integer indentLevel = 0;
     Boolean isNewline = true;
+    OutputStream out;
+
+    public PrettyPrintVisitor(OutputStream out) {
+        super();
+        this.out = out;
+    }
 
     public void visit(FunctionNode node) {
         print("(");
         node.parameters.stream().limit(1).forEach(arg -> {
-            visit(arg);
+            visit(arg.identifier);
         });
         node.parameters.stream().skip(1).forEach(arg -> {
             print(", ");
@@ -30,24 +37,20 @@ public class PrettyPrintVisitor implements Visitor {
     public void visit(LetBindingNode node) {
         print("let ");
         visit(node.identifier);
-        if (node.type != null) {
-            print(" ");
-            visit(node.type);
-        }
         print(" = ");
         visit(node.expr);
         println();
     }
 
     public void visit(BoolNode node) {
-        print("" + node.value);
+        print(Boolean.toString(node.value));
     }
 
     public void visit(NumberNode node) {
         if (node.value == Math.round(node.value)) {
-            print("" + (long)node.value);
+            print(Long.toString((long)node.value));
         } else {
-            print("" + node.value);
+            print(Double.toString(node.value));
         }
     }
 
@@ -58,8 +61,16 @@ public class PrettyPrintVisitor implements Visitor {
     }
 
     public void visit(IdentifierNode node) {
-        print("" + node.identifier.scopedValue());
+        print(node.value.scopedName());
     }
+    
+    public void visit(IdentifierDeclarationNode n) {
+        visit(n.identifier);
+        if (n.type != null) {
+            print(": ");
+            visit(n.type);
+        }
+    };
 
     public void visit(SimpleTypeNode node) {
         visit(node.identifier);
@@ -135,15 +146,24 @@ public class PrettyPrintVisitor implements Visitor {
     }
 
     void print(String text) {
-        if (isNewline) {
-            System.out.print(" ".repeat(this.indentLevel * 4));
-            isNewline = false;
+        try {
+            if (isNewline) {
+                out.write(" ".repeat(this.indentLevel * 4).getBytes());
+                isNewline = false;
+            }
+            out.write(text.getBytes());
+        } catch (Exception e) {
+            throw new Error(e);
         }
-        System.out.print(text);
     }
 
     void println() {
-        System.out.println();
-        isNewline = true;
+        try {
+            out.write("\n".getBytes());
+            // System.out.println();
+            isNewline = true;
+        } catch (Exception e) {
+            throw new Error(e);
+        }
     }
 }

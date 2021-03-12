@@ -5,11 +5,11 @@ import java.util.ArrayList;
 // shorter/simpler methods of constructing nodes
 public class AST {
     public static FunctionNode function() {
-        return new FunctionNode(new ArrayList<IdentifierNode>(), new ArrayList<LetBindingNode>(), null);
+        return new FunctionNode();
     }
 
     public static FunctionInvocationNode invoke(String identifier) {
-        return new FunctionInvocationNode(ident(identifier), new ArrayList<Expression>());
+        return new FunctionInvocationNode().identifier(ident(identifier));
     }
 
     public static BoolNode bool(Boolean value) {
@@ -24,55 +24,35 @@ public class AST {
         return new StringNode(value);
     }
 
-    public static BinaryOperatorNode add(Expression left, Expression right) {
-        return new BinaryOperatorNode(left, Operator.Add, right);
-    }
-
     public static IdentifierNode ident(String value) {
         return new IdentifierNode(value);
     }
 
-    public static LetBindingNode binding(String identifier, Expression expr) {
-        return new LetBindingNode(ident(identifier), null, expr);
-    }
-
-    public static LetBindingNode binding(String identifier, String type, Expression expr) {
-        return new LetBindingNode(ident(identifier), type(type), expr);
-    }
-
-    public static LetBindingNode binding(String identifier, TypeNode type, Expression expr) {
-        return new LetBindingNode(ident(identifier), type, expr);
+    public static LetBindingNode let(String identifier) {
+        return new LetBindingNode(ident(identifier));
     }
 
     public static SimpleTypeNode type(String identifier) {
-        return new SimpleTypeNode(ident(identifier));
+        return new SimpleTypeNode().identifier(ident(identifier));
     }
 
-    public static FunctionTypeNode funcType(String return_) {
-        return new FunctionTypeNode(new ArrayList<IdentifierNode>(), ident(return_));
+    public static FunctionTypeNode funcType() {
+        return new FunctionTypeNode();
     }
 
     public static ProgramNode program() {
-        return new ProgramNode(new ArrayList<LetBindingNode>());
+        return new ProgramNode();
     }
 
-    public static IfElseNode ifElse(Expression boolExpr) {
-        return new IfElseNode(boolExpr, null, null);
+    public static IfElseNode ifElse() {
+        return new IfElseNode();
     }
 
-    public static BinaryOperatorNode binOp(Operator op) {
-        return new BinaryOperatorNode(null, op, null);
+    public static BinaryOperatorNode binOp() {
+        return new BinaryOperatorNode();
     }
 
-    public static BinaryOperatorNode binOp(Expression left, Operator op, Expression right) {
-        return new BinaryOperatorNode(left, op, right);
-    }
-
-    public static UnaryOperatorNode unOp(Operator op) {
-        return new UnaryOperatorNode(op, null);
-    }
-
-    public static UnaryOperatorNode unOp(Operator op, Expression expr) {
-        return new UnaryOperatorNode(op, expr);
+    public static UnaryOperatorNode unOp() {
+        return new UnaryOperatorNode();
     }
 }

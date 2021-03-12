@@ -137,6 +137,35 @@ table Persons = Person[1:4] {
 }
 ```
 
+## Scoping rules
+
+scopes are static, and identifier-bindings can be declared in any order (as opposed to top-to-bottom), but only 1 identifier of the same name can exist in any scope.
+
+examples:
+
+```
+
+let g = (a) {
+    f(a)
+};
+
+let f = (a) {
+    let x = a _ y
+    let y = 2
+    g(a _ x)
+};
+
+let x = 4;
+
+```
+
+circular definitions are however not allowed:
+
+```
+let x = y + 2
+let y = x     // error
+```
+
 # Implementation Language
 
 We’ll use Java because it’s the language being used in the CC Course and so the exercises from the course will be more relevant to our compiler work.
