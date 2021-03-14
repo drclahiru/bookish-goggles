@@ -1,5 +1,7 @@
 package compiler.ast;
 
+import java.util.Objects;
+
 public class Identifier {
     String name;
     Integer scopeId;
@@ -22,6 +24,11 @@ public class Identifier {
         var other = (Identifier)o;
         return this.scopeId == other.scopeId
             && this.name == other.name;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(scopeId, name);
     }
 
     public String scopedName() {

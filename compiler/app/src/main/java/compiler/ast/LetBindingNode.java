@@ -3,24 +3,22 @@ package compiler.ast;
 import java.util.stream.*;
 
 public class LetBindingNode extends AbstractNode {
-    IdentifierDeclarationNode identifier;
+    IdentifierDeclarationNode declaration;
     Expression expr;
 
     public LetBindingNode(IdentifierNode identifier) {
-        this.identifier = new IdentifierDeclarationNode(identifier);
+        this.declaration = new IdentifierDeclarationNode(identifier);
     }
 
     public Stream<AbstractNode> children() {
-        return Stream.of(this.identifier, this.expr);
+        return Stream.of(this.declaration, this.expr);
     }
 
-    public LetBindingNode type(TypeNode type) {
-        this.identifier.type = type;
-        return this;
+    public void type(TypeNode type) {
+        this.declaration.type = type;
     }
 
-    public LetBindingNode expression(Expression expr) {
+    public void expression(Expression expr) {
         this.expr = expr;
-        return this;
     }
 }

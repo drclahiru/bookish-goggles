@@ -1,96 +1,93 @@
 package compiler.ast;
 
-public interface Visitor {
-    default void defaultVisit(AbstractNode n) {
+public abstract class Visitor {
+    protected void defaultVisit(AbstractNode n) {
         n.children().filter((x) -> x != null).forEach((x) -> visit(x));
-    };
-    default void visit(AbstractNode n) {
-        if (n instanceof Expression) {
-            visit((Expression)n);
+    }
+    protected void visit(AbstractNode n) {
+        if (n == null) {
+        } else if (n instanceof Expression) {
+            visitExpression((Expression)n);
         } else if (n instanceof TypeNode) {
-            visit((TypeNode)n);
+            visitType((TypeNode)n);
         } else if (n instanceof LetBindingNode) {
-            visit((LetBindingNode)n);
+            visitLetBinding((LetBindingNode)n);
         } else if (n instanceof IdentifierDeclarationNode) {
-            visit((IdentifierDeclarationNode)n);
+            visitIdentifierDeclaration((IdentifierDeclarationNode)n);
         } else if (n instanceof ProgramNode) {
-            visit((ProgramNode)n);
+            visitProgram((ProgramNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
-    };
-    default void visit(BinaryOperatorNode n) {
+    }
+    protected void visitOperator(OperatorNode n) {
         defaultVisit(n);
-    };
-    default void visit(LetBindingNode n) {
+    }
+    protected void visitLetBinding(LetBindingNode n) {
         defaultVisit(n);
-    };
-    default void visit(BoolNode n) {
+    }
+    protected void visitBool(BoolNode n) {
         defaultVisit(n);
-    };
-    default void visit(Expression n) {
-        if (n instanceof BinaryOperatorNode) {
-            visit((BinaryOperatorNode)n);
+    }
+    protected void visitExpression(Expression n) {
+        if (n instanceof OperatorNode) {
+            visitOperator((OperatorNode)n);
         } else if (n instanceof BoolNode) {
-            visit((BoolNode)n);
+            visitBool((BoolNode)n);
         } else if (n instanceof FunctionInvocationNode) {
-            visit((FunctionInvocationNode)n);
+            visitFunctionInvocation((FunctionInvocationNode)n);
         } else if (n instanceof FunctionNode) {
-            visit((FunctionNode)n);
+            visitFunction((FunctionNode)n);
         } else if (n instanceof IdentifierNode) {
-            visit((IdentifierNode)n);
+            visitIdentifier((IdentifierNode)n);
         } else if (n instanceof IfElseNode) {
-            visit((IfElseNode)n);
+            visitIfElse((IfElseNode)n);
         } else if (n instanceof NumberNode) {
-            visit((NumberNode)n);
+            visitNumber((NumberNode)n);
         } else if (n instanceof StringNode) {
-            visit((StringNode)n);
-        } else if (n instanceof UnaryOperatorNode) {
-            visit((UnaryOperatorNode)n);
+            visitString((StringNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
-    };
-    default void visit(FunctionInvocationNode n) {
+    }
+    protected void visitFunctionInvocation(FunctionInvocationNode n) {
         defaultVisit(n);
-    };
-    default void visit(FunctionNode n) {
+    }
+    protected void visitFunction(FunctionNode n) {
         defaultVisit(n);
-    };
-    default void visit(FunctionTypeNode n) {
+    }
+    protected void visitFunctionType(FunctionTypeNode n) {
         defaultVisit(n);
-    };
-    default void visit(IdentifierNode n) {
+    }
+    protected void visitIdentifier(IdentifierNode n) {
         defaultVisit(n);
-    };
-    default void visit(IdentifierDeclarationNode n) {
+    }
+    protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
         defaultVisit(n);
-    };
-    default void visit(IfElseNode n) {
+    }
+    protected void visitIfElse(IfElseNode n) {
         defaultVisit(n);
-    };
-    default void visit(NumberNode n) {
+    }
+    protected void visitNumber(NumberNode n) {
         defaultVisit(n);
-    };
-    default void visit(ProgramNode n) {
+    }
+    protected void visitProgram(ProgramNode n) {
         defaultVisit(n);
-    };
-    default void visit(SimpleTypeNode n) {
+    }
+    protected void visitSimpleType(SimpleTypeNode n) {
         defaultVisit(n);
-    };
-    default void visit(StringNode n) {
+    }
+    protected void visitString(StringNode n) {
         defaultVisit(n);
-    };
-    default void visit(TypeNode n) {
-        if (n instanceof SimpleTypeNode) {
-            visit((SimpleTypeNode)n);
+    }
+    protected void visitType(TypeNode n) {
+        if (n == null) {
+        } else if (n instanceof SimpleTypeNode) {
+            visitSimpleType((SimpleTypeNode)n);
         } else if (n instanceof FunctionTypeNode) {
-            visit((FunctionTypeNode)n);
+            visitFunctionType((FunctionTypeNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
-    };
-    default void visit(UnaryOperatorNode n) {
-        defaultVisit(n);
-    };
+    }
 }

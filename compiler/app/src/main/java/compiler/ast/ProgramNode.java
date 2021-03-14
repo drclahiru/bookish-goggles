@@ -10,8 +10,7 @@ public class ProgramNode extends AbstractNode {
         return this.bindings.stream().map((x) -> (AbstractNode)x);
     }
 
-    public ProgramNode let(LetBindingNode let) {
+    public void let(LetBindingNode let) {
         this.bindings.add(let);
-        return this;
     }
 }

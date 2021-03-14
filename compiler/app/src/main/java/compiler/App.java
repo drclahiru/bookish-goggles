@@ -2,63 +2,68 @@ package compiler;
 
 import compiler.ast.*;
 import java.io.OutputStream;
+import java.util.*;
 
 class App {
-
     public void printExampleProgram(OutputStream out) {
-        var f = AST.function()
-            .parameter(AST.ident("a"))
-            .let(AST
-                .let("b")
-                .expression(AST
-                    .binOp()
-                    .left(AST.ident("x"))
-                    .operator(Operator.Add)
-                    .right(AST.number(2))))
-            .let(AST
-                .let("x")
-                .expression(AST
-                    .binOp()
-                    .left(AST.ident("a"))
-                    .operator(Operator.Multiply)
-                    .right(AST.ident("b"))))
-            .returns(AST.invoke("f").argument(AST.ident("x")));
-        var fBind = AST.let("f").expression(f);
-        var xBind = AST
-            .let("x")
-            .type(AST.type("Number"))
-            .expression(AST
-                .invoke("f")
-                .argument(AST.number(4.5)));
-        var gBind = AST.let("g")
-            .type(AST.funcType()
-                .parameter(AST.type("Number"))
-                .returns(AST.type("Number")))
-            .expression(AST.ident("f"));
-        var a = AST.ifElse()
-            .expression(AST.unOp()
-                .operator(Operator.Not)
-                .expression(AST.bool(false)))
-            .caseTrue(AST.string("A"))
-            .caseElse(AST.string("B"));
-        var aBind = AST.let("a").expression(a);
-        var b = AST.unOp()
-            .operator(Operator.Not)
-            .expression(AST.binOp()
-                .left(AST.bool(false))
-                .operator(Operator.Or)
-                .right(AST.bool(true)));
-        var bBind = AST.let("b").expression(b);
+        var f = AST.function(fa -> {
+            fa.parameter(AST.ident("a"));
+            fa.let(AST.let("b", e -> {
+                e.expression(AST.op(Operator.Add, op -> {
+                    op.left(AST.ident("y"));
+                    op.right(AST.number(2));
+                }));
+            }));
+            fa.let(AST.let("x", e -> {
+                e.expression(AST.op(Operator.Multiply, op -> {
+                    op.left(AST.ident("a"));
+                    op.right(AST.ident("b"));
+                }));
+            }));
+            fa.returns(AST.invoke(i -> {
+                i.identifier(AST.ident("f"));
+                i.argument(AST.ident("x"));
+            }));
+        });
+        var fBind = AST.let("f", x -> {
+            x.expression(f);
+        });
+        var xBind = AST.let("x", x -> {
+            x.type(AST.numberType());
+            x.expression(AST.invoke(i -> {
+                i.identifier(AST.ident("f"));
+                i.argument(AST.number(4.5));
+            }));
+        });
+        var gBind = AST.let("g", x -> {
+            x.type(AST.funcType(t -> {
+                t.parameter(AST.numberType());
+                t.returns(AST.numberType());
+            }));
+            x.expression(AST.ident("f"));
+        });
+        var a = AST.ifElse(x -> {
+            x.expression(AST.bool(false));
+            x.caseTrue(AST.string("A"));
+            x.caseElse(AST.string("B"));
+        });
+        var aBind = AST.let("a", e -> e.expression(a));
+        var b = AST.op(Operator.Or, op -> {
+            op.left(AST.bool(false));
+            op.right(AST.bool(false));
+        });
+        var bBind = AST.let("b", e -> e.expression(b));
 
-        var globalScope = AST.program()
-            .let(fBind)
-            .let(xBind)
-            .let(gBind)
-            .let(aBind)
-            .let(bBind);
+        var globalScope = AST.program(p -> {
+            p.let(fBind);
+            p.let(xBind);
+            p.let(gBind);
+            p.let(aBind);
+            p.let(bBind);
+        });
             
-        (new SetScopeIdsVisitor()).visit(globalScope);
-        (new PrettyPrintVisitor(out)).visit(globalScope);
+        new SetScopeIdsVisitor().run(globalScope);
+        new PrettyPrintVisitor(out).run(globalScope);
     }
 
     public static void main(String[] args) {

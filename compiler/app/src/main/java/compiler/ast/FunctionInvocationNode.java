@@ -11,13 +11,11 @@ public class FunctionInvocationNode extends Expression {
         return Stream.concat(Stream.of(this.identifier), this.arguments.stream());
     }
 
-    public FunctionInvocationNode identifier(IdentifierNode id) {
+    public void identifier(IdentifierNode id) {
         this.identifier = id;
-        return this;
     }
 
-    public FunctionInvocationNode argument(Expression arg) {
+    public void argument(Expression arg) {
         this.arguments.add(arg);
-        return this;
     }
 }

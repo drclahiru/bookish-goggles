@@ -1,15 +1,20 @@
 package compiler.ast;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 // shorter/simpler methods of constructing nodes
 public class AST {
-    public static FunctionNode function() {
-        return new FunctionNode();
+    public static FunctionNode function(Consumer<FunctionNode> f) {
+        var n = new FunctionNode();
+        f.accept(n);
+        return n;
     }
 
-    public static FunctionInvocationNode invoke(String identifier) {
-        return new FunctionInvocationNode().identifier(ident(identifier));
+    public static FunctionInvocationNode invoke(Consumer<FunctionInvocationNode> f) {
+        var n = new FunctionInvocationNode();
+        f.accept(n);
+        return n;
     }
 
     public static BoolNode bool(Boolean value) {
@@ -28,31 +33,49 @@ public class AST {
         return new IdentifierNode(value);
     }
 
-    public static LetBindingNode let(String identifier) {
-        return new LetBindingNode(ident(identifier));
+    public static LetBindingNode let(String identifier, Consumer<LetBindingNode> f) {
+        var n = new LetBindingNode(ident(identifier));
+        f.accept(n);
+        return n;
     }
 
-    public static SimpleTypeNode type(String identifier) {
-        return new SimpleTypeNode().identifier(ident(identifier));
+    public static SimpleTypeNode type(SimpleType type) {
+        return new SimpleTypeNode(type);
     }
 
-    public static FunctionTypeNode funcType() {
-        return new FunctionTypeNode();
+    public static SimpleTypeNode boolType() {
+        return new SimpleTypeNode(SimpleType.Bool);
     }
 
-    public static ProgramNode program() {
-        return new ProgramNode();
+    public static SimpleTypeNode numberType() {
+        return new SimpleTypeNode(SimpleType.Number);
     }
 
-    public static IfElseNode ifElse() {
-        return new IfElseNode();
+    public static SimpleTypeNode stringType() {
+        return new SimpleTypeNode(SimpleType.String);
     }
 
-    public static BinaryOperatorNode binOp() {
-        return new BinaryOperatorNode();
+    public static FunctionTypeNode funcType(Consumer<FunctionTypeNode> f) {
+        var n = new FunctionTypeNode();
+        f.accept(n);
+        return n;
     }
 
-    public static UnaryOperatorNode unOp() {
-        return new UnaryOperatorNode();
+    public static ProgramNode program(Consumer<ProgramNode> f) {
+        var n = new ProgramNode();
+        f.accept(n);
+        return n;
+    }
+
+    public static IfElseNode ifElse(Consumer<IfElseNode> f) {
+        var n = new IfElseNode();
+        f.accept(n);
+        return n;
+    }
+
+    public static OperatorNode op(Operator op, Consumer<OperatorNode> f) {
+        var n = new OperatorNode(op);
+        f.accept(n);
+        return n;
     }
 }

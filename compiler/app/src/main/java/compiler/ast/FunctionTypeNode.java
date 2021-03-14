@@ -1,23 +1,22 @@
 package compiler.ast;
 
+import java.lang.annotation.Inherited;
 import java.util.ArrayList;
 import java.util.stream.*;
 
 public class FunctionTypeNode extends TypeNode {
-    ArrayList<SimpleTypeNode> parameters = new ArrayList<>();
-    SimpleTypeNode return_;
+    ArrayList<TypeNode> parameters = new ArrayList<>();
+    TypeNode return_;
 
     public Stream<AbstractNode> children() {
         return Stream.concat(this.parameters.stream(), Stream.of(return_));
     }
 
-    public FunctionTypeNode parameter(SimpleTypeNode param) {
+    public void parameter(TypeNode param) {
         this.parameters.add(param);
-        return this;
     }
 
-    public FunctionTypeNode returns(SimpleTypeNode return_) {
+    public void returns(TypeNode return_) {
         this.return_ = return_;
-        return this;
     }
 }

@@ -11,18 +11,15 @@ public class IfElseNode extends Expression {
         return Stream.of(boolExpr, trueCase, elseCase);
     }
 
-    public IfElseNode expression(Expression boolExpr) {
+    public void expression(Expression boolExpr) {
         this.boolExpr = boolExpr;
-        return this;
     }
 
-    public IfElseNode caseTrue(Expression trueCase) {
+    public void caseTrue(Expression trueCase) {
         this.trueCase = trueCase;
-        return this;
     }
 
-    public IfElseNode caseElse(Expression elseCase) {
+    public void caseElse(Expression elseCase) {
         this.elseCase = elseCase;
-        return this;
     }
 }

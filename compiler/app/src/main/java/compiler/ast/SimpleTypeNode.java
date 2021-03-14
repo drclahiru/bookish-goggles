@@ -3,14 +3,13 @@ package compiler.ast;
 import java.util.stream.*;
 
 public class SimpleTypeNode extends TypeNode {
-    IdentifierNode identifier;
+    final SimpleType type;
 
-    public Stream<AbstractNode> children() {
-        return Stream.of(identifier);
+    public SimpleTypeNode(SimpleType type) {
+        this.type = type;
     }
 
-    public SimpleTypeNode identifier(IdentifierNode identifier) {
-        this.identifier = identifier;
-        return this;
+    public Stream<AbstractNode> children() {
+        return Stream.empty();
     }
 }

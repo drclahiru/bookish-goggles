@@ -1,7 +1,13 @@
 package compiler.ast;
 
+import java.util.*;
+
 public class Utility {
-    public static String operatorToString(Operator op) {
+    public static String simpleTypeToString(SimpleType type) {
+        return "" + type;
+    }
+
+    public static String opToString(Operator op) {
         switch (op) {
             case Add: return "+";
             case Subtract: return "-";
@@ -13,13 +19,44 @@ public class Utility {
             case GreaterThan: return ">";
             case GreaterThanEq: return ">=";
             case Eq: return "==";
-            case Not: return "!";
-            case Negate: return "-";
             case And: return "&&";
             case Or: return "||";
             default:
-                System.out.println("Missing operator string definition for " + op);
-                return "";
+                throw new Error("Missing operator string definition for " + op);
+        }
+    }
+
+    public static FunctionTypeNode opType(Operator op) {
+        switch (op) {
+            case Add:
+            case Subtract:
+            case Multiply:
+            case Divide:
+            case Modulo:
+            return AST.funcType(t -> {
+                t.parameter(AST.numberType());
+                t.parameter(AST.numberType());
+                t.returns(AST.numberType());
+            });
+            case LessThan:
+            case LessThanEq:
+            case GreaterThan:
+            case GreaterThanEq:
+            case Eq:
+            return AST.funcType(t -> {
+                t.parameter(AST.numberType());
+                t.parameter(AST.numberType());
+                t.returns(AST.boolType());
+            });
+            case And:
+            case Or:
+            return AST.funcType(t -> {
+                t.parameter(AST.boolType());
+                t.parameter(AST.boolType());
+                t.returns(AST.boolType());
+            });
+            default:
+                throw new Error("Missing operator type definition for " + op);
         }
     }
 

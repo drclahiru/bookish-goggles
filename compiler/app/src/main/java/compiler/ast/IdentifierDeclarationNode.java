@@ -10,9 +10,8 @@ public class IdentifierDeclarationNode extends AbstractNode {
         this.identifier = node;
     }
 
-    public IdentifierDeclarationNode type(TypeNode type) {
+    public void type(TypeNode type) {
         this.type = type;
-        return this;
     }
 
     public Stream<AbstractNode> children() {

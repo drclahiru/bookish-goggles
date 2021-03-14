@@ -3,7 +3,7 @@ package compiler.ast;
 import java.util.*;
 import java.io.OutputStream;
 
-public class PrettyPrintVisitor implements Visitor {
+public class PrettyPrintVisitor extends Visitor {
     Integer indentLevel = 0;
     Boolean isNewline = true;
     OutputStream out;
@@ -13,10 +13,16 @@ public class PrettyPrintVisitor implements Visitor {
         this.out = out;
     }
 
-    public void visit(FunctionNode node) {
+    public void run(AbstractNode n) {
+        visit(n);
+    }
+
+    @Override
+    protected void visitFunction(FunctionNode node) {
         print("(");
         node.parameters.stream().limit(1).forEach(arg -> {
-            visit(arg.identifier);
+            // visit(arg.identifier);
+            visit(arg);
         });
         node.parameters.stream().skip(1).forEach(arg -> {
             print(", ");
@@ -34,19 +40,22 @@ public class PrettyPrintVisitor implements Visitor {
         print("}");
     }
 
-    public void visit(LetBindingNode node) {
+    @Override
+    protected void visitLetBinding(LetBindingNode node) {
         print("let ");
-        visit(node.identifier);
+        visit(node.declaration);
         print(" = ");
         visit(node.expr);
         println();
     }
 
-    public void visit(BoolNode node) {
+    @Override
+    protected void visitBool(BoolNode node) {
         print(Boolean.toString(node.value));
     }
 
-    public void visit(NumberNode node) {
+    @Override
+    protected void visitNumber(NumberNode node) {
         if (node.value == Math.round(node.value)) {
             print(Long.toString((long)node.value));
         } else {
@@ -54,29 +63,36 @@ public class PrettyPrintVisitor implements Visitor {
         }
     }
 
-    public void visit(StringNode node) {
+    @Override
+    protected void visitString(StringNode node) {
         print("\"");
         print(node.value.replace("\\", "\\\\").replace("\"", "\\\""));
         print("\"");
     }
 
-    public void visit(IdentifierNode node) {
-        print(node.value.scopedName());
+    @Override
+    protected void visitIdentifier(IdentifierNode node) {
+        print(node.value.name);
     }
     
-    public void visit(IdentifierDeclarationNode n) {
+    @Override
+    protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
         visit(n.identifier);
         if (n.type != null) {
             print(": ");
             visit(n.type);
+        } else {
+            print(": ?");
         }
     };
 
-    public void visit(SimpleTypeNode node) {
-        visit(node.identifier);
+    @Override
+    protected void visitSimpleType(SimpleTypeNode node) {
+        print(Utility.simpleTypeToString(node.type));
     }
 
-    public void visit(FunctionTypeNode node) {
+    @Override
+    protected void visitFunctionType(FunctionTypeNode node) {
         print("(");
         node.parameters.stream().limit(1).forEach(arg -> {
             visit(arg);
@@ -89,7 +105,8 @@ public class PrettyPrintVisitor implements Visitor {
         visit(node.return_);
     }
 
-    public void visit(FunctionInvocationNode node) {
+    @Override
+    protected void visitFunctionInvocation(FunctionInvocationNode node) {
         visit(node.identifier);
         print("(");
         node.arguments.stream().limit(1).forEach(arg -> {
@@ -102,7 +119,8 @@ public class PrettyPrintVisitor implements Visitor {
         print(")");
     }
 
-    public void visit(IfElseNode node) {
+    @Override
+    protected void visitIfElse(IfElseNode node) {
         print("if ");
         visit(node.boolExpr);
         print(" { ");
@@ -116,26 +134,17 @@ public class PrettyPrintVisitor implements Visitor {
         print(" }");
     }
 
-    public void visit(UnaryOperatorNode node) {
-        print(Utility.operatorToString(node.operator));
-        if (node.expr.getClass() == BinaryOperatorNode.class) {
-            print("(");
-            visit(node.expr);
-            print(")");
-        } else {
-            visit(node.expr);
-        }
+    @Override
+    protected void visitOperator(OperatorNode node) {
+        visit(node.getLeft());
+        print(" ");
+        print(Utility.opToString(node.operator));
+        print(" ");
+        visit(node.getRight());
     }
 
-    public void visit(BinaryOperatorNode node) {
-        visit(node.left);
-        print(" ");
-        print(Utility.operatorToString(node.operator));
-        print(" ");
-        visit(node.right);
-    }
-
-    public void visit(ProgramNode node) {
+    @Override
+    protected void visitProgram(ProgramNode node) {
         node.bindings.stream().limit(1).forEach(x -> {
             visit(x);
         });

@@ -7,9 +7,13 @@ import java.util.*;
 
  For every new scope it enters it will first visit the identifier-declarations of the let-bindings and function-parameters before visiting any expressions.
  */
-public class SetScopeIdsVisitor implements Visitor {
+public class SetScopeIdsVisitor extends Visitor {
     Queue<Expression> deferredVisits = new LinkedList<>();
     IdentifierTable idTable = new IdentifierTable();
+
+    public void run(ProgramNode n) {
+        visit(n);
+    }
 
     void enterScope() {
         this.idTable.enterScope();
@@ -27,7 +31,8 @@ public class SetScopeIdsVisitor implements Visitor {
         this.deferredVisits.add(n);
     }
 
-    public void visit(FunctionNode node) {
+    @Override
+    protected void visitFunction(FunctionNode node) {
         enterScope();
         node.parameters.stream().forEach((p) -> visit(p));
         node.body.stream().forEach((p) -> visit(p));
@@ -35,22 +40,29 @@ public class SetScopeIdsVisitor implements Visitor {
         exitScope();
     }
 
-    public void visit(LetBindingNode node) {
-        visit(node.identifier);
+    @Override
+    protected void visitLetBinding(LetBindingNode node) {
+        visit(node.declaration);
         enqueue(node.expr);
     }
 
-    public void visit(IdentifierNode node) {
+    @Override
+    protected void visitIdentifier(IdentifierNode node) {
         var decl = idTable.get(node.value.name);
         // TODO: error if decl is null
-        node.value = decl.identifier.value;
+        if (decl != null) {
+            node.value = decl.identifier.value;
+        }
     }
-    public void visit(IdentifierDeclarationNode node) {
+
+    @Override
+    protected void visitIdentifierDeclaration(IdentifierDeclarationNode node) {
         idTable.declare(node);
         node.identifier.value = new Identifier(node.identifier.value.name, idTable.scopeId());
     }
 
-    public void visit(ProgramNode node) {
+    @Override
+    protected void visitProgram(ProgramNode node) {
         enterScope();
         node.bindings.stream().forEach(x -> visit(x));
         exitScope();

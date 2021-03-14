@@ -11,8 +11,6 @@ public enum Operator {
     LessThanEq,
     GreaterThanEq,
     Eq,
-    Not,
-    Negate,
     And,
     Or,
 }
