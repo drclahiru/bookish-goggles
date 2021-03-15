@@ -2,6 +2,7 @@ package compiler.visitor;
 
 import compiler.ast.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 /* 
  This visitor disambiguates identifiers of the same name by annotating every identifier with a scopeId.
@@ -9,23 +10,29 @@ import java.util.*;
  For every new scope it enters it will first visit the identifier-declarations of the let-bindings and function-parameters before visiting any expressions.
  */
 public class SetScopeIdsVisitor extends Visitor {
-    Queue<ExpressionNode> deferredVisits = new LinkedList<>();
-    IdentifierTable idTable = new IdentifierTable();
+    final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
+    final IdentifierTable idTable;
+
+    public SetScopeIdsVisitor() {
+        this.idTable = new IdentifierTable();
+    }
+    public SetScopeIdsVisitor(IdentifierTable idTable) {
+        this.idTable = idTable;
+    }
 
     public void run(ProgramNode n) {
         visit(n);
     }
 
-    void enterScope() {
-        this.idTable.enterScope();
-    }
-
-    void exitScope() {
-        while (!this.deferredVisits.isEmpty()) {
-            var next = this.deferredVisits.remove();
-            visit(next);
+    void scoped(Consumer<SetScopeIdsVisitor> f) {
+        idTable.enterScope();
+        var v = new SetScopeIdsVisitor(idTable);
+        f.accept(v);
+        while (!v.deferredVisits.isEmpty()) {
+            var next = v.deferredVisits.remove();
+            v.visit(next);
         }
-        this.idTable.exitScope();
+        idTable.exitScope();
     }
 
     void enqueue(ExpressionNode n) {
@@ -34,11 +41,11 @@ public class SetScopeIdsVisitor extends Visitor {
 
     @Override
     protected void visitFunction(FunctionNode node) {
-        enterScope();
-        node.parameters.stream().forEach((p) -> visit(p));
-        node.body.stream().forEach((p) -> visit(p));
-        enqueue(node.return_);
-        exitScope();
+        scoped(v -> {
+            node.parameters.stream().forEach((p) -> v.visit(p));
+            node.body.stream().forEach((p) -> v.visit(p));
+            v.enqueue(node.return_);
+        });
     }
 
     @Override
@@ -64,9 +71,9 @@ public class SetScopeIdsVisitor extends Visitor {
 
     @Override
     protected void visitProgram(ProgramNode node) {
-        enterScope();
-        node.bindings.stream().forEach(x -> visit(x));
-        exitScope();
+        scoped(v -> {
+            node.bindings.stream().forEach(x -> v.visit(x));
+        });
     }
 
     class IdentifierTable {
