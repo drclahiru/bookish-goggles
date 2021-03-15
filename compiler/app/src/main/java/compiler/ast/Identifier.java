@@ -3,8 +3,8 @@ package compiler.ast;
 import java.util.Objects;
 
 public class Identifier {
-    String name;
-    Integer scopeId;
+    public final String name;
+    public final Integer scopeId;
 
     public Identifier(String name) {
         this.name = name;

@@ -1,5 +1,6 @@
-package compiler.ast;
+package compiler.visitor;
 
+import compiler.ast.*;
 import java.util.*;
 
 /* 
@@ -8,7 +9,7 @@ import java.util.*;
  For every new scope it enters it will first visit the identifier-declarations of the let-bindings and function-parameters before visiting any expressions.
  */
 public class SetScopeIdsVisitor extends Visitor {
-    Queue<Expression> deferredVisits = new LinkedList<>();
+    Queue<ExpressionNode> deferredVisits = new LinkedList<>();
     IdentifierTable idTable = new IdentifierTable();
 
     public void run(ProgramNode n) {
@@ -27,7 +28,7 @@ public class SetScopeIdsVisitor extends Visitor {
         this.idTable.exitScope();
     }
 
-    void enqueue(Expression n) {
+    void enqueue(ExpressionNode n) {
         this.deferredVisits.add(n);
     }
 

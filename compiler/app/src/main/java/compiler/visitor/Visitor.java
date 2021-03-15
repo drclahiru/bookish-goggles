@@ -1,4 +1,6 @@
-package compiler.ast;
+package compiler.visitor;
+
+import compiler.ast.*;
 
 public abstract class Visitor {
     protected void defaultVisit(AbstractNode n) {
@@ -6,8 +8,8 @@ public abstract class Visitor {
     }
     protected void visit(AbstractNode n) {
         if (n == null) {
-        } else if (n instanceof Expression) {
-            visitExpression((Expression)n);
+        } else if (n instanceof ExpressionNode) {
+            visitExpression((ExpressionNode)n);
         } else if (n instanceof TypeNode) {
             visitType((TypeNode)n);
         } else if (n instanceof LetBindingNode) {
@@ -29,7 +31,7 @@ public abstract class Visitor {
     protected void visitBool(BoolNode n) {
         defaultVisit(n);
     }
-    protected void visitExpression(Expression n) {
+    protected void visitExpression(ExpressionNode n) {
         if (n instanceof OperatorNode) {
             visitOperator((OperatorNode)n);
         } else if (n instanceof BoolNode) {
@@ -46,6 +48,8 @@ public abstract class Visitor {
             visitNumber((NumberNode)n);
         } else if (n instanceof StringNode) {
             visitString((StringNode)n);
+        } else if (n instanceof RangeNode) {
+            visitRange((RangeNode)n);   
         } else {
             throw new Error("Unexpected type: " + n);
         }
@@ -89,5 +93,8 @@ public abstract class Visitor {
         } else {
             throw new Error("Unexpected type: " + n);
         }
+    }
+    protected void visitRange(RangeNode n) {
+        defaultVisit(n);
     }
 }

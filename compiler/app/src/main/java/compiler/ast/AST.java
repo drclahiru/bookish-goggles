@@ -33,6 +33,10 @@ public class AST {
         return new IdentifierNode(value);
     }
 
+    public static IdentifierDeclarationNode identDecl(String value) {
+        return new IdentifierDeclarationNode(new IdentifierNode(value));
+    }
+
     public static LetBindingNode let(String identifier, Consumer<LetBindingNode> f) {
         var n = new LetBindingNode(ident(identifier));
         f.accept(n);

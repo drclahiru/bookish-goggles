@@ -2,8 +2,8 @@ package compiler.ast;
 
 import java.util.stream.*;
 
-public class IdentifierNode extends Expression {
-    Identifier value;
+public class IdentifierNode extends ExpressionNode {
+    public Identifier value;
 
     public IdentifierNode(String name) {
         this.value = new Identifier(name);

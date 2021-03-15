@@ -1,5 +1,6 @@
-package compiler.ast;
+package compiler.visitor;
 
+import compiler.ast.*;
 import java.util.*;
 import java.io.OutputStream;
 
@@ -72,6 +73,10 @@ public class PrettyPrintVisitor extends Visitor {
 
     @Override
     protected void visitIdentifier(IdentifierNode node) {
+        if (node.value.scopeId != null) {
+            print(Integer.toString(node.value.scopeId));
+            print("_");
+        }
         print(node.value.name);
     }
     
@@ -81,8 +86,6 @@ public class PrettyPrintVisitor extends Visitor {
         if (n.type != null) {
             print(": ");
             visit(n.type);
-        } else {
-            print(": ?");
         }
     };
 
@@ -152,6 +155,15 @@ public class PrettyPrintVisitor extends Visitor {
             println();
             visit(x);
         });
+    }
+
+    @Override
+    protected void visitRange(RangeNode node) {
+        print(node.startCol);
+        print(Integer.toString(node.startRow));
+        print(":");
+        print(node.endCol);
+        print(Integer.toString(node.endRow));
     }
 
     void print(String text) {

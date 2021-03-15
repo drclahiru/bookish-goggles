@@ -34,9 +34,9 @@ public class Utility {
             case Divide:
             case Modulo:
             return AST.funcType(t -> {
-                t.parameter(AST.numberType());
-                t.parameter(AST.numberType());
-                t.returns(AST.numberType());
+                t.parameters.add(AST.numberType());
+                t.parameters.add(AST.numberType());
+                t.return_ = AST.numberType();
             });
             case LessThan:
             case LessThanEq:
@@ -44,16 +44,16 @@ public class Utility {
             case GreaterThanEq:
             case Eq:
             return AST.funcType(t -> {
-                t.parameter(AST.numberType());
-                t.parameter(AST.numberType());
-                t.returns(AST.boolType());
+                t.parameters.add(AST.numberType());
+                t.parameters.add(AST.numberType());
+                t.return_ = AST.boolType();
             });
             case And:
             case Or:
             return AST.funcType(t -> {
-                t.parameter(AST.boolType());
-                t.parameter(AST.boolType());
-                t.returns(AST.boolType());
+                t.parameters.add(AST.boolType());
+                t.parameters.add(AST.boolType());
+                t.return_ = AST.boolType();
             });
             default:
                 throw new Error("Missing operator type definition for " + op);
