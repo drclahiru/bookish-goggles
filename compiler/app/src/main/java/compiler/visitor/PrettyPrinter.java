@@ -4,12 +4,12 @@ import compiler.ast.*;
 import java.util.*;
 import java.io.OutputStream;
 
-public class PrettyPrintVisitor extends Visitor {
+public class PrettyPrinter extends Visitor {
     Integer indentLevel = 0;
     Boolean isNewline = true;
     OutputStream out;
 
-    public PrettyPrintVisitor(OutputStream out) {
+    public PrettyPrinter(OutputStream out) {
         super();
         this.out = out;
     }
@@ -91,21 +91,17 @@ public class PrettyPrintVisitor extends Visitor {
 
     @Override
     protected void visitSimpleType(SimpleTypeNode node) {
-        print(Utility.simpleTypeToString(node.type));
+        print(node.toString());
     }
 
     @Override
     protected void visitFunctionType(FunctionTypeNode node) {
-        print("(");
-        node.parameters.stream().limit(1).forEach(arg -> {
-            visit(arg);
-        });
-        node.parameters.stream().skip(1).forEach(arg -> {
-            print(", ");
-            visit(arg);
-        });
-        print(") -> ");
-        visit(node.return_);
+        print(node.toString());
+    }
+
+    @Override
+    protected void visitGenericType(GenericTypeNode node) {
+        print(node.toString());
     }
 
     @Override
@@ -166,7 +162,7 @@ public class PrettyPrintVisitor extends Visitor {
         print(Integer.toString(node.endRow));
     }
 
-    void print(String text) {
+    protected void print(String text) {
         try {
             if (isNewline) {
                 out.write(" ".repeat(this.indentLevel * 4).getBytes());
@@ -178,7 +174,7 @@ public class PrettyPrintVisitor extends Visitor {
         }
     }
 
-    void println() {
+    protected void println() {
         try {
             out.write("\n".getBytes());
             // System.out.println();

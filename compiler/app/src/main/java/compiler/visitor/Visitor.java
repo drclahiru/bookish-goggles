@@ -81,6 +81,9 @@ public abstract class Visitor {
     protected void visitSimpleType(SimpleTypeNode n) {
         defaultVisit(n);
     }
+    protected void visitGenericType(GenericTypeNode n) {
+        defaultVisit(n);
+    }
     protected void visitString(StringNode n) {
         defaultVisit(n);
     }
@@ -90,6 +93,8 @@ public abstract class Visitor {
             visitSimpleType((SimpleTypeNode)n);
         } else if (n instanceof FunctionTypeNode) {
             visitFunctionType((FunctionTypeNode)n);
+        } else if (n instanceof GenericTypeNode) {
+            visitGenericType((GenericTypeNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }

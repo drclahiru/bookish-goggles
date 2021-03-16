@@ -63,8 +63,8 @@ class App {
             p.bindings.add(bBind);
         });
             
-        new SetScopeIdsVisitor().run(globalScope);
-        new PrettyPrintVisitor(out).run(globalScope);
+        new ScopeResolver().run(globalScope);
+        new PrettyPrinter(out).run(globalScope);
     }
 
     public static void main(String[] args) {

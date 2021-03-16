@@ -9,14 +9,14 @@ import java.util.function.Consumer;
 
  For every new scope it enters it will first visit the identifier-declarations of the let-bindings and function-parameters before visiting any expressions.
  */
-public class SetScopeIdsVisitor extends Visitor {
+public class ScopeResolver extends Visitor {
     final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
     final IdentifierTable idTable;
 
-    public SetScopeIdsVisitor() {
+    public ScopeResolver() {
         this.idTable = new IdentifierTable();
     }
-    public SetScopeIdsVisitor(IdentifierTable idTable) {
+    public ScopeResolver(IdentifierTable idTable) {
         this.idTable = idTable;
     }
 
@@ -24,9 +24,9 @@ public class SetScopeIdsVisitor extends Visitor {
         visit(n);
     }
 
-    void scoped(Consumer<SetScopeIdsVisitor> f) {
+    void scoped(Consumer<ScopeResolver> f) {
         idTable.enterScope();
-        var v = new SetScopeIdsVisitor(idTable);
+        var v = new ScopeResolver(idTable);
         f.accept(v);
         while (!v.deferredVisits.isEmpty()) {
             var next = v.deferredVisits.remove();

@@ -3,11 +3,11 @@ package compiler.ast;
 import java.util.*;
 import java.util.stream.*;
 
-public class SimpleTypeNode extends TypeNode {
-    public final SimpleType type;
+public class GenericTypeNode extends TypeNode {
+    public final int id;
 
-    public SimpleTypeNode(SimpleType type) {
-        this.type = type;
+    public GenericTypeNode(int id) {
+        this.id = id;
     }
 
     public Stream<AbstractNode> children() {
@@ -16,21 +16,21 @@ public class SimpleTypeNode extends TypeNode {
 
     @Override
     public String toString() {
-        return Utility.simpleTypeToString(type);
+        return "'" + Utility.intToAlphabetic(id);
     }
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof SimpleTypeNode)) {
+        if (!(o instanceof GenericTypeNode)) {
             return false;
         }
 
-        var other = (SimpleTypeNode)o;
-        return this.type == other.type;
+        var other = (GenericTypeNode)o;
+        return this.id == other.id;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(type);
+        return Objects.hash(id);
     }
 }
