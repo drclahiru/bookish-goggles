@@ -65,6 +65,10 @@ public class AST {
         return n;
     }
 
+    public static GenericTypeNode variableType(int id) {
+        return new GenericTypeNode(id);
+    }
+
     public static ProgramNode program(Consumer<ProgramNode> f) {
         var n = new ProgramNode();
         f.accept(n);
