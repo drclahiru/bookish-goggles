@@ -11,12 +11,12 @@ import java.util.function.Consumer;
  */
 public class ScopeResolver extends Visitor {
     final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
-    final IdentifierTable idTable;
+    final IdentifierMap idTable;
 
     public ScopeResolver() {
-        this.idTable = new IdentifierTable();
+        this.idTable = new IdentifierMap();
     }
-    public ScopeResolver(IdentifierTable idTable) {
+    public ScopeResolver(IdentifierMap idTable) {
         this.idTable = idTable;
     }
 
@@ -76,7 +76,7 @@ public class ScopeResolver extends Visitor {
         });
     }
 
-    class IdentifierTable {
+    class IdentifierMap {
         final ArrayList<HashMap<String, IdentifierDeclarationNode>> idMapStack = new ArrayList<>();
         Stack<Integer> scopeId = new Stack<>();
         int nextScopeId = 1;

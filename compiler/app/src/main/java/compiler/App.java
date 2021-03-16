@@ -36,7 +36,7 @@ class App {
             e.expr = AST.invoke(i -> {
                 i.identifier = AST.ident("apply");
                 i.arguments.add(AST.ident("square"));
-                i.arguments.add(AST.ident("x"));
+                i.arguments.add(AST.ident("a"));
             });
         });
 

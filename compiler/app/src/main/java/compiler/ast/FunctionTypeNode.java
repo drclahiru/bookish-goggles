@@ -49,7 +49,7 @@ public class FunctionTypeNode extends TypeNode {
                 return false;
             }
         }
-        return this.return_ == other.return_;
+        return this.return_.equals(other.return_);
     }
     
     @Override
