@@ -100,11 +100,6 @@ public class PrettyPrinter extends Visitor {
     }
 
     @Override
-    protected void visitGenericType(GenericTypeNode node) {
-        print(node.toString());
-    }
-
-    @Override
     protected void visitFunctionInvocation(FunctionInvocationNode node) {
         visit(node.identifier);
         print("(");

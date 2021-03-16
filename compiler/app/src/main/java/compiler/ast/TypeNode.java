@@ -13,9 +13,6 @@ public abstract class TypeNode extends AbstractNode {
             return ((FunctionTypeNode)this).equals((FunctionTypeNode)o);
         }
 
-        if (this instanceof GenericTypeNode && o instanceof GenericTypeNode) {
-            return ((GenericTypeNode)this).equals((GenericTypeNode)o);
-        }
         return false;
     }
 }
