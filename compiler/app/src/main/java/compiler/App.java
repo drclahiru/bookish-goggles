@@ -67,10 +67,43 @@ class App {
         new PrettyPrinter(out).run(globalScope);
     }
 
+    public void typeCheckingExample(OutputStream out) {
+        var fBind = AST.let("f", x -> {
+            x.expr = AST.function(fa -> {
+                fa.parameters.add(AST.identDecl("a"));
+                fa.return_ = AST.ident("a");
+            });
+            x.declaration.type = AST.funcType(y -> {
+                y.return_ = AST.numberType();
+                y.parameters.add(AST.numberType());
+            });
+        });
+
+        var kBind = AST.let("k", x -> {
+            x.expr = AST.invoke(fa -> {
+                fa.identifier = (AST.ident("f"));
+                fa.arguments.add(AST.number(2.2));
+            });
+            x.declaration.type = AST.numberType();
+        });
+        
+        var globalScope = AST.program(p -> {
+            p.bindings.add(fBind);
+            p.bindings.add(kBind);
+        });
+            
+        new ScopeResolver().run(globalScope);
+        var cls = new CollectIdentifierDeclarations().run(globalScope);
+        new PrettyPrinter(out).run(globalScope);
+
+        new TypeChecker(cls).run(globalScope);
+    }
+
     public static void main(String[] args) {
         try {
             var app = new App();
-            app.printExampleProgram(System.out);
+            //app.printExampleProgram(System.out);
+            app.typeCheckingExample(System.out);
         } catch (Exception ex) {
             System.out.println();
             ex.printStackTrace(System.err);

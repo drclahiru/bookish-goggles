@@ -73,10 +73,10 @@ public class PrettyPrinter extends Visitor {
 
     @Override
     protected void visitIdentifier(IdentifierNode node) {
-        if (node.value.scopeId != null) {
-            print(Integer.toString(node.value.scopeId));
-            print("_");
-        }
+        // if (node.value.scopeId != null) {
+        //     print(Integer.toString(node.value.scopeId));
+        //     print("_");
+        // }
         print(node.value.name);
     }
     
