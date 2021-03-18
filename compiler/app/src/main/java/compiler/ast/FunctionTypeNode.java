@@ -45,7 +45,7 @@ public class FunctionTypeNode extends TypeNode {
         for (var i = 0; i < this.parameters.size(); i++) {
             var a1 = this.parameters.get(i);
             var a2 = other.parameters.get(i);
-            if (a1 != a2) {
+            if (!a1.equals(a2)) {
                 return false;
             }
         }

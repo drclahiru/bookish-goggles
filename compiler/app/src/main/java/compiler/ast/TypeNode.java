@@ -13,6 +13,10 @@ public abstract class TypeNode extends AbstractNode {
             return ((FunctionTypeNode)this).equals((FunctionTypeNode)o);
         }
 
+        if (this instanceof VariableTypeNode && o instanceof VariableTypeNode) {
+            return ((VariableTypeNode)this).equals((VariableTypeNode)o);
+        }
+
         return false;
     }
 }

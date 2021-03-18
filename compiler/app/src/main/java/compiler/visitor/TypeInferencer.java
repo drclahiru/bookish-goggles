@@ -96,6 +96,7 @@ public class TypeInferencer {
         @Override
         protected void visitLetBinding(LetBindingNode n) {
             n.declaration.type = sub(n.declaration.identifier.inferredType);
+            visit(n.expr);
         }
 
         @Override

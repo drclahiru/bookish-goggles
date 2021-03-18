@@ -22,12 +22,11 @@ public class PrettyPrinter extends Visitor {
     protected void visitFunction(FunctionNode node) {
         print("(");
         node.parameters.stream().limit(1).forEach(arg -> {
-            // visit(arg.identifier);
-            visit(arg);
+            visit(arg.identifier);
         });
         node.parameters.stream().skip(1).forEach(arg -> {
             print(", ");
-            visit(arg);
+            visit(arg.identifier);
         });
         print(") {");
         println();
