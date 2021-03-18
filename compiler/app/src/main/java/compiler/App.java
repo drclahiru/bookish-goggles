@@ -7,17 +7,22 @@ import java.util.*;
 
 class App {
     public void printExampleProgram(OutputStream out) {
+        // let apply = (f, x) {
+        //     f(x)
+        // }
         var applyBind = AST.let("apply", e -> {
             e.expr = AST.function(apply -> {
                 apply.parameters.add(AST.identDecl("f"));
                 apply.parameters.add(AST.identDecl("x"));
-                apply.return_ = AST.invoke(asdf -> {
-                    asdf.identifier = AST.ident("f");
+                apply.return_ = AST.invoke("f", asdf -> {
                     asdf.arguments.add(AST.ident("x"));
                 });
             });
         });
 
+        // let square = (x) {
+        //     x * x
+        // }
         var squareBind = AST.let("square", e -> {
             e.expr = AST.function(square -> {
                 square.parameters.add(AST.identDecl("x"));
@@ -28,37 +33,49 @@ class App {
             });
         });
 
+        // let id = (x) {
+        //     x
+        // }
+        var idBind = AST.let("id", e -> {
+            e.expr = AST.function(f -> {
+                f.parameters.add(AST.identDecl("x"));
+                f.return_ = AST.ident("x");
+            });
+        });
+
+        // let a = 2
         var aBind = AST.let("a", e -> {
             e.expr = AST.number(2);
         });
 
+        // let b = apply(square, a)
         var bBind = AST.let("b", e -> {
-            e.expr = AST.invoke(i -> {
-                i.identifier = AST.ident("apply");
+            e.expr = AST.invoke("apply", i -> {
                 i.arguments.add(AST.ident("square"));
                 i.arguments.add(AST.ident("a"));
             });
         });
 
+        // let c = apply(id, 4)
         var cBind = AST.let("c", e -> {
-            e.expr = AST.invoke(i -> {
-                i.identifier = AST.ident("apply");
-                i.arguments.add(AST.ident("square"));
+            e.expr = AST.invoke("apply", i -> {
+                i.arguments.add(AST.ident("id"));
                 i.arguments.add(AST.number(4));
             });
         });
 
         var globalScope = AST.program(p -> {
+            p.bindings.add(idBind);
             p.bindings.add(applyBind);
-            p.bindings.add(squareBind);
             p.bindings.add(aBind);
             p.bindings.add(bBind);
             p.bindings.add(cBind);
+            p.bindings.add(squareBind);
         });
             
-        new ScopeResolver().run(globalScope);
-        new TypeInferencer().run(globalScope);
-        // new PrettyPrinter(out).run(globalScope);
+        var idMap = new ScopeResolver().run(globalScope);
+        new TypeInferencer(idMap).run(globalScope);
+        new PrettyPrinter(out).run(globalScope);
     }
 
     public void typeCheckingExample(OutputStream out) {
@@ -74,8 +91,7 @@ class App {
         });
 
         var kBind = AST.let("k", x -> {
-            x.expr = AST.invoke(fa -> {
-                fa.identifier = (AST.ident("f"));
+            x.expr = AST.invoke("f", fa -> {
                 fa.arguments.add(AST.number(2.2));
             });
             x.declaration.type = AST.numberType();
@@ -85,12 +101,10 @@ class App {
             p.bindings.add(fBind);
             p.bindings.add(kBind);
         });
-            
-        new ScopeResolver().run(globalScope);
-        var cls = new CollectIdentifierDeclarations().run(globalScope);
+        
+        var idMap = new ScopeResolver().run(globalScope);
         new PrettyPrinter(out).run(globalScope);
-
-        new TypeChecker(cls).run(globalScope);
+        new TypeChecker(idMap).run(globalScope);
     }
 
     public static void main(String[] args) {

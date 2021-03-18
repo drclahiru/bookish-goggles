@@ -90,11 +90,16 @@ public abstract class Visitor {
             visitSimpleType((SimpleTypeNode)n);
         } else if (n instanceof FunctionTypeNode) {
             visitFunctionType((FunctionTypeNode)n);
+        } else if (n instanceof VariableTypeNode) {
+            visitVariableType((VariableTypeNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
     }
     protected void visitRange(RangeNode n) {
+        defaultVisit(n);
+    }
+    protected void visitVariableType(VariableTypeNode n) {
         defaultVisit(n);
     }
 }

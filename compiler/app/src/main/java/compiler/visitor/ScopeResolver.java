@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 public class ScopeResolver extends Visitor {
     final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
     final IdentifierMap idTable;
+    HashMap<Identifier, IdentifierDeclarationNode> flatIdTable = new HashMap<>();      
 
     public ScopeResolver() {
         this.idTable = new IdentifierMap();
@@ -20,8 +21,9 @@ public class ScopeResolver extends Visitor {
         this.idTable = idTable;
     }
 
-    public void run(ProgramNode n) {
+    public HashMap<Identifier, IdentifierDeclarationNode> run(ProgramNode n) {
         visit(n);
+        return flatIdTable;
     }
 
     void scoped(Consumer<ScopeResolver> f) {
@@ -57,16 +59,17 @@ public class ScopeResolver extends Visitor {
     @Override
     protected void visitIdentifier(IdentifierNode node) {
         var decl = idTable.get(node.value.name);
-        // TODO: error if decl is null
-        if (decl != null) {
-            node.value = decl.identifier.value;
+        if (decl == null) {
+            throw new Error("Use of undeclared identifier: " + node.value.name);
         }
+        node.value = decl.identifier.value;
     }
 
     @Override
     protected void visitIdentifierDeclaration(IdentifierDeclarationNode node) {
         idTable.declare(node);
         node.identifier.value = new Identifier(node.identifier.value.name, idTable.scopeId());
+        flatIdTable.put(node.identifier.value, node);
     }
 
     @Override

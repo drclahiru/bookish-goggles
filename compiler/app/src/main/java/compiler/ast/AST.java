@@ -11,8 +11,9 @@ public class AST {
         return n;
     }
 
-    public static FunctionInvocationNode invoke(Consumer<FunctionInvocationNode> f) {
+    public static FunctionInvocationNode invoke(String name, Consumer<FunctionInvocationNode> f) {
         var n = new FunctionInvocationNode();
+        n.identifier = ident(name);
         f.accept(n);
         return n;
     }
@@ -65,8 +66,8 @@ public class AST {
         return n;
     }
 
-    public static GenericTypeNode variableType(int id) {
-        return new GenericTypeNode(id);
+    public static VariableTypeNode variableType(int id) {
+        return new VariableTypeNode(id);
     }
 
     public static ProgramNode program(Consumer<ProgramNode> f) {

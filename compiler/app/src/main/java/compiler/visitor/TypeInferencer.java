@@ -9,6 +9,12 @@ import java.util.function.Consumer;
 //     https://www.cs.cornell.edu/courses/cs3110/2016fa/l/17-inference/notes.html
 
 public class TypeInferencer {
+    public HashMap<Identifier, IdentifierDeclarationNode> idMap = new HashMap<>();
+
+    public TypeInferencer(HashMap<Identifier, IdentifierDeclarationNode> idMap) {
+        this.idMap = idMap;
+    }
+
     public void run(ProgramNode p) {
         var typeGen = new TypeVarGenerator();
         var idMap = new CollectIdentifierDeclarations().run(p);
@@ -32,7 +38,6 @@ public class TypeInferencer {
         System.out.println("====");
 
         new TypeSubber(uni.substitutions).visit(p);
-        new PrettyPrinter(System.out).run(p);
     }
 
     class TypeConstraint {
@@ -191,16 +196,16 @@ public class TypeInferencer {
             var offset = 0;
             for (var c : cs) {
                 offset += 1;
-                if (c.type1 instanceof GenericTypeNode && c.type2 instanceof GenericTypeNode && c.type1.equals(c.type2)) {
+                if (c.type1 instanceof VariableTypeNode && c.type2 instanceof VariableTypeNode && c.type1.equals(c.type2)) {
                     var nextCs = cs.stream().skip(offset).collect(Collectors.toSet());
                     return unify(nextCs);
                 }
-                if (c.type1 instanceof GenericTypeNode && !typeContains(c.type2, (GenericTypeNode)c.type1)) {
+                if (c.type1 instanceof VariableTypeNode && !typeContains(c.type2, (VariableTypeNode)c.type1)) {
                     substitutions.put(c.type1, c.type2);
                     var nextCs = cs.stream().skip(offset).map(x -> sub(x)).collect(Collectors.toSet());
                     return unify(nextCs);
                 }
-                if (c.type2 instanceof GenericTypeNode && !typeContains(c.type1, (GenericTypeNode)c.type2)) {
+                if (c.type2 instanceof VariableTypeNode && !typeContains(c.type1, (VariableTypeNode)c.type2)) {
                     substitutions.put(c.type2, c.type1);
                     var nextCs = cs.stream().skip(offset).map(x -> sub(x)).collect(Collectors.toSet());
                     return unify(nextCs);
@@ -280,7 +285,7 @@ public class TypeInferencer {
                 for (var i = 0; i < n.arguments.size() && i < tf.parameters.size(); i++) {
                     addConstraint(n.arguments.get(i).inferredType, tf.parameters.get(i));
                 }
-            } else if (t instanceof GenericTypeNode) {
+            } else if (t instanceof VariableTypeNode) {
                 addConstraint(
                     AST.funcType(f -> {
                         for (var arg : n.arguments) {
@@ -315,8 +320,8 @@ public class TypeInferencer {
     class TypeVarGenerator {
         int nextTypeVarId = 1;
 
-        public GenericTypeNode next() {
-            return new GenericTypeNode(nextTypeVarId++);
+        public VariableTypeNode next() {
+            return new VariableTypeNode(nextTypeVarId++);
         }
     }
 
@@ -401,12 +406,12 @@ public class TypeInferencer {
     }
     
 
-    static boolean typeContains(TypeNode t, GenericTypeNode v) {
+    static boolean typeContains(TypeNode t, VariableTypeNode v) {
         if (t instanceof SimpleTypeNode) {
             return false;
         }
-        if (t instanceof GenericTypeNode) {
-            return ((GenericTypeNode)t).id == v.id;
+        if (t instanceof VariableTypeNode) {
+            return ((VariableTypeNode)t).id == v.id;
         }
         if (t instanceof FunctionTypeNode) {
             var t_ = (FunctionTypeNode)t;
