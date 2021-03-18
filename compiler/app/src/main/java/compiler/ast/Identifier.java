@@ -31,10 +31,11 @@ public class Identifier {
         return Objects.hash(scopeId, name);
     }
 
-    public String scopedName() {
-        if (this.scopeId == null) {
-            return this.name;
+    @Override
+    public String toString() {
+        if (scopeId == null) {
+            return name;
         }
-        return name + "@" + Utility.intToAlphabetic(scopeId);
+        return scopeId + "_" + name;
     }
 }

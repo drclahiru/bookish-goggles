@@ -9,33 +9,27 @@ import java.util.function.Consumer;
 //     https://www.cs.cornell.edu/courses/cs3110/2016fa/l/17-inference/notes.html
 
 public class TypeInferencer {
-    public HashMap<Identifier, IdentifierDeclarationNode> idMap = new HashMap<>();
+    final HashMap<Identifier, IdentifierDeclarationNode> idMap;
 
     public TypeInferencer(HashMap<Identifier, IdentifierDeclarationNode> idMap) {
         this.idMap = idMap;
     }
 
     public void run(ProgramNode p) {
-        var typeGen = new TypeVarGenerator();
-        var idMap = new CollectIdentifierDeclarations().run(p);
-        new SetPreliminaryType(idMap, typeGen).visit(p);
+        new PreliminaryTypeSetter(idMap).run(p);
+        // new InferredTypePrinter(System.out).run(p);
         var uni = new TypeUnifier(idMap);
         uni.run(p);
-        new InferredTypePrinter(System.out).run(p);
 
-        System.out.println("====");
-        System.out.println("Substitutions:");
-        uni.substitutions.forEach((t1, t2) -> {
-            System.out.print(t1);
-            System.out.print(" -> ");
-            System.out.print(t2);
-            System.out.println();
-        });
-        
-        for (var x : uni.constraints) {
-            System.out.println(x);
-        }
-        System.out.println("====");
+        // System.out.println("====");
+        // System.out.println("Substitutions:");
+        // uni.substitutions.forEach((t1, t2) -> {
+        //     System.out.print(t1);
+        //     System.out.print(" -> ");
+        //     System.out.print(t2);
+        //     System.out.println();
+        // });
+        // System.out.println("====");
 
         new TypeSubber(uni.substitutions).visit(p);
     }
@@ -136,6 +130,9 @@ public class TypeInferencer {
         }
 
         TypeNode sub(TypeNode t) {
+            if (t == null) {
+                throw new Error("Attempt to substitute non-type null");
+            }
             if (t instanceof FunctionTypeNode) {
                 var tf = (FunctionTypeNode)t;
                 return AST.funcType(f -> {
@@ -188,17 +185,12 @@ public class TypeInferencer {
             constraints.addAll(unify(v.constraints));
         }
 
-        void enqueue(ExpressionNode n) {
-            this.deferredVisits.add(n);
-        }
-
         Set<TypeConstraint> unify(Set<TypeConstraint> cs) {
             var offset = 0;
             for (var c : cs) {
                 offset += 1;
-                if (c.type1 instanceof VariableTypeNode && c.type2 instanceof VariableTypeNode && c.type1.equals(c.type2)) {
-                    var nextCs = cs.stream().skip(offset).collect(Collectors.toSet());
-                    return unify(nextCs);
+                if (c.type1.equals(c.type2)) {
+                    continue;
                 }
                 if (c.type1 instanceof VariableTypeNode && !typeContains(c.type2, (VariableTypeNode)c.type1)) {
                     substitutions.put(c.type1, c.type2);
@@ -226,10 +218,16 @@ public class TypeInferencer {
                     nextCs.add(new TypeConstraint(t1.return_, t2.return_));
                     return unify(nextCs);
                 }
-                // TODO: error: untypeable
-                System.out.println("Cannot unify \"" + c.type1 + "\" and \"" + c.type2 + "\"");
+                throw new Error("Unification between \"" + c.type1 + "\" and \"" + c.type2 + "\" is untypeable");
             }
             return new HashSet<>();
+        }
+
+        TypeNode assertPriliminaryType(TypeNode t, String location) {
+            if (t == null) {
+                throw new Error(location + ": preliminary type not set");
+            }
+            return t;
         }
 
         @Override
@@ -238,7 +236,7 @@ public class TypeInferencer {
                 n.declaration.identifier.inferredType,
                 n.expr.inferredType
             );
-            enqueue(n.expr);
+            deferredVisits.add(n.expr);
         }
         
         @Override
@@ -247,15 +245,17 @@ public class TypeInferencer {
                 n.inferredType,
                 AST.funcType(f -> {
                     n.parameters.forEach(param -> {
-                        f.parameters.add(param.identifier.inferredType);
+                        f.parameters.add(
+                            assertPriliminaryType(param.identifier.inferredType, "function param")
+                        );
                     });
-                    f.return_ = n.return_.inferredType;
+                    f.return_ = assertPriliminaryType(n.return_.inferredType, "function return");
                 })
             );
             scoped(v -> {
                 n.parameters.stream().forEach((p) -> v.visit(p));
                 n.body.stream().forEach((p) -> v.visit(p));
-                v.enqueue(n.return_);
+                v.deferredVisits.add(n.return_);
             });
         }
 
@@ -289,9 +289,11 @@ public class TypeInferencer {
                 addConstraint(
                     AST.funcType(f -> {
                         for (var arg : n.arguments) {
-                            f.parameters.add(arg.inferredType);
+                            f.parameters.add(
+                                assertPriliminaryType(arg.inferredType, "functionInvocation arg")
+                            );
                         }
-                        f.return_ = n.inferredType;
+                        f.return_ = assertPriliminaryType(n.inferredType, "functionInvocation return");
                     }),
                     t
                 );
@@ -303,20 +305,6 @@ public class TypeInferencer {
         }
     }
 
-    class CollectIdentifierDeclarations extends Visitor {
-        HashMap<Identifier, IdentifierDeclarationNode> idMap = new HashMap<>();
-    
-        public HashMap<Identifier, IdentifierDeclarationNode> run(ProgramNode n) {
-            visit(n);
-            return idMap;
-        }
-
-        @Override
-        protected void visitIdentifierDeclaration(IdentifierDeclarationNode node) {
-            idMap.put(node.identifier.value, node);
-        }
-    }
-
     class TypeVarGenerator {
         int nextTypeVarId = 1;
 
@@ -325,11 +313,16 @@ public class TypeInferencer {
         }
     }
 
-    class SetPreliminaryType extends Visitor {
+    class PreliminaryTypeSetter extends Visitor {
+        final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
         final HashMap<Identifier, IdentifierDeclarationNode> idMap;
         final TypeVarGenerator typeGen;
 
-        public SetPreliminaryType(HashMap<Identifier, IdentifierDeclarationNode> idMap, TypeVarGenerator typeGen) {
+        public PreliminaryTypeSetter(HashMap<Identifier, IdentifierDeclarationNode> idMap) {
+            this.idMap = idMap;
+            this.typeGen = new TypeVarGenerator();
+        }
+        PreliminaryTypeSetter(HashMap<Identifier, IdentifierDeclarationNode> idMap, TypeVarGenerator typeGen) {
             this.idMap = idMap;
             this.typeGen = typeGen;
         }
@@ -341,7 +334,18 @@ public class TypeInferencer {
             idMap.forEach((t, x) -> {
                 visit(x);
             });
-            visit(n);
+            scoped(v -> {
+                v.visit(n);
+            });
+        }
+
+        void scoped(Consumer<PreliminaryTypeSetter> f) {
+            var v = new PreliminaryTypeSetter(idMap, typeGen);
+            f.accept(v);
+            while (!v.deferredVisits.isEmpty()) {
+                var next = v.deferredVisits.remove();
+                v.visit(next);
+            }
         }
 
         @Override
@@ -365,7 +369,7 @@ public class TypeInferencer {
             if (decl != null) {
                 n.inferredType = decl.identifier.inferredType;
             } else {
-                throw new Error("Identifier has no definition: " + n);
+                throw new Error("Identifier has no definition: " + n.value);
             }
         }
     
@@ -381,10 +385,21 @@ public class TypeInferencer {
             n.identifier.inferredType = Utility.opType(n.operator);
             visit(n.getRight());
         }
-
+        
+        @Override
+        protected void visitLetBinding(LetBindingNode n) {
+            visit(n.declaration);
+            deferredVisits.add(n.expr);
+        }
+        
         @Override
         protected void visitFunction(FunctionNode n) {
-            super.visitFunction(n);
+            scoped(v -> {
+                n.parameters.stream().forEach((p) -> v.visit(p));
+                n.body.stream().forEach((p) -> v.visit(p));
+                v.deferredVisits.add(n.return_);
+            });
+
             n.inferredType = AST.funcType(f -> {
                 n.parameters.forEach(param -> {
                     f.parameters.add(param.identifier.inferredType);

@@ -19,6 +19,18 @@ class App {
                 });
             });
         });
+        // let apply2 = (f, x) {
+        //     f(x)
+        // }
+        var apply2Bind = AST.let("apply2", e -> {
+            e.expr = AST.function(apply -> {
+                apply.parameters.add(AST.identDecl("f"));
+                apply.parameters.add(AST.identDecl("x"));
+                apply.return_ = AST.invoke("f", asdf -> {
+                    asdf.arguments.add(AST.ident("x"));
+                });
+            });
+        });
 
         // let square = (x) {
         //     x * x
@@ -56,17 +68,18 @@ class App {
             });
         });
 
-        // let c = apply(id, 4)
+        // let c = apply(id, id)
         var cBind = AST.let("c", e -> {
-            e.expr = AST.invoke("apply", i -> {
+            e.expr = AST.invoke("apply2", i -> {
                 i.arguments.add(AST.ident("id"));
-                i.arguments.add(AST.number(4));
+                i.arguments.add(AST.ident("square"));
             });
         });
 
         var globalScope = AST.program(p -> {
             p.bindings.add(idBind);
             p.bindings.add(applyBind);
+            p.bindings.add(apply2Bind);
             p.bindings.add(aBind);
             p.bindings.add(bBind);
             p.bindings.add(cBind);
@@ -110,8 +123,8 @@ class App {
     public static void main(String[] args) {
         try {
             var app = new App();
-            //app.printExampleProgram(System.out);
-            app.typeCheckingExample(System.out);
+            app.printExampleProgram(System.out);
+            //app.typeCheckingExample(System.out);
         } catch (Exception ex) {
             System.out.println();
             ex.printStackTrace(System.err);

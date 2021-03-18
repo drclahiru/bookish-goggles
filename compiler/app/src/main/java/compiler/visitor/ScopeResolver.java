@@ -12,13 +12,15 @@ import java.util.function.Consumer;
 public class ScopeResolver extends Visitor {
     final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
     final IdentifierMap idTable;
-    HashMap<Identifier, IdentifierDeclarationNode> flatIdTable = new HashMap<>();      
+    final HashMap<Identifier, IdentifierDeclarationNode> flatIdTable;      
 
     public ScopeResolver() {
         this.idTable = new IdentifierMap();
+        flatIdTable = new HashMap<>();
     }
-    public ScopeResolver(IdentifierMap idTable) {
+    ScopeResolver(IdentifierMap idTable, HashMap<Identifier, IdentifierDeclarationNode> flatIdTable) {
         this.idTable = idTable;
+        this.flatIdTable = flatIdTable;
     }
 
     public HashMap<Identifier, IdentifierDeclarationNode> run(ProgramNode n) {
@@ -28,7 +30,7 @@ public class ScopeResolver extends Visitor {
 
     void scoped(Consumer<ScopeResolver> f) {
         idTable.enterScope();
-        var v = new ScopeResolver(idTable);
+        var v = new ScopeResolver(idTable, flatIdTable);
         f.accept(v);
         while (!v.deferredVisits.isEmpty()) {
             var next = v.deferredVisits.remove();
