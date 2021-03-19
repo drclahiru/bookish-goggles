@@ -76,6 +76,35 @@ class App {
             });
         });
 
+        // let fact = (n) {
+        //     if n == 0 {
+        //         1
+        //      } else {
+        //         n * fact(n - 1)
+        //      }
+        // }
+        var factBind = AST.let("fact", e -> {
+            e.expr = AST.function(f -> {
+                f.parameters.add(AST.identDecl("n"));
+                f.return_ = AST.ifElse(i -> {
+                    i.boolExpr = AST.op(Operator.Eq, x -> {
+                        x.left(AST.ident("n"));
+                        x.right(AST.number(0));
+                    });
+                    i.trueCase = AST.number(1);
+                    i.elseCase = AST.op(Operator.Multiply, x -> {
+                        x.left(AST.ident("n"));
+                        x.right(AST.invoke("fact", i2 -> {
+                            i2.arguments.add(AST.op(Operator.Subtract, x2 -> {
+                                x2.left(AST.ident("n"));
+                                x2.right(AST.number(1));
+                            }));
+                        }));
+                    });
+                });
+            });
+        });
+
         var globalScope = AST.program(p -> {
             p.bindings.add(idBind);
             p.bindings.add(applyBind);
@@ -84,6 +113,7 @@ class App {
             p.bindings.add(bBind);
             p.bindings.add(cBind);
             p.bindings.add(squareBind);
+            p.bindings.add(factBind);
         });
             
         var idMap = new ScopeResolver().run(globalScope);

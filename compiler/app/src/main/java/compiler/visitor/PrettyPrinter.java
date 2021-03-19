@@ -122,13 +122,17 @@ public class PrettyPrinter extends Visitor {
         print("if ");
         visit(node.boolExpr);
         print(" { ");
+        println();
         indentLevel++;
         visit(node.trueCase);
         indentLevel--;
+        println();
         print(" } else { ");
+        println();
         indentLevel++;
         visit(node.elseCase);
         indentLevel--;
+        println();
         print(" }");
     }
 
