@@ -363,6 +363,15 @@ public class TypeInferencer {
         }
     
         @Override
+        protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
+            if (n.type != null) {
+                n.identifier.inferredType = n.type;
+            } else {
+                n.identifier.inferredType = typeGen.next();
+            }
+        }
+    
+        @Override
         protected void visitExpression(ExpressionNode n) {
             n.inferredType = typeGen.next();
             super.visitExpression(n);
