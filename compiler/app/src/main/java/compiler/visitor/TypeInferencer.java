@@ -31,7 +31,7 @@ public class TypeInferencer {
         // });
         // System.out.println("====");
 
-        new TypeSubber(uni.substitutions).visit(p);
+        new TypeAnnotater(uni.substitutions).visit(p);
     }
 
     class TypeConstraint {
@@ -71,9 +71,9 @@ public class TypeInferencer {
         }
     }
 
-    class TypeSubber extends Visitor {
+    class TypeAnnotater extends Visitor {
         final HashMap<TypeNode, TypeNode> substitutions;
-        public TypeSubber(HashMap<TypeNode, TypeNode> substitutions) {
+        public TypeAnnotater(HashMap<TypeNode, TypeNode> substitutions) {
             this.substitutions = substitutions;
         }
 
@@ -91,12 +91,6 @@ public class TypeInferencer {
                 t = sub(substitutions.get(t));
             }
             return t;
-        }
-
-        @Override
-        protected void visitLetBinding(LetBindingNode n) {
-            n.declaration.type = sub(n.declaration.identifier.inferredType);
-            visit(n.expr);
         }
 
         @Override
@@ -329,12 +323,6 @@ public class TypeInferencer {
         }
 
         public void run(ProgramNode n) {
-            // ensure all the let declarations have their preliminary type so that 
-            // when we visit a reference to a declaration, we can use the declaration's
-            // type.
-            idMap.forEach((t, x) -> {
-                visit(x);
-            });
             scoped(v -> {
                 v.visit(n);
             });

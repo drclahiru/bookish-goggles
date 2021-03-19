@@ -15,15 +15,6 @@ public class InferredTypePrinter extends PrettyPrinter {
     }
 
     @Override
-    protected void visitIdentifierDeclaration(IdentifierDeclarationNode node) {
-        wrapped(x -> {
-            visit(node.identifier);
-            print(" ");
-            visit(node.identifier.inferredType);
-        });
-    }
-
-    @Override
     protected void visitExpression(ExpressionNode node) {
         wrapped(x -> {
             super.visitExpression(node);
