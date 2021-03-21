@@ -1,5 +1,9 @@
 grammar g;
 
+@header {
+package compiler.parser;
+}
+
 base_rule
     : code_block EOF
     ;

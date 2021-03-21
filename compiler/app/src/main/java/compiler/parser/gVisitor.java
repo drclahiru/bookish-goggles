@@ -1,4 +1,7 @@
-// Generated from C:/Users/Jitka/IdeaProjects/untitled\g.g4 by ANTLR 4.9.1
+// Generated from app/src/main/java/compiler/g.g4 by ANTLR 4.9.2
+
+package compiler.parser;
+
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
