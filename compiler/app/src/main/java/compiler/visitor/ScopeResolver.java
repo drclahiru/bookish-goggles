@@ -13,12 +13,19 @@ public class ScopeResolver extends Visitor {
     final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
     final IdentifierMap idTable;
     final HashMap<Identifier, IdentifierDeclarationNode> flatIdTable;      
+    final HashMap<Identifier, TypeNode> prelude;
 
     public ScopeResolver() {
+        this.prelude = Utility.createPrelude();
         this.idTable = new IdentifierMap();
         flatIdTable = new HashMap<>();
     }
-    ScopeResolver(IdentifierMap idTable, HashMap<Identifier, IdentifierDeclarationNode> flatIdTable) {
+    ScopeResolver(
+        HashMap<Identifier, TypeNode> prelude,
+        IdentifierMap idTable,
+        HashMap<Identifier, IdentifierDeclarationNode> flatIdTable
+    ) {
+        this.prelude = prelude;
         this.idTable = idTable;
         this.flatIdTable = flatIdTable;
     }
@@ -30,7 +37,7 @@ public class ScopeResolver extends Visitor {
 
     void scoped(Consumer<ScopeResolver> f) {
         idTable.enterScope();
-        var v = new ScopeResolver(idTable, flatIdTable);
+        var v = new ScopeResolver(prelude, idTable, flatIdTable);
         f.accept(v);
         while (!v.deferredVisits.isEmpty()) {
             var next = v.deferredVisits.remove();
@@ -61,10 +68,11 @@ public class ScopeResolver extends Visitor {
     @Override
     protected void visitIdentifier(IdentifierNode node) {
         var decl = idTable.get(node.value.name);
-        if (decl == null) {
+        if (decl != null) {
+            node.value = decl.identifier.value;
+        } else if (!prelude.containsKey(node.value)) {
             throw new Error("Use of undeclared identifier: " + node.value.name);
         }
-        node.value = decl.identifier.value;
     }
 
     @Override

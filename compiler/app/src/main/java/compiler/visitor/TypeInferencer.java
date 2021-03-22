@@ -106,7 +106,7 @@ public class TypeInferencer {
         HashSet<TypeConstraint> constraints = new HashSet<>();
 
         public TypeUnifier(HashMap<Identifier, IdentifierDeclarationNode> idMap) {
-            var idTypeMap = Utility.getPrelude();
+            var idTypeMap = Utility.createPrelude();
             idMap.forEach((id, decl) -> {
                 idTypeMap.put(id, decl.identifier.inferredType);
             });
@@ -261,11 +261,6 @@ public class TypeInferencer {
             addConstraint(n.inferredType, n.trueCase.inferredType);
             addConstraint(n.trueCase.inferredType, n.elseCase.inferredType);
         }
-        
-        @Override
-        protected void visitOperator(OperatorNode n) {
-            visitFunctionInvocation(n);
-        }
 
         @Override
         protected void visitFunctionInvocation(FunctionInvocationNode n) {
@@ -310,14 +305,21 @@ public class TypeInferencer {
 
     class PreliminaryTypeSetter extends Visitor {
         final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
+        final HashMap<Identifier, TypeNode> prelude;
         final HashMap<Identifier, IdentifierDeclarationNode> idMap;
         final TypeVarGenerator typeGen;
 
         public PreliminaryTypeSetter(HashMap<Identifier, IdentifierDeclarationNode> idMap) {
+            this.prelude = Utility.createPrelude();
             this.idMap = idMap;
             this.typeGen = new TypeVarGenerator();
         }
-        PreliminaryTypeSetter(HashMap<Identifier, IdentifierDeclarationNode> idMap, TypeVarGenerator typeGen) {
+        PreliminaryTypeSetter(
+            HashMap<Identifier, TypeNode> prelude,
+            HashMap<Identifier, IdentifierDeclarationNode> idMap,
+            TypeVarGenerator typeGen
+        ) {
+            this.prelude = prelude;
             this.idMap = idMap;
             this.typeGen = typeGen;
         }
@@ -329,7 +331,7 @@ public class TypeInferencer {
         }
 
         void scoped(Consumer<PreliminaryTypeSetter> f) {
-            var v = new PreliminaryTypeSetter(idMap, typeGen);
+            var v = new PreliminaryTypeSetter(prelude, idMap, typeGen);
             f.accept(v);
             while (!v.deferredVisits.isEmpty()) {
                 var next = v.deferredVisits.remove();
@@ -357,7 +359,7 @@ public class TypeInferencer {
             var decl = idMap.get(n.value);
             if (decl != null) {
                 n.inferredType = decl.identifier.inferredType;
-            } else {
+            } else if (!prelude.containsKey(n.value)) {
                 throw new Error("Identifier has no definition: " + n.value);
             }
         }
@@ -375,13 +377,6 @@ public class TypeInferencer {
         protected void visitExpression(ExpressionNode n) {
             n.inferredType = typeGen.next();
             super.visitExpression(n);
-        }
-    
-        @Override
-        protected void visitOperator(OperatorNode n) {
-            visit(n.getLeft());
-            n.identifier.inferredType = Utility.opType(n.operator);
-            visit(n.getRight());
         }
         
         @Override

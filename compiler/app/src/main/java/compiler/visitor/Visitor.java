@@ -22,9 +22,6 @@ public abstract class Visitor {
             throw new Error("Unexpected type: " + n);
         }
     }
-    protected void visitOperator(OperatorNode n) {
-        defaultVisit(n);
-    }
     protected void visitLetBinding(LetBindingNode n) {
         defaultVisit(n);
     }
@@ -32,9 +29,7 @@ public abstract class Visitor {
         defaultVisit(n);
     }
     protected void visitExpression(ExpressionNode n) {
-        if (n instanceof OperatorNode) {
-            visitOperator((OperatorNode)n);
-        } else if (n instanceof BoolNode) {
+        if (n instanceof BoolNode) {
             visitBool((BoolNode)n);
         } else if (n instanceof FunctionInvocationNode) {
             visitFunctionInvocation((FunctionInvocationNode)n);

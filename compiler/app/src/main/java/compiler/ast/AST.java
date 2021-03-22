@@ -81,10 +81,4 @@ public class AST {
         f.accept(n);
         return n;
     }
-
-    public static OperatorNode op(Operator op, Consumer<OperatorNode> f) {
-        var n = new OperatorNode(op);
-        f.accept(n);
-        return n;
-    }
 }

@@ -23,17 +23,6 @@ public class InferredTypePrinter extends PrettyPrinter {
         });
     }
 
-    @Override
-    protected void visitOperator(OperatorNode node) {
-        visit(node.getLeft());
-        wrapped(x -> {
-            visit(node.identifier);
-            print(" ");
-            visit(node.inferredType);
-        });
-        visit(node.getRight());
-    }
-
     void wrapped(Consumer f) {
         print("[");
         f.accept(null);

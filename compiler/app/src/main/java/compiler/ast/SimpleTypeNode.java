@@ -16,7 +16,7 @@ public class SimpleTypeNode extends TypeNode {
 
     @Override
     public String toString() {
-        return Utility.simpleTypeToString(type);
+        return type.toString();
     }
     
     @Override

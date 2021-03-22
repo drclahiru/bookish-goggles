@@ -105,16 +105,24 @@ public class PrettyPrinter extends Visitor {
 
     @Override
     protected void visitFunctionInvocation(FunctionInvocationNode node) {
-        visit(node.identifier);
-        print("(");
-        node.arguments.stream().limit(1).forEach(arg -> {
-            visit(arg);
-        });
-        node.arguments.stream().skip(1).forEach(arg -> {
-            print(", ");
-            visit(arg);
-        });
-        print(")");
+        if (node.isOperator()) {
+            visit(node.arguments.get(0));
+            print(" ");
+            visit(node.identifier);
+            print(" ");
+            visit(node.arguments.get(1));
+        } else {
+            visit(node.identifier);
+            print("(");
+            node.arguments.stream().limit(1).forEach(arg -> {
+                visit(arg);
+            });
+            node.arguments.stream().skip(1).forEach(arg -> {
+                print(", ");
+                visit(arg);
+            });
+            print(")");
+        }
     }
 
     @Override
@@ -134,15 +142,6 @@ public class PrettyPrinter extends Visitor {
         indentLevel--;
         println();
         print(" }");
-    }
-
-    @Override
-    protected void visitOperator(OperatorNode node) {
-        visit(node.getLeft());
-        print(" ");
-        print(Utility.opToString(node.operator));
-        print(" ");
-        visit(node.getRight());
     }
 
     @Override

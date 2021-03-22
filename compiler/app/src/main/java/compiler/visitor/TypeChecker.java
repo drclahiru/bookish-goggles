@@ -4,7 +4,7 @@ import compiler.ast.*;
 import java.util.*;
 
 public class TypeChecker extends Visitor {
-    HashMap<Identifier, TypeNode> map = Utility.getPrelude(); 
+    HashMap<Identifier, TypeNode> map = Utility.createPrelude(); 
     private TypeNode previousType;
     public TypeChecker(HashMap<Identifier, IdentifierDeclarationNode> hm) {
         
@@ -63,10 +63,6 @@ public class TypeChecker extends Visitor {
     	if(!n.declaration.type.equals(previousType)) {
     		throw new Error ("type mismatch" + previousType.toString() + "opa");
     	}
-    }
-    @Override
-    public void visitOperator(OperatorNode n) {
-    	visitFunctionInvocation(n);
     }
     @Override
     public void visitFunctionInvocation(FunctionInvocationNode fn) {

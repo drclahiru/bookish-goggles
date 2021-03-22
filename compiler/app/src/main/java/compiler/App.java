@@ -32,9 +32,9 @@ class App {
         var squareBind = AST.let("square", e -> {
             e.expr = AST.function(square -> {
                 square.parameters.add(AST.identDecl("x"));
-                square.return_ = AST.op(Operator.Multiply, op -> {
-                    op.left(AST.ident("x"));
-                    op.right(AST.ident("x"));
+                square.return_ = AST.invoke("*", op -> {
+                    op.arguments.add(AST.ident("x"));
+                    op.arguments.add(AST.ident("x"));
                 });
             });
         });
@@ -73,17 +73,17 @@ class App {
             e.expr = AST.function(f -> {
                 f.parameters.add(AST.identDecl("n"));
                 f.return_ = AST.ifElse(i -> {
-                    i.boolExpr = AST.op(Operator.Eq, x -> {
-                        x.left(AST.ident("n"));
-                        x.right(AST.number(0));
+                    i.boolExpr = AST.invoke("==", x -> {
+                        x.arguments.add(AST.ident("n"));
+                        x.arguments.add(AST.number(0));
                     });
                     i.trueCase = AST.number(1);
-                    i.elseCase = AST.op(Operator.Multiply, x -> {
-                        x.left(AST.ident("n"));
-                        x.right(AST.invoke("fact", i2 -> {
-                            i2.arguments.add(AST.op(Operator.Subtract, x2 -> {
-                                x2.left(AST.ident("n"));
-                                x2.right(AST.number(1));
+                    i.elseCase = AST.invoke("*", x -> {
+                        x.arguments.add(AST.ident("n"));
+                        x.arguments.add(AST.invoke("fact", i2 -> {
+                            i2.arguments.add(AST.invoke("-", x2 -> {
+                                x2.arguments.add(AST.ident("n"));
+                                x2.arguments.add(AST.number(1));
                             }));
                         }));
                     });
@@ -101,41 +101,10 @@ class App {
             p.bindings.add(squareBind);
             p.bindings.add(factBind);
         });
-            
+        
         var idMap = new ScopeResolver().run(globalScope);
         new TypeInferencer(idMap).run(globalScope);
         new PrettyPrinter(out).run(globalScope);
-        new TypeChecker(idMap).run(globalScope);
-
-    }
-
-    public void typeCheckingExample(OutputStream out) {
-        var fBind = AST.let("f", x -> {
-            x.expr = AST.function(fa -> {
-                fa.parameters.add(AST.identDecl("a"));
-                fa.return_ = AST.ident("a");
-            });
-            x.declaration.type = AST.funcType(y -> {
-                y.return_ = AST.numberType();
-                y.parameters.add(AST.numberType());
-            });
-        });
-
-        var kBind = AST.let("k", x -> {
-            x.expr = AST.invoke("f", fa -> {
-                fa.arguments.add(AST.number(2.2));
-            });
-            x.declaration.type = AST.numberType();
-        });
-        
-        var globalScope = AST.program(p -> {
-            p.bindings.add(fBind);
-            p.bindings.add(kBind);
-        });
-        
-        var idMap = new ScopeResolver().run(globalScope);
-        new PrettyPrinter(out).run(globalScope);
-        new TypeInferencer(idMap).run(globalScope);
         new TypeChecker(idMap).run(globalScope);
     }
 
@@ -143,7 +112,6 @@ class App {
         try {
             var app = new App();
             app.printExampleProgram(System.out);
-            //app.typeCheckingExample(System.out);
         } catch (Exception ex) {
             System.out.println();
             ex.printStackTrace(System.err);
