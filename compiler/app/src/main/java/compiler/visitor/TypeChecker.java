@@ -4,27 +4,74 @@ import compiler.ast.*;
 import java.util.*;
 
 public class TypeChecker extends Visitor {
-    HashMap<Identifier, IdentifierDeclarationNode> map = new HashMap<>(); 
-
+    HashMap<Identifier, TypeNode> map = Utility.getPrelude(); 
+    private TypeNode previousType;
     public TypeChecker(HashMap<Identifier, IdentifierDeclarationNode> hm) {
-        this.map = hm;
+        
+        hm.forEach((i,id)-> {map.put(i,id.type);  } );
     }
 
-    public TypeNode typeOf(Identifier i) {
-        if(map.get(i) == null) {
-            throw new Error("Identifier not declared" + i);    
-        }
-        
-        return map.get(i).type;
-    }
 
     public void run(ProgramNode pn) {
         visit(pn);
     }
-    
+    @Override
+    public void visitNumber(NumberNode n) {
+    	previousType = AST.numberType();
+    }
+    @Override
+    public void visitBool(BoolNode n) {
+    	previousType = AST.boolType();
+    }
+    @Override
+    public void visitString(StringNode n) {
+    	previousType = AST.stringType();
+    }
+    @Override
+    public void visitIdentifier(IdentifierNode n) {
+    	previousType=map.get(n.value);
+    	
+    }
+    @Override 
+    public void visitFunction(FunctionNode n) {
+    	for(var x:n.body) {visit(x);}
+    	
+    	 previousType=AST.funcType((t) -> {
+    		 for(var k:n.parameters) 
+    	 	{
+    		 visit(k);
+    		 t.parameters.add(previousType);
+    	 	}
+    		 visit(n.return_);
+    		 t.return_= previousType;
+    	 }
+    	 );
+    }
+    @Override 
+    public void visitIfElse(IfElseNode n) {
+    	visit(n.boolExpr);
+    	if(!AST.boolType().equals(previousType)) { throw new Error("Not a boolean");}
+    	visit(n.trueCase);
+    	var t = previousType;
+    	visit(n.elseCase);
+    	if(!t.equals(previousType)) {throw new Error ("mismatching types");}
+    	
+    }
+    @Override
+    public void visitLetBinding(LetBindingNode n) {
+    	visit(n.expr);
+    	if(!n.declaration.type.equals(previousType)) {
+    		throw new Error ("type mismatch" + previousType.toString() + "opa");
+    	}
+    }
+    @Override
+    public void visitOperator(OperatorNode n) {
+    	visitFunctionInvocation(n);
+    }
     @Override
     public void visitFunctionInvocation(FunctionInvocationNode fn) {
-        var t = typeOf(fn.identifier.value);
+       visit(fn.identifier);
+    	var t = previousType;
 
         if (!(t instanceof FunctionTypeNode)) {
             throw new Error("Identifier is not a function" + t);
@@ -36,33 +83,17 @@ public class TypeChecker extends Visitor {
             throw new Error("Arity mismatch");
         }
         for(int e = 0; e < tf.parameters.size(); e++) {
-            if (!tf.parameters.get(e).equals(typeOf(fn.arguments.get(e)))) {
+        	visit(fn.arguments.get(e));
+            if (!tf.parameters.get(e).equals(previousType)) {
                 throw new Error ("Type mismatch of the function and the arguments");
             }
          }
+        previousType = tf.return_;
+        
     }
 
-    public TypeNode typeOf(ExpressionNode n) {
-        if (n instanceof BoolNode) {
-            return AST.boolType();
-        } else if (n instanceof FunctionInvocationNode) {
-            var x = (FunctionInvocationNode) n;
-            var y = (FunctionTypeNode) typeOf(x.identifier);
-            return y.return_;
-        } else if (n instanceof FunctionNode) {
-            throw new Error ("TODO");
-        } else if (n instanceof IdentifierNode) {
-            var x = (IdentifierNode) n;
-            return typeOf(x.value);           
-        } else if (n instanceof IfElseNode) {
-            throw new Error ("TODO");
-        } else if (n instanceof NumberNode) {
-            return AST.numberType();
-        } else if (n instanceof StringNode) {
-            return AST.stringType();
-        } else {
-            throw new Error("Unexpected type: " + n);
-        }
-    }
-}
+  
+   
+
+}  
 

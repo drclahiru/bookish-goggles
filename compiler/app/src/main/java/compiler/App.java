@@ -119,6 +119,8 @@ class App {
         var idMap = new ScopeResolver().run(globalScope);
         new TypeInferencer(idMap).run(globalScope);
         new PrettyPrinter(out).run(globalScope);
+        new TypeChecker(idMap).run(globalScope);
+
     }
 
     public void typeCheckingExample(OutputStream out) {
@@ -147,6 +149,7 @@ class App {
         
         var idMap = new ScopeResolver().run(globalScope);
         new PrettyPrinter(out).run(globalScope);
+        new TypeInferencer(idMap).run(globalScope);
         new TypeChecker(idMap).run(globalScope);
     }
 
