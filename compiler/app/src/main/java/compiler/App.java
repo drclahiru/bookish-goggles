@@ -7,9 +7,7 @@ import java.util.*;
 
 class App {
     public void printExampleProgram(OutputStream out) {
-        // let apply = (f, x) {
-        //     f(x)
-        // }
+        // let apply = (f, x) { f(x) }
         var applyBind = AST.let("apply", e -> {
             e.expr = AST.function(apply -> {
                 apply.parameters.add(AST.identDecl("f"));
@@ -19,9 +17,7 @@ class App {
                 });
             });
         });
-        // let apply2 = (f, x) {
-        //     f(x)
-        // }
+        // let apply2 = (f, x) { f(x) }
         var apply2Bind = AST.let("apply2", e -> {
             e.expr = AST.function(apply -> {
                 apply.parameters.add(AST.identDecl("f"));
@@ -32,9 +28,7 @@ class App {
             });
         });
 
-        // let square = (x) {
-        //     x * x
-        // }
+        // let square = (x) { x * x }
         var squareBind = AST.let("square", e -> {
             e.expr = AST.function(square -> {
                 square.parameters.add(AST.identDecl("x"));
@@ -45,9 +39,7 @@ class App {
             });
         });
 
-        // let id = (x) {
-        //     x
-        // }
+        // let id = (x) { x }
         var idBind = AST.let("id", e -> {
             e.expr = AST.function(f -> {
                 f.parameters.add(AST.identDecl("x"));
@@ -76,13 +68,7 @@ class App {
             });
         });
 
-        // let fact = (n) {
-        //     if n == 0 {
-        //         1
-        //      } else {
-        //         n * fact(n - 1)
-        //      }
-        // }
+        // let fact = (n) { if n == 0 { 1 } else { n * fact(n - 1) } }
         var factBind = AST.let("fact", e -> {
             e.expr = AST.function(f -> {
                 f.parameters.add(AST.identDecl("n"));
