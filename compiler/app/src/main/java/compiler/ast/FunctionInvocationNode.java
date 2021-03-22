@@ -12,6 +12,6 @@ public class FunctionInvocationNode extends ExpressionNode {
     }
 
     public boolean isOperator() {
-        return arguments.size() == 2 && identifier.value.name.matches("^[^[a-z]].*");
+        return arguments.size() == 2 && identifier.value.name.matches("^[^[a-z_]].*");
     }
 }
