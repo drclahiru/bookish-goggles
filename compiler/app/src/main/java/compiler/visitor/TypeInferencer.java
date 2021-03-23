@@ -95,7 +95,9 @@ public class TypeInferencer {
 
         @Override
         protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
-            n.type = sub(n.identifier.inferredType);
+            if (n.type == null) {
+                n.type = sub(n.identifier.inferredType);
+            }
         }
     }
 
