@@ -1,6 +1,5 @@
 package compiler.ast;
 
-import java.lang.annotation.Inherited;
 import java.util.*;
 import java.util.stream.*;
 

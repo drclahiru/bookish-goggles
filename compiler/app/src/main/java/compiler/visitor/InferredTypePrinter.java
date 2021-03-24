@@ -1,7 +1,6 @@
 package compiler.visitor;
 
 import compiler.ast.*;
-import java.util.*;
 import java.util.function.Consumer;
 import java.io.OutputStream;
 
@@ -23,7 +22,7 @@ public class InferredTypePrinter extends PrettyPrinter {
         });
     }
 
-    void wrapped(Consumer f) {
+    void wrapped(Consumer<Object> f) {
         print("[");
         f.accept(null);
         print("]");

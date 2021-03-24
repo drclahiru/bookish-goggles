@@ -20,7 +20,7 @@ range_binding: range ASSIGN OPAR (value (COMMA value)*)? CPAR;
 /* types are optional part of let binding.
  let x (String) = 4*4
  */
-let_binding: LET ID type ASSIGN expr;
+let_binding: LET ID type? ASSIGN expr;
 
 /* range_bindings : (range_binding NEWLINE+)* ;
  let_bindings : let_binding (NEWLINE let_binding)*

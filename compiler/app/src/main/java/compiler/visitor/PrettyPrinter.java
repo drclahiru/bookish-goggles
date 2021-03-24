@@ -1,7 +1,6 @@
 package compiler.visitor;
 
 import compiler.ast.*;
-import java.util.*;
 import java.io.OutputStream;
 
 public class PrettyPrinter extends Visitor {

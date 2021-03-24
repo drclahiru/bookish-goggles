@@ -22,8 +22,10 @@ public class Identifier {
         }
 
         var other = (Identifier)o;
-        return this.scopeId == other.scopeId
-            && this.name == other.name;
+        var scopeEq = this.scopeId == other.scopeId;
+        var nameEq = this.name.equals(other.name);
+        var eq = scopeEq && nameEq;
+        return eq;
     }
 
     @Override

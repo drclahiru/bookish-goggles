@@ -2,7 +2,6 @@ package compiler.visitor;
 
 import compiler.ast.*;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.function.Consumer;
 
 // reference material:

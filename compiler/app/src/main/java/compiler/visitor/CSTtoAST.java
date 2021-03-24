@@ -23,7 +23,10 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
 	public LetBindingNode visitLet_binding(gParser.Let_bindingContext ctx) {
         var id = ctx.ID().getText();
         var x = new LetBindingNode(new IdentifierNode(id));
-        x.declaration.type = visitType(ctx.type());
+        var t = ctx.type();
+        if (t != null) {
+            x.declaration.type = visitType(t);
+        }
         x.expr = visitExpr(ctx.expr());
         return x;
     }

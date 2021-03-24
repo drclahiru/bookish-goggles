@@ -1,4 +1,4 @@
-let id ((Number) -> Number) -> (Number) -> Number = (x) {
+let id = (x) {
     x
 }
 
@@ -6,21 +6,21 @@ let apply ((Number) -> Number, Number) -> Number = (f, x) {
     f(x)
 }
 
-let apply2 (((Number) -> Number) -> (Number) -> Number, (Number) -> Number) -> (Number) -> Number = (f, x) {
+let apply2 = (f, x) {
     f(x)
 }
 
 let a Number = 2
 
-let b Number = apply(square, a)
+let b = apply(square, a)
 
-let c (Number) -> Number = apply2(id, square)
+let c = apply2(id, square)
 
-let square (Number) -> Number = (x) {
+let square = (x) {
     x * x
 }
 
-let fact (Number) -> Number = (n) {
+let fact = (n) {
     if n == 0 {
         1
      } else {
