@@ -95,7 +95,9 @@ public class TypeInferencer {
 
         @Override
         protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
-            n.type = sub(n.identifier.inferredType);
+            if (n.type == null) {
+                n.type = sub(n.identifier.inferredType);
+            }
         }
     }
 
@@ -103,7 +105,7 @@ public class TypeInferencer {
         final Queue<ExpressionNode> deferredVisits = new LinkedList<>();
         final HashMap<Identifier, TypeNode> idTypeMap;
         final HashMap<TypeNode, TypeNode> substitutions;
-        HashSet<TypeConstraint> constraints = new HashSet<>();
+        final List<TypeConstraint> constraints = new ArrayList<>();
 
         public TypeUnifier(HashMap<Identifier, IdentifierDeclarationNode> idMap) {
             var idTypeMap = Utility.createPrelude();
@@ -177,45 +179,45 @@ public class TypeInferencer {
                 var next = v.deferredVisits.remove();
                 v.visit(next);
             }
-            constraints.addAll(unify(v.constraints));
+            unify(v.constraints);
         }
 
-        Set<TypeConstraint> unify(Set<TypeConstraint> cs) {
-            var offset = 0;
-            for (var c : cs) {
-                offset += 1;
+        void unify(List<TypeConstraint> cs) {
+            for (var i = 0; i < cs.size(); i++) {
+                var c = cs.get(i);
                 if (c.type1.equals(c.type2)) {
                     continue;
                 }
                 if (c.type1 instanceof VariableTypeNode && !typeContains(c.type2, (VariableTypeNode)c.type1)) {
                     substitutions.put(c.type1, c.type2);
-                    var nextCs = cs.stream().skip(offset).map(x -> sub(x)).collect(Collectors.toSet());
-                    return unify(nextCs);
+                    subFromIdx(cs, i);
+                    continue;
                 }
                 if (c.type2 instanceof VariableTypeNode && !typeContains(c.type1, (VariableTypeNode)c.type2)) {
                     substitutions.put(c.type2, c.type1);
-                    var nextCs = cs.stream().skip(offset).map(x -> sub(x)).collect(Collectors.toSet());
-                    return unify(nextCs);
+                    subFromIdx(cs, i);
+                    continue;
                 }
                 if (c.type1 instanceof FunctionTypeNode && c.type2 instanceof FunctionTypeNode) {
-                    var nextCs = cs
-                        .stream()
-                        .skip(offset)
-                        .collect(Collectors.toSet());
                     var t1 = (FunctionTypeNode)c.type1;
                     var t2 = (FunctionTypeNode)c.type2;
                     if (t1.parameters.size() != t2.parameters.size()) {
                         throw new Error("arity mismatch between function types \"" + t1 + "\" and \"" + t2 + "\"");
                     }
-                    for (var i = 0; i < t1.parameters.size() && i < t2.parameters.size(); i++) {
-                        nextCs.add(new TypeConstraint(t1.parameters.get(i), t2.parameters.get(i)));
+                    for (var j = 0; j < t1.parameters.size() && j < t2.parameters.size(); j++) {
+                        cs.add(new TypeConstraint(t1.parameters.get(j), t2.parameters.get(j)));
                     }
-                    nextCs.add(new TypeConstraint(t1.return_, t2.return_));
-                    return unify(nextCs);
+                    cs.add(new TypeConstraint(t1.return_, t2.return_));
+                    continue;
                 }
                 throw new Error("Unification between \"" + c.type1 + "\" and \"" + c.type2 + "\" is untypeable");
             }
-            return new HashSet<>();
+        }
+
+        void subFromIdx(List<TypeConstraint> cs, int idx) {
+            for (var i = idx; i < cs.size(); i++) {
+                cs.set(i, sub(cs.get(i)));
+            }
         }
 
         TypeNode assertPriliminaryType(TypeNode t, String location) {
