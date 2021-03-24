@@ -20,13 +20,13 @@ statements
 
 
 range_binding
-    : RANGE ASSIGN OPAR (value_type(COMMA value_type)*)? CPAR
+    : RANGE ASSIGN OPAR (value(COMMA value)*)? CPAR
     ;
 
 /* types are optional part of let binding.
 let x (String) = 4*4 */
 let_binding
-    : LET ID OPAR BASIC_TYPE CPAR ASSIGN (expr)
+    : LET ID OPAR type CPAR ASSIGN (expr)
     ;
 
 /* range_bindings : (range_binding NEWLINE+)* ;
@@ -44,7 +44,7 @@ expr
     | expr (EQ | NEQ | LT | GT | LTEQ | GTEQ) expr
     | lambda
     | if_else        /*accepts IDs starting with small letters or _ */
-    | value_type   /* accepts booleans, numbers and strings: True/False, "String", 4 */
+    | value   /* accepts booleans, numbers and strings: True/False, "String", 4 */
     | RANGE    /* A1:B5 */
     | ID  /*accepts IDs starting with small letters or _ */
     ;
@@ -52,7 +52,7 @@ expr
 /* example use:
     if x==3 {4/2 } else {7 } */
 if_else
-    : type? IF expr OBRACE
+    : IF expr OBRACE
     expr  CBRACE ELSE OBRACE (expr | ) CBRACE   #visitorTest
     ;
 
@@ -64,13 +64,13 @@ range_type : RANGE_NAME OPAR BASIC_TYPE CPAR ;
 /* x(y,z) - invoking lambda*/
 /* (String, String) -> Number (x) { let x (String) = 4*4 4*x} */
 lambda
-    : (lambda_type)? OPAR (ID (COMMA ID)*)? CPAR OBRACE (let_binding)* (expr) CBRACE NEWLINE
+    :  OPAR (ID (COMMA ID)*)? CPAR OBRACE (let_binding NEWLINE)*  (expr) CBRACE NEWLINE
     ;
 
 /* () -> Number, (String, String) -> Number */
 lambda_type : OPAR (BASIC_TYPE (COMMA BASIC_TYPE)*)? CPAR ARROW BASIC_TYPE;
 
-value_type : NUMBER | BOOL | STRING ;
+value : NUMBER | BOOL | STRING ;
 BASIC_TYPE : 'String' | 'Bool' | 'Number' ;
 /* lexer rules and token definitions*/
 OR: '||';
