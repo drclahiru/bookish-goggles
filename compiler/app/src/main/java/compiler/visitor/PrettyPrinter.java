@@ -83,7 +83,7 @@ public class PrettyPrinter extends Visitor {
     protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
         visit(n.identifier);
         if (n.type != null) {
-            print(": ");
+            print(" ");
             visit(n.type);
         }
     };

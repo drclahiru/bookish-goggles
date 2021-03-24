@@ -1,9 +1,14 @@
 package compiler;
 
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStreams;
 import compiler.ast.*;
+import compiler.parser.gLexer;
+import compiler.parser.gParser;
 import compiler.visitor.*;
+
+import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
 
 class App {
     public void printExampleProgram(OutputStream out) {
@@ -107,11 +112,20 @@ class App {
         new PrettyPrinter(out).run(globalScope);
         new TypeChecker(idMap).run(globalScope);
     }
+    public void cstTestCase(String source) throws IOException {
+        var cs = CharStreams.fromFileName(source);
+        var lexer = new gLexer(cs);
+        var tokenStream = new CommonTokenStream(lexer);
+        var parser = new gParser(tokenStream);
+        var ast = new CSTtoAST().visitGlobal_scope(parser.global_scope());
+        new PrettyPrinter(System.out).run(ast);
+    }
 
     public static void main(String[] args) {
         try {
             var app = new App();
-            app.printExampleProgram(System.out);
+            app.cstTestCase("D:\\dev\\bookish-goggles\\compiler\\app\\examples\\example1.bg");
+            //app.printExampleProgram(System.out);
         } catch (Exception ex) {
             System.out.println();
             ex.printStackTrace(System.err);

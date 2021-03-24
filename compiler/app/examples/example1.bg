@@ -1,0 +1,30 @@
+let id ((Number) -> Number) -> (Number) -> Number = (x) {
+    x
+}
+
+let apply ((Number) -> Number, Number) -> Number = (f, x) {
+    f(x)
+}
+
+let apply2 (((Number) -> Number) -> (Number) -> Number, (Number) -> Number) -> (Number) -> Number = (f, x) {
+    f(x)
+}
+
+let a Number = 2
+
+let b Number = apply(square, a)
+
+let c (Number) -> Number = apply2(id, square)
+
+let square (Number) -> Number = (x) {
+    x * x
+}
+
+let fact (Number) -> Number = (n) {
+    if n == 0 {
+        1
+     } else {
+        n * fact(n - 1)
+     }
+}
+

@@ -71,7 +71,7 @@ public class ScopeResolver extends Visitor {
         if (decl != null) {
             node.value = decl.identifier.value;
         } else if (!prelude.containsKey(node.value)) {
-            throw new Error("Use of undeclared identifier: " + node.value.name);
+            throw new Error("Use of undeclared identifier: \"" + node.value.name + "\"");
         }
     }
 

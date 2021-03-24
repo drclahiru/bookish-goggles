@@ -4,6 +4,9 @@
 # Ignore intellij idea stuff
 .idea
 
+# Ignore vscode settings
+.vscode
+
 # Ignore Gradle build output directory
 /app/build
 /app/bin

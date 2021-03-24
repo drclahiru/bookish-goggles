@@ -13,36 +13,17 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link gParser#base_rule}.
+	 * Visit a parse tree produced by {@link gParser#global_scope}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBase_rule(gParser.Base_ruleContext ctx);
+	T visitGlobal_scope(gParser.Global_scopeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#code_block}.
+	 * Visit a parse tree produced by {@link gParser#statements}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCode_block(gParser.Code_blockContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link gParser#stat}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStat(gParser.StatContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code visitorTest}
-	 * labeled alternative in {@link gParser#if_else}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVisitorTest(gParser.VisitorTestContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link gParser#lambda}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLambda(gParser.LambdaContext ctx);
+	T visitStatements(gParser.StatementsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#range_binding}.
 	 * @param ctx the parse tree
@@ -56,23 +37,60 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLet_binding(gParser.Let_bindingContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#range_bindings}.
+	 * Visit a parse tree produced by the {@code expr_lambda}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRange_bindings(gParser.Range_bindingsContext ctx);
+	T visitExpr_lambda(gParser.Expr_lambdaContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#let_bindings}.
+	 * Visit a parse tree produced by the {@code expr_invoke}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLet_bindings(gParser.Let_bindingsContext ctx);
+	T visitExpr_invoke(gParser.Expr_invokeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#global_scope}.
+	 * Visit a parse tree produced by the {@code expr_value}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGlobal_scope(gParser.Global_scopeContext ctx);
+	T visitExpr_value(gParser.Expr_valueContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code expr_if_else}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr_if_else(gParser.Expr_if_elseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code expr_range}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr_range(gParser.Expr_rangeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code id}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitId(gParser.IdContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code operator}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOperator(gParser.OperatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#if_else}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIf_else(gParser.If_elseContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#type}.
 	 * @param ctx the parse tree
@@ -80,11 +98,23 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType(gParser.TypeContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link gParser#basic_type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBasic_type(gParser.Basic_typeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link gParser#range_type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitRange_type(gParser.Range_typeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#lambda}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLambda(gParser.LambdaContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#lambda_type}.
 	 * @param ctx the parse tree
@@ -92,9 +122,36 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLambda_type(gParser.Lambda_typeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#expr}.
+	 * Visit a parse tree produced by {@link gParser#lambda_invocation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr(gParser.ExprContext ctx);
+	T visitLambda_invocation(gParser.Lambda_invocationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code number}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNumber(gParser.NumberContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code bool}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBool(gParser.BoolContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code string}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitString(gParser.StringContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#range}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRange(gParser.RangeContext ctx);
 }

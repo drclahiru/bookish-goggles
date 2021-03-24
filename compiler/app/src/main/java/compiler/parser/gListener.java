@@ -10,57 +10,25 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface gListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link gParser#base_rule}.
+	 * Enter a parse tree produced by {@link gParser#global_scope}.
 	 * @param ctx the parse tree
 	 */
-	void enterBase_rule(gParser.Base_ruleContext ctx);
+	void enterGlobal_scope(gParser.Global_scopeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#base_rule}.
+	 * Exit a parse tree produced by {@link gParser#global_scope}.
 	 * @param ctx the parse tree
 	 */
-	void exitBase_rule(gParser.Base_ruleContext ctx);
+	void exitGlobal_scope(gParser.Global_scopeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#code_block}.
+	 * Enter a parse tree produced by {@link gParser#statements}.
 	 * @param ctx the parse tree
 	 */
-	void enterCode_block(gParser.Code_blockContext ctx);
+	void enterStatements(gParser.StatementsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#code_block}.
+	 * Exit a parse tree produced by {@link gParser#statements}.
 	 * @param ctx the parse tree
 	 */
-	void exitCode_block(gParser.Code_blockContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link gParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterStat(gParser.StatContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link gParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitStat(gParser.StatContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code visitorTest}
-	 * labeled alternative in {@link gParser#if_else}.
-	 * @param ctx the parse tree
-	 */
-	void enterVisitorTest(gParser.VisitorTestContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code visitorTest}
-	 * labeled alternative in {@link gParser#if_else}.
-	 * @param ctx the parse tree
-	 */
-	void exitVisitorTest(gParser.VisitorTestContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link gParser#lambda}.
-	 * @param ctx the parse tree
-	 */
-	void enterLambda(gParser.LambdaContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link gParser#lambda}.
-	 * @param ctx the parse tree
-	 */
-	void exitLambda(gParser.LambdaContext ctx);
+	void exitStatements(gParser.StatementsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#range_binding}.
 	 * @param ctx the parse tree
@@ -82,35 +50,99 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitLet_binding(gParser.Let_bindingContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#range_bindings}.
+	 * Enter a parse tree produced by the {@code expr_lambda}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterRange_bindings(gParser.Range_bindingsContext ctx);
+	void enterExpr_lambda(gParser.Expr_lambdaContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#range_bindings}.
+	 * Exit a parse tree produced by the {@code expr_lambda}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitRange_bindings(gParser.Range_bindingsContext ctx);
+	void exitExpr_lambda(gParser.Expr_lambdaContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#let_bindings}.
+	 * Enter a parse tree produced by the {@code expr_invoke}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterLet_bindings(gParser.Let_bindingsContext ctx);
+	void enterExpr_invoke(gParser.Expr_invokeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#let_bindings}.
+	 * Exit a parse tree produced by the {@code expr_invoke}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitLet_bindings(gParser.Let_bindingsContext ctx);
+	void exitExpr_invoke(gParser.Expr_invokeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#global_scope}.
+	 * Enter a parse tree produced by the {@code expr_value}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterGlobal_scope(gParser.Global_scopeContext ctx);
+	void enterExpr_value(gParser.Expr_valueContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#global_scope}.
+	 * Exit a parse tree produced by the {@code expr_value}
+	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitGlobal_scope(gParser.Global_scopeContext ctx);
+	void exitExpr_value(gParser.Expr_valueContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code expr_if_else}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpr_if_else(gParser.Expr_if_elseContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code expr_if_else}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpr_if_else(gParser.Expr_if_elseContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code expr_range}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpr_range(gParser.Expr_rangeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code expr_range}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpr_range(gParser.Expr_rangeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code id}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterId(gParser.IdContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code id}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitId(gParser.IdContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code operator}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterOperator(gParser.OperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code operator}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitOperator(gParser.OperatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#if_else}.
+	 * @param ctx the parse tree
+	 */
+	void enterIf_else(gParser.If_elseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#if_else}.
+	 * @param ctx the parse tree
+	 */
+	void exitIf_else(gParser.If_elseContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#type}.
 	 * @param ctx the parse tree
@@ -122,6 +154,16 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitType(gParser.TypeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link gParser#basic_type}.
+	 * @param ctx the parse tree
+	 */
+	void enterBasic_type(gParser.Basic_typeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#basic_type}.
+	 * @param ctx the parse tree
+	 */
+	void exitBasic_type(gParser.Basic_typeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link gParser#range_type}.
 	 * @param ctx the parse tree
 	 */
@@ -131,6 +173,16 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitRange_type(gParser.Range_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#lambda}.
+	 * @param ctx the parse tree
+	 */
+	void enterLambda(gParser.LambdaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#lambda}.
+	 * @param ctx the parse tree
+	 */
+	void exitLambda(gParser.LambdaContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#lambda_type}.
 	 * @param ctx the parse tree
@@ -142,13 +194,59 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitLambda_type(gParser.Lambda_typeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link gParser#expr}.
+	 * Enter a parse tree produced by {@link gParser#lambda_invocation}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpr(gParser.ExprContext ctx);
+	void enterLambda_invocation(gParser.Lambda_invocationContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link gParser#expr}.
+	 * Exit a parse tree produced by {@link gParser#lambda_invocation}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpr(gParser.ExprContext ctx);
+	void exitLambda_invocation(gParser.Lambda_invocationContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code number}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumber(gParser.NumberContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code number}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void exitNumber(gParser.NumberContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code bool}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void enterBool(gParser.BoolContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code bool}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void exitBool(gParser.BoolContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code string}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void enterString(gParser.StringContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code string}
+	 * labeled alternative in {@link gParser#value}.
+	 * @param ctx the parse tree
+	 */
+	void exitString(gParser.StringContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#range}.
+	 * @param ctx the parse tree
+	 */
+	void enterRange(gParser.RangeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#range}.
+	 * @param ctx the parse tree
+	 */
+	void exitRange(gParser.RangeContext ctx);
 }
