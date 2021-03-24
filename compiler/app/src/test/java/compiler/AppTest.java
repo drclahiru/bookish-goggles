@@ -5,13 +5,12 @@ package compiler;
 
 import java.io.*;
 import org.junit.Test;
-import static org.junit.Assert.*;
+// import static org.junit.Assert.*;
 
 public class AppTest {
-    @Test public void testAppHasAGreeting() {
-        var app = new App();
-        var stream = new ByteArrayOutputStream();
-        app.printExampleProgram(stream);
-        assertNotEquals("", new String(stream.toByteArray()));
+    @Test
+    public void testAppHasAGreeting() throws IOException {
+        var ast = App.readAndParse("./examples/example1.bg");
+        App.check(ast);
     }
 }

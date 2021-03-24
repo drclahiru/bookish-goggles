@@ -1,6 +1,5 @@
 package compiler.ast;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 // shorter/simpler methods of constructing nodes
