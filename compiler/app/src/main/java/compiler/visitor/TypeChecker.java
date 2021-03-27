@@ -61,7 +61,7 @@ public class TypeChecker extends Visitor {
     public void visitLetBinding(LetBindingNode n) {
     	visit(n.expr);
     	if(!n.declaration.type.equals(previousType)) {
-    		throw new Error ("type mismatch" + previousType.toString() + "opa");
+    		throw new Error ("type mismatch between " + n.declaration.type + " and " + previousType);
     	}
     }
     @Override
