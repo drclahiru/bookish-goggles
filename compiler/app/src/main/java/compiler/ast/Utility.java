@@ -6,21 +6,23 @@ public class Utility {
     public static HashMap<Identifier, TypeNode> createPrelude() {
         var map = new HashMap<Identifier, TypeNode>();
 
-        var nnn = AST.funcType(t -> {
-            t.parameters.add(AST.numberType());
-            t.parameters.add(AST.numberType());
-            t.return_ = AST.numberType();
-        });
-        var bbb = AST.funcType(t -> {
-            t.parameters.add(AST.boolType());
-            t.parameters.add(AST.boolType());
-            t.return_ = AST.boolType();
-        });
-        var nnb = AST.funcType(t -> {
-            t.parameters.add(AST.numberType());
-            t.parameters.add(AST.numberType());
-            t.return_ = AST.boolType();
-        });
+        var n = new SimpleTypeNode(null, SimpleType.Number);
+        var b = new SimpleTypeNode(null, SimpleType.Bool);
+
+        var nnn = new FunctionTypeNode(null);
+        nnn.parameters.add(n);
+        nnn.parameters.add(n);
+        nnn.return_ = n;
+
+        var bbb = new FunctionTypeNode(null);
+        bbb.parameters.add(b);
+        bbb.parameters.add(b);
+        bbb.return_ = b;
+
+        var nnb = new FunctionTypeNode(null);
+        nnb.parameters.add(n);
+        nnb.parameters.add(n);
+        nnb.return_ = b;
 
         map.put(new Identifier("+"), nnn);
         map.put(new Identifier("-"), nnn);
