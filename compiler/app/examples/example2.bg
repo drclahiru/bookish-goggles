@@ -1,0 +1,17 @@
+let id = (x) {
+    x
+}
+
+let apply = (f, x) {
+    f(x)
+}
+
+let a Number = 2
+
+let square = (x) {
+    x * x
+}
+
+let b = apply(square, a)
+
+let c = apply(id, square)

@@ -4,11 +4,6 @@ grammar g;
 package compiler.parser;
 }
 
-/*base_rule
- : global_scope
- ;
- */
-
 global_scope: statements* EOF;
 
 statements:
@@ -22,10 +17,7 @@ range_binding: range ASSIGN OPAR (value (COMMA value)*)? CPAR;
  */
 let_binding: LET ID type? ASSIGN expr;
 
-/* range_bindings : (range_binding NEWLINE+)* ;
- let_bindings : let_binding (NEWLINE let_binding)*
- ;
- */
+let_expr: LET ID type? ASSIGN expr IN expr;
 
 /*there is an issue with the operator_expression as it is defined in the grammar because
  it
@@ -46,7 +38,8 @@ expr:
 	| value											# expr_value /* accepts booleans, numbers and strings: True/False, "String", 4 */
 	| range											# expr_range /* A1:B5 */
 	| ID											# id /*accepts IDs starting with small letters or _ */
-	| lambda_invocation                             # expr_invoke;
+	| lambda_invocation                             # expr_invoke
+	| let_expr										# expr_let;
 
 /* example use:
  if x==3 {4/2 } else {7 }
@@ -138,6 +131,7 @@ ARROW: '->';
  */
 
 LET: 'let';
+IN: 'in';
 RANGE_NAME: 'Range';
 
 BOOL: TRUE | FALSE;

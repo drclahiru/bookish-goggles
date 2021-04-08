@@ -4,9 +4,9 @@ import java.util.*;
 import java.util.stream.*;
 
 public class VariableTypeNode extends TypeNode {
-    public final int id;
+    public final String id;
 
-    public VariableTypeNode(int id) {
+    public VariableTypeNode(String id) {
         super(null);
         this.id = id;
     }
@@ -17,7 +17,7 @@ public class VariableTypeNode extends TypeNode {
 
     @Override
     public String toString() {
-        return "'" + Utility.intToAlphabetic(id);
+        return id;
     }
     
     @Override
@@ -27,7 +27,7 @@ public class VariableTypeNode extends TypeNode {
         }
 
         var other = (VariableTypeNode)o;
-        return this.id == other.id;
+        return this.id.equals(other.id);
     }
     
     @Override

@@ -24,10 +24,17 @@ class App {
         return ast;
     }
 
-    public static void check(ProgramNode ast) throws VisitorException, VisitorExceptionAggregate {
+    public static IdentifierContext infer(ProgramNode ast) throws VisitorException, VisitorExceptionAggregate {
         var idMap = new ScopeResolver().run(ast);
-        // new TypeInferencer(idMap).run(ast);
-        new TypeChecker(idMap).run(ast);
+        var idCtx = new TypeInferencer(idMap).run(ast);
+        return idCtx;
+    }
+
+    public static void check(
+        IdentifierContext idCtx,
+        ProgramNode ast
+    ) throws VisitorException, VisitorExceptionAggregate {
+        new TypeChecker(idCtx).run(ast);
     }
 
     public static void print(ProgramNode ast) throws VisitorException {
@@ -36,12 +43,13 @@ class App {
 
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/error.bg");
+            var ast = readAndParse("./examples/example1.bg");
             System.out.println("\n\n-------- Parsed --------\n\n");
             print(ast);
-            check(ast);
+            var idMap = infer(ast);
             System.out.println("\n\n-------- Types inferenced --------\n\n");
             print(ast);
+            check(idMap, ast);
         } catch (VisitorExceptionAggregate exAggr) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");
