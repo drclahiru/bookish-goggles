@@ -76,12 +76,14 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     }
 	public SimpleTypeNode visitBasic_type(gParser.Basic_typeContext ctx) {
         var t = ctx.BASIC_TYPE().getText();
-        if (t == "String") {
+        if (t.equals("String")) {
             return new SimpleTypeNode(ctx, SimpleType.String);
-        } else if (t == "Bool") {
+        } else if (t.equals("Bool")) {
             return new SimpleTypeNode(ctx, SimpleType.Bool);
-        } else {
+        } else if (t.equals("Number")) {
             return new SimpleTypeNode(ctx, SimpleType.Number);
+        } else {
+            throw new Error("Unexpected type: " + t);
         }
     }
 

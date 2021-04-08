@@ -1,5 +1,6 @@
 
 let a Number = 1
 let b String = true
+let d String = "hey"
 let c Number = 1
 

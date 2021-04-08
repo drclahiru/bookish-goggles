@@ -13,11 +13,10 @@ public class TypeInferencer {
         this.declMap = declMap;
     }
 
-    public void run(ProgramNode p) {
+    public void run(ProgramNode p) throws Visitor.VisitorException{
         new PreliminaryTypeSetter().visit(p);
         var uni = new TypeUnifier();
-        uni.run(p);
-
+        uni.visitProgram(p);
         declMap.forEach((i, decl) -> {
             if (decl.type == null) {
                 decl.type = uni.subber.sub(decl.identifier.inferredType);
@@ -36,10 +35,6 @@ public class TypeInferencer {
                 idTypeMap.put(id, decl.identifier.inferredType);
             });
             this.idTypeMap = idTypeMap;
-        }
-
-        public void run(ProgramNode n) {
-            visit(n);
         }
 
         void addConstraint(TypeNode a, TypeNode b) {
@@ -93,7 +88,7 @@ public class TypeInferencer {
         }
 
         @Override
-        protected void visitProgram(ProgramNode n) {
+        protected void visitProgram(ProgramNode n) throws VisitorException {
             for (var b : n.bindings) {
                 visit(b.declaration);
             }
@@ -108,7 +103,7 @@ public class TypeInferencer {
         }
 
         @Override
-        protected void visitFunction(FunctionNode n) {
+        protected void visitFunction(FunctionNode n) throws VisitorException {
             var tEq = new FunctionTypeNode(n.source);
             n.parameters.forEach(param -> {
                 tEq.parameters.add(
@@ -136,7 +131,7 @@ public class TypeInferencer {
         }
 
         @Override
-        protected void visitIfElse(IfElseNode n) {
+        protected void visitIfElse(IfElseNode n) throws VisitorException {
             super.visitIfElse(n);
             addConstraint(n.boolExpr.inferredType, new SimpleTypeNode(n.boolExpr.source, SimpleType.Bool));
             addConstraint(n.inferredType, n.trueCase.inferredType);
@@ -144,7 +139,7 @@ public class TypeInferencer {
         }
 
         @Override
-        protected void visitFunctionInvocation(FunctionInvocationNode n) {
+        protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
             super.visitFunctionInvocation(n);
             var t = idTypeMap.get(n.identifier.value);
             if (t instanceof FunctionTypeNode) {
@@ -225,13 +220,13 @@ public class TypeInferencer {
         }
     
         @Override
-        protected void visitExpression(ExpressionNode n) {
+        protected void visitExpression(ExpressionNode n) throws VisitorException {
             n.inferredType = typeGen.next();
             super.visitExpression(n);
         }
 
         @Override
-        protected void visitProgram(ProgramNode n) {
+        protected void visitProgram(ProgramNode n) throws VisitorException {
             for (var b : n.bindings) {
                 visit(b.declaration);
             }
@@ -241,7 +236,7 @@ public class TypeInferencer {
         }
         
         @Override
-        protected void visitFunction(FunctionNode n) {
+        protected void visitFunction(FunctionNode n) throws VisitorException {
             for (var p : n.parameters) {
                 visit(p);
             }
@@ -262,7 +257,7 @@ public class TypeInferencer {
         }
 
         @Override
-        protected void visitFunctionInvocation(FunctionInvocationNode n) {
+        protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
             super.visitFunctionInvocation(n);
             var t = new FunctionTypeNode(n.source);
             n.arguments.forEach(arg -> {

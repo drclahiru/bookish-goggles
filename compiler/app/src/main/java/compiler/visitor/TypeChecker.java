@@ -12,8 +12,18 @@ public class TypeChecker extends Visitor {
         });
     }
 
-    public void run(ProgramNode pn) {
-        visit(pn);
+    public void run(ProgramNode pn) throws VisitorException, Visitor.VisitorExceptionAggregate {
+        var exceptions = new ArrayList<VisitorException>();
+        for (var bind : pn.bindings) {
+            try {
+                visit(bind);
+            } catch (VisitorException ex) {
+                exceptions.add(ex);
+            }
+        }
+        if (exceptions.size() > 0) {
+            throw new VisitorExceptionAggregate(exceptions);
+        }
     }
     @Override
     public void visitNumber(NumberNode n) {
@@ -33,7 +43,7 @@ public class TypeChecker extends Visitor {
     	
     }
     @Override 
-    public void visitFunction(FunctionNode n) {
+    public void visitFunction(FunctionNode n) throws VisitorException {
     	for(var x : n.body) {
             visit(x);
         }
@@ -49,30 +59,28 @@ public class TypeChecker extends Visitor {
     	previousType = t;
     }
     @Override 
-    public void visitIfElse(IfElseNode n) {
+    public void visitIfElse(IfElseNode n) throws VisitorException {
     	visit(n.boolExpr);
     	if (!(new SimpleTypeNode(null, SimpleType.Bool)).equals(previousType)) {
-            throw new Error("Not a boolean");
+            throw new VisitorException(n, "Not a boolean");
         }
     	visit(n.trueCase);
     	var t = previousType;
     	visit(n.elseCase);
     	if (!t.equals(previousType)) {
-            throw new Error ("mismatching types");
+            throw new VisitorException(n, "mismatching types");
         }
     	
     }
     @Override
-    public void visitLetBinding(LetBindingNode n) {
+    public void visitLetBinding(LetBindingNode n) throws VisitorException {
     	visit(n.expr);
     	if (!n.declaration.type.equals(previousType)) {
-            var start = n.source.getStart();
-            var stop = n.source.getStop();
-    		throw new Error ("type mismatch in " + start.getLine() + ":" + start.getCharPositionInLine() + ".." + stop.getLine() + ":" + stop.getCharPositionInLine());
+            throw new VisitorException(n, "type mismatch");
     	}
     }
     @Override
-    public void visitFunctionInvocation(FunctionInvocationNode fn) {
+    public void visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {
        visit(fn.identifier);
     	var t = previousType;
 

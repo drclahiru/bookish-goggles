@@ -13,20 +13,20 @@ public class PrettyPrinter extends Visitor {
         this.out = out;
     }
 
-    public void run(AbstractNode n) {
+    public void run(AbstractNode n) throws VisitorException {
         visit(n);
     }
 
     @Override
-    protected void visitFunction(FunctionNode node) {
+    protected void visitFunction(FunctionNode node) throws VisitorException {
         print("(");
-        node.parameters.stream().limit(1).forEach(arg -> {
+        for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().limit(1)::iterator) {
             visit(arg.identifier);
-        });
-        node.parameters.stream().skip(1).forEach(arg -> {
+        }
+        for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().skip(1)::iterator) {
             print(", ");
             visit(arg.identifier);
-        });
+        }
         print(") {");
         println();
         indentLevel++;
@@ -40,7 +40,7 @@ public class PrettyPrinter extends Visitor {
     }
 
     @Override
-    protected void visitLetBinding(LetBindingNode node) {
+    protected void visitLetBinding(LetBindingNode node) throws VisitorException {
         print("let ");
         visit(node.declaration);
         print(" = ");
@@ -79,7 +79,7 @@ public class PrettyPrinter extends Visitor {
     }
     
     @Override
-    protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
+    protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
         visit(n.identifier);
         if (n.type != null) {
             print(" ");
@@ -103,7 +103,7 @@ public class PrettyPrinter extends Visitor {
     }
 
     @Override
-    protected void visitFunctionInvocation(FunctionInvocationNode node) {
+    protected void visitFunctionInvocation(FunctionInvocationNode node) throws VisitorException {
         if (node.isOperator()) {
             visit(node.arguments.get(0));
             print(" ");
@@ -113,19 +113,19 @@ public class PrettyPrinter extends Visitor {
         } else {
             visit(node.identifier);
             print("(");
-            node.arguments.stream().limit(1).forEach(arg -> {
-                visit(arg);
-            });
-            node.arguments.stream().skip(1).forEach(arg -> {
+            for (var x : (Iterable<ExpressionNode>) node.arguments.stream().limit(1)::iterator) {
+                visit(x);
+            }
+            for (var x : (Iterable<ExpressionNode>) node.arguments.stream().skip(1)::iterator) {
                 print(", ");
-                visit(arg);
-            });
+                visit(x);
+            }
             print(")");
         }
     }
 
     @Override
-    protected void visitIfElse(IfElseNode node) {
+    protected void visitIfElse(IfElseNode node) throws VisitorException {
         print("if ");
         visit(node.boolExpr);
         print(" { ");
@@ -144,14 +144,14 @@ public class PrettyPrinter extends Visitor {
     }
 
     @Override
-    protected void visitProgram(ProgramNode node) {
-        node.bindings.stream().limit(1).forEach(x -> {
+    protected void visitProgram(ProgramNode node) throws VisitorException {
+        for (var x : (Iterable<LetBindingNode>) node.bindings.stream().limit(1)::iterator) {
             visit(x);
-        });
-        node.bindings.stream().skip(1).forEach(x -> {
+        }
+        for (var x : (Iterable<LetBindingNode>) node.bindings.stream().skip(1)::iterator) {
             println();
             visit(x);
-        });
+        }
     }
 
     @Override

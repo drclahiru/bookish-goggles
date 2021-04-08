@@ -17,12 +17,12 @@ public class ScopeResolver extends Visitor {
         this.idTable = new IdentifierMap();
         flatIdTable = new HashMap<>();
     }
-    public HashMap<Identifier, IdentifierDeclarationNode> run(ProgramNode n) {
+    public HashMap<Identifier, IdentifierDeclarationNode> run(ProgramNode n) throws VisitorException {
         visit(n);
         return flatIdTable;
     }
     @Override
-    protected void visitFunction(FunctionNode node) {
+    protected void visitFunction(FunctionNode node) throws VisitorException {
         idTable.enterScope();
         for (var p : node.parameters) {
             visit(p);
@@ -56,7 +56,7 @@ public class ScopeResolver extends Visitor {
         flatIdTable.put(node.identifier.value, node);
     }
     @Override
-    protected void visitProgram(ProgramNode node) {
+    protected void visitProgram(ProgramNode node) throws VisitorException {
         idTable.enterScope();
         for (var b : node.bindings) {
             visit(b.declaration);
