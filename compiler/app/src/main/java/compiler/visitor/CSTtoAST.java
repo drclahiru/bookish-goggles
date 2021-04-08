@@ -130,7 +130,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     }
 	public BoolNode visitBool(gParser.BoolContext ctx) {
         var b = ctx.BOOL();
-        return new BoolNode(ctx, b.getText() == "true");
+        return new BoolNode(ctx, b.getText().equals("true"));
     }
 	public StringNode visitString(gParser.StringContext ctx) {
         var s = ctx.STRING();
