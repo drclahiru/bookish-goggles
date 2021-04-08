@@ -1,6 +1,12 @@
 package compiler.ast;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
 public abstract class TypeNode extends AbstractNode {
+    public TypeNode(ParserRuleContext source) {
+        super(source);
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this instanceof SimpleTypeNode && o instanceof SimpleTypeNode) {

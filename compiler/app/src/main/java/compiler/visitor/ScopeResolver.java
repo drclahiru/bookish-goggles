@@ -42,7 +42,11 @@ public class ScopeResolver extends Visitor {
         if (decl != null) {
             node.value = decl.identifier.value;
         } else if (!prelude.containsKey(node.value)) {
-            throw new Error("Use of undeclared identifier: \"" + node.value.name + "\"");
+            var ctx = node.source;
+            while (ctx.depth() > 2) {
+                ctx = ctx.getParent();
+            }
+            throw new Error("Use of undeclared identifier: \"" + node.value.name + "\" at " + node.source.getParent().getSourceInterval() + " in the token stream");
         }
     }
     @Override

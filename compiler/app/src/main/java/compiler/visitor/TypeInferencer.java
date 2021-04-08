@@ -109,17 +109,15 @@ public class TypeInferencer {
 
         @Override
         protected void visitFunction(FunctionNode n) {
-            addConstraint(
-                n.inferredType,
-                AST.funcType(f -> {
-                    n.parameters.forEach(param -> {
-                        f.parameters.add(
-                            assertPreliminary(param.identifier.inferredType, "function param")
-                        );
-                    });
-                    f.return_ = assertPreliminary(n.return_.inferredType, "function return");
-                })
-            );
+            var tEq = new FunctionTypeNode(n.source);
+            n.parameters.forEach(param -> {
+                tEq.parameters.add(
+                    assertPreliminary(param.identifier.inferredType, "function param")
+                );
+            });
+            tEq.return_ = assertPreliminary(n.return_.inferredType, "function return");
+            addConstraint(n.inferredType, tEq);
+
             for (var p : n.parameters) {
                 visit(p);
             }
@@ -140,7 +138,7 @@ public class TypeInferencer {
         @Override
         protected void visitIfElse(IfElseNode n) {
             super.visitIfElse(n);
-            addConstraint(n.boolExpr.inferredType, AST.boolType());
+            addConstraint(n.boolExpr.inferredType, new SimpleTypeNode(n.boolExpr.source, SimpleType.Bool));
             addConstraint(n.inferredType, n.trueCase.inferredType);
             addConstraint(n.trueCase.inferredType, n.elseCase.inferredType);
         }
@@ -159,17 +157,14 @@ public class TypeInferencer {
                     addConstraint(n.arguments.get(i).inferredType, tf.parameters.get(i));
                 }
             } else if (t instanceof VariableTypeNode) {
-                addConstraint(
-                    AST.funcType(f -> {
-                        for (var arg : n.arguments) {
-                            f.parameters.add(
-                                assertPreliminary(arg.inferredType, "functionInvocation arg")
-                            );
-                        }
-                        f.return_ = assertPreliminary(n.inferredType, "functionInvocation return");
-                    }),
-                    t
-                );
+                var f = new FunctionTypeNode(n.source);
+                for (var arg : n.arguments) {
+                    f.parameters.add(
+                        assertPreliminary(arg.inferredType, "functionInvocation arg")
+                    );
+                }
+                f.return_ = assertPreliminary(n.inferredType, "functionInvocation return");
+                addConstraint(f, t);
             } else if (t == null) {
                 throw new Error("no declaration found for invoked function");
             } else {
@@ -197,17 +192,17 @@ public class TypeInferencer {
         
         @Override
         protected void visitBool(BoolNode n) {
-            n.inferredType = AST.boolType();
+            n.inferredType = new SimpleTypeNode(n.source, SimpleType.Bool);
         }
     
         @Override
         protected void visitNumber(NumberNode n) {
-            n.inferredType = AST.numberType();
+            n.inferredType = new SimpleTypeNode(n.source, SimpleType.Number);
         }
     
         @Override
         protected void visitString(StringNode n) {
-            n.inferredType = AST.stringType();
+            n.inferredType = new SimpleTypeNode(n.source, SimpleType.String);
         }
     
         @Override
@@ -258,23 +253,23 @@ public class TypeInferencer {
             }
             visit(n.return_);
 
-            n.inferredType = AST.funcType(f -> {
-                n.parameters.forEach(param -> {
-                    f.parameters.add(param.identifier.inferredType);
-                });
-                f.return_ = n.inferredType;
+            var t = new FunctionTypeNode(n.source);
+            n.parameters.forEach(param -> {
+                t.parameters.add(param.identifier.inferredType);
             });
+            t.return_ = n.return_.inferredType;
+            n.inferredType = t;
         }
 
         @Override
         protected void visitFunctionInvocation(FunctionInvocationNode n) {
             super.visitFunctionInvocation(n);
-            n.identifier.inferredType = AST.funcType(f -> {
-                n.arguments.forEach(arg -> {
-                    f.parameters.add(arg.inferredType);
-                });
-                f.return_ = n.inferredType;
+            var t = new FunctionTypeNode(n.source);
+            n.arguments.forEach(arg -> {
+                t.parameters.add(arg.inferredType);
             });
+            t.return_ = n.inferredType;
+            n.identifier.inferredType = t;
         }
     }
 
@@ -301,12 +296,12 @@ public class TypeInferencer {
             }
             if (t instanceof FunctionTypeNode) {
                 var tf = (FunctionTypeNode)t;
-                return AST.funcType(f -> {
-                    tf.parameters.forEach(p -> {
-                        f.parameters.add(sub(p));
-                    });
-                    f.return_ = sub(tf.return_);
+                var f = new FunctionTypeNode(tf.source);
+                tf.parameters.forEach(p -> {
+                    f.parameters.add(sub(p));
                 });
+                f.return_ = sub(tf.return_);
+                return f;
             }
             if (subs.containsKey(t)) {
                 t = subs.get(t);

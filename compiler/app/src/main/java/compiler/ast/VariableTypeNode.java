@@ -7,6 +7,7 @@ public class VariableTypeNode extends TypeNode {
     public final int id;
 
     public VariableTypeNode(int id) {
+        super(null);
         this.id = id;
     }
 

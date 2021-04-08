@@ -2,10 +2,14 @@ package compiler.ast;
 
 import java.util.*;
 import java.util.stream.*;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class FunctionTypeNode extends TypeNode {
     public final ArrayList<TypeNode> parameters = new ArrayList<>();
     public TypeNode return_;
+    public FunctionTypeNode(ParserRuleContext source) {
+        super(source);
+    }
 
     public Stream<AbstractNode> children() {
         return Stream.concat(this.parameters.stream(), Stream.of(return_));
