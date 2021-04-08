@@ -26,7 +26,7 @@ class App {
 
     public static void check(ProgramNode ast) {
         var idMap = new ScopeResolver().run(ast);
-        new TypeInferencer(idMap).run(ast);
+        // new TypeInferencer(idMap).run(ast);
         new TypeChecker(idMap).run(ast);
     }
 
@@ -36,7 +36,7 @@ class App {
 
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/example1.bg");
+            var ast = readAndParse("./examples/error.bg");
             System.out.println("\n\n-------- Parsed --------\n\n");
             print(ast);
             check(ast);

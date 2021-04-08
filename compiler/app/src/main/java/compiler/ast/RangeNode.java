@@ -1,7 +1,7 @@
 package compiler.ast;
 
 import java.util.stream.*;
-import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RangeNode extends ExpressionNode {
     public final String startCol;
@@ -9,7 +9,7 @@ public class RangeNode extends ExpressionNode {
     public final String endCol;
     public final int endRow;
 
-    public RangeNode(RuleContext source, String startCol, int startRow, String endCol, int endRow) {
+    public RangeNode(ParserRuleContext source, String startCol, int startRow, String endCol, int endRow) {
         super(source);
         this.startCol = startCol;
         this.startRow = startRow;

@@ -2,14 +2,14 @@ package compiler.ast;
 
 import java.util.ArrayList;
 import java.util.stream.*;
-import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class FunctionNode extends ExpressionNode {
     public final ArrayList<IdentifierDeclarationNode> parameters = new ArrayList<>();
     public final ArrayList<LetBindingNode> body = new ArrayList<>();
     public ExpressionNode return_;
 
-    public FunctionNode(RuleContext source) {
+    public FunctionNode(ParserRuleContext source) {
         super(source);
     }
 

@@ -2,12 +2,12 @@ package compiler.ast;
 
 import java.util.*;
 import java.util.stream.*;
-import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class FunctionTypeNode extends TypeNode {
     public final ArrayList<TypeNode> parameters = new ArrayList<>();
     public TypeNode return_;
-    public FunctionTypeNode(RuleContext source) {
+    public FunctionTypeNode(ParserRuleContext source) {
         super(source);
     }
 

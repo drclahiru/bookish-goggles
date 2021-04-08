@@ -3,12 +3,12 @@ package compiler.ast;
 import java.util.*;
 import java.util.stream.*;
 
-import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class SimpleTypeNode extends TypeNode {
     public final SimpleType type;
 
-    public SimpleTypeNode(RuleContext source, SimpleType type) {
+    public SimpleTypeNode(ParserRuleContext source, SimpleType type) {
         super(source);
         this.type = type;
     }

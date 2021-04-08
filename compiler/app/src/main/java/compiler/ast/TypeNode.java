@@ -1,9 +1,9 @@
 package compiler.ast;
 
-import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public abstract class TypeNode extends AbstractNode {
-    public TypeNode(RuleContext source) {
+    public TypeNode(ParserRuleContext source) {
         super(source);
     }
     
