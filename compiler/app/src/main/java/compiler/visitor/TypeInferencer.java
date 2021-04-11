@@ -13,7 +13,7 @@ public class TypeInferencer {
         this.declMap = declMap;
     }
 
-    public void run(ProgramNode p) throws Visitor.VisitorException{
+    public void run(ProgramNode p) throws VisitorException{
         new PreliminaryTypeSetter().visit(p);
         var uni = new TypeUnifier();
         uni.visitProgram(p);
@@ -24,7 +24,7 @@ public class TypeInferencer {
         });
     }
 
-    class TypeUnifier extends Visitor {
+    class TypeUnifier extends VisitorVoid {
         final HashMap<Identifier, TypeNode> idTypeMap;
         final Substituter subber = new Substituter();
         final List<TypePair> constraints = new ArrayList<>();
@@ -176,7 +176,7 @@ public class TypeInferencer {
         }
     }
 
-    class PreliminaryTypeSetter extends Visitor {
+    class PreliminaryTypeSetter extends VisitorVoid {
         final HashMap<Identifier, TypeNode> prelude;
         final TypeVarGenerator typeGen;
 

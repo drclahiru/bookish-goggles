@@ -3,7 +3,7 @@ package compiler.visitor;
 import compiler.ast.*;
 import java.io.OutputStream;
 
-public class PrettyPrinter extends Visitor {
+public class PrettyPrinter extends VisitorVoid {
     Integer indentLevel = 0;
     Boolean isNewline = true;
     OutputStream out;

@@ -1,10 +1,8 @@
 package compiler.visitor;
 
-import java.util.List;
-
 import compiler.ast.*;
 
-public abstract class Visitor {
+public abstract class VisitorVoid {
     protected void defaultVisit(AbstractNode n) throws VisitorException {
         for (var x : (Iterable<AbstractNode>) n.children().filter((x) -> x != null)::iterator) {
             visit(x);
@@ -100,27 +98,5 @@ public abstract class Visitor {
     }
     protected void visitVariableType(VariableTypeNode n) throws VisitorException {
         defaultVisit(n);
-    }
-
-    public class VisitorException extends Exception {
-        @java.io.Serial
-        static final long serialVersionUID = 1L;
-
-        public final AbstractNode source;
-        public final String message;
-        public VisitorException(AbstractNode source, String message) {
-            this.source = source;
-            this.message = message;
-        }
-    }
-    
-    public class VisitorExceptionAggregate extends Exception {
-        @java.io.Serial
-        static final long serialVersionUID = 1L;
-        public final List<VisitorException> exceptions;
-
-        public VisitorExceptionAggregate(List<VisitorException> exceptions) {
-            this.exceptions = exceptions;
-        }
     }
 }

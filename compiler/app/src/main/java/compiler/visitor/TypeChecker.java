@@ -3,7 +3,7 @@ package compiler.visitor;
 import compiler.ast.*;
 import java.util.*;
 
-public class TypeChecker extends Visitor {
+public class TypeChecker extends VisitorVoid {
     final HashMap<Identifier, TypeNode> map = Utility.createPrelude(); 
     private TypeNode previousType;
     public TypeChecker(HashMap<Identifier, IdentifierDeclarationNode> hm) {
@@ -12,7 +12,7 @@ public class TypeChecker extends Visitor {
         });
     }
 
-    public void run(ProgramNode pn) throws VisitorException, Visitor.VisitorExceptionAggregate {
+    public void run(ProgramNode pn) throws VisitorException, VisitorExceptionAggregate {
         var exceptions = new ArrayList<VisitorException>();
         for (var bind : pn.bindings) {
             try {
@@ -85,18 +85,18 @@ public class TypeChecker extends Visitor {
     	var t = previousType;
 
         if (!(t instanceof FunctionTypeNode)) {
-            throw new Error("Identifier is not a function" + t);
+            throw new VisitorException(fn, "Identifier is not a function" + t);
         }
 
         var tf = (FunctionTypeNode) t;
 
         if (tf.parameters.size() != fn.arguments.size()) {
-            throw new Error("Arity mismatch");
+            throw new VisitorException(fn, "Arity mismatch");
         }
         for (int e = 0; e < tf.parameters.size(); e++) {
         	visit(fn.arguments.get(e));
             if (!tf.parameters.get(e).equals(previousType)) {
-                throw new Error ("Type mismatch of the function and the arguments");
+                throw new VisitorException(fn, "Type mismatch of the function and the arguments");
             }
          }
         previousType = tf.return_;

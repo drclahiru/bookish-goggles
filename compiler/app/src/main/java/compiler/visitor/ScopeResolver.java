@@ -8,7 +8,7 @@ import java.util.*;
 
  For every new scope it enters it will first visit the identifier-declarations of the let-bindings and function-parameters before visiting any expressions.
  */
-public class ScopeResolver extends Visitor {
+public class ScopeResolver extends VisitorVoid {
     final IdentifierMap idTable;
     final HashMap<Identifier, IdentifierDeclarationNode> flatIdTable;      
     final HashMap<Identifier, TypeNode> prelude;
