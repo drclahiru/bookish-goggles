@@ -11,7 +11,7 @@ public class TypeChecker extends VisitorVoid {
         this.map = map;
     }
 
-    public void run(ProgramNode pn) throws VisitorException, VisitorExceptionAggregate {
+    public void run(ProgramNode pn) throws VisitorExceptionAggregate {
         var exceptions = new ArrayList<VisitorException>();
         for (var bind : pn.bindings) {
             try {

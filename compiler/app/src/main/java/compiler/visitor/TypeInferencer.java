@@ -12,10 +12,23 @@ public class TypeInferencer {
     public TypeInferencer(HashMap<Identifier, IdentifierDeclarationNode> declMap) {
         this.declMap = declMap;
     }
-    public IdentifierContext run(ProgramNode n) throws VisitorException {
-        var v = new InferenceVisitor();
-        v.visitProgram(n);
+    public IdentifierContext run(ProgramNode pn) throws VisitorExceptionAggregate {
+        var exceptions = new ArrayList<VisitorException>();
         
+        var v = new InferenceVisitor();
+        for (var bind : pn.bindings) {
+            try {
+                // we don't strictly need to clear the substitution set, but all existing substitutions are irrelevant to the next global binding
+                // so this helps with performance and debuggability
+                v.subst.clear();
+                v.visitLetBinding(bind);
+            } catch (VisitorException ex) {
+                exceptions.add(ex);
+            }
+        }
+        if (exceptions.size() > 0) {
+            throw new VisitorExceptionAggregate(exceptions);
+        }
         declMap.forEach((i, decl) -> {
             if (decl.type == null) {
                 decl.type = v.ctx.get(decl.identifier.value);
@@ -140,13 +153,7 @@ public class TypeInferencer {
         }
         @Override
         TypeNode visitProgram(ProgramNode n) throws VisitorException {
-            for (var x: n.bindings) {
-                // we don't strictly need to clear the substitution set, but all existing substitutions are irrelevant to the next global binding
-                // so this helps with performance and debuggability
-                subst.clear();
-                visitLetBinding(x);
-            }
-            return null;
+            throw new Error("Shouldn't be visited");
         }
         @Override
         TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {

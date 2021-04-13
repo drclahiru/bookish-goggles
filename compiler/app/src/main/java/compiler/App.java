@@ -24,7 +24,7 @@ class App {
         return ast;
     }
 
-    public static IdentifierContext infer(ProgramNode ast) throws VisitorException, VisitorExceptionAggregate {
+    public static IdentifierContext infer(ProgramNode ast) throws VisitorExceptionAggregate {
         var idMap = new ScopeResolver().run(ast);
         var idCtx = new TypeInferencer(idMap).run(ast);
         return idCtx;
@@ -33,7 +33,7 @@ class App {
     public static void check(
         IdentifierContext idCtx,
         ProgramNode ast
-    ) throws VisitorException, VisitorExceptionAggregate {
+    ) throws VisitorExceptionAggregate {
         new TypeChecker(idCtx).run(ast);
     }
 
@@ -50,16 +50,14 @@ class App {
             System.out.println("\n\n-------- Types inferenced --------\n\n");
             print(ast);
             check(idMap, ast);
-        } catch (VisitorExceptionAggregate exAggr) {
+        } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");
-            for (var ex : exAggr.exceptions) {
-                printError(ex);
-            }
+            System.out.println(ex);
         } catch (VisitorException ex) {
             System.out.println("-------------------------------------");
             System.out.println("Compilation aborted because of error:");
-            printError(ex);
+            System.out.println(ex);
         } catch (Exception ex) {
             System.out.println();
             ex.printStackTrace(System.err);
@@ -67,21 +65,5 @@ class App {
             System.out.println();
             ex.printStackTrace(System.err);
         }
-    }
-    static void printError(VisitorException ex) {
-        var sourceNode = ex.source;
-        var source = sourceNode.source;
-        var start = source.getStart();
-        var stop = source.getStop();
-        System.out.print("[");
-        System.out.print(start.getLine());
-        System.out.print(":");
-        System.out.print(start.getCharPositionInLine());
-        System.out.print("..");
-        System.out.print(stop.getLine());
-        System.out.print(":");
-        System.out.print(stop.getCharPositionInLine());
-        System.out.print("] ");
-        System.out.println(ex.message);
     }
 }

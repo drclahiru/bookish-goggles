@@ -4,13 +4,49 @@
 package compiler;
 
 import java.io.*;
+import java.util.ArrayList;
+import org.antlr.v4.runtime.CharStreams;
+import org.junit.Assert;
 import org.junit.Test;
 // import static org.junit.Assert.*;
 
+import compiler.visitor.*;
+
 public class AppTest {
     @Test
-    public void testAppHasAGreeting() throws IOException {
+    public void typeCheckExample1() throws Exception {
         var ast = App.readAndParse("./examples/example1.bg");
-        App.check(ast);
+        App.check(App.infer(ast), ast);
+    }
+
+    @Test
+    public void typeCheckExample2() throws Exception {
+        var ast = App.readAndParse("./examples/example2.bg");
+        App.check(App.infer(ast), ast);
+    }
+
+    @Test
+    public void typeCheckError() throws IOException {
+        var ast = App.readAndParse("./examples/type_error.bg");
+        Assert.assertThrows(VisitorExceptionAggregate.class, () -> {
+            App.check(App.infer(ast), ast);
+        });
+    }
+    
+    @Test
+    public void printParsePrint() throws Exception {
+        var paths = new ArrayList<String>();
+        paths.add("./examples/type_error.bg");
+        paths.add("./examples/example1.bg");
+        paths.add("./examples/example2.bg");
+
+        for (var path : paths) {
+            var ast = App.readAndParse(path);
+            var astTxt = PrettyPrinter.stringify(ast);
+            var cs = CharStreams.fromReader(new StringReader(astTxt));
+            var ast2 = App.parse(cs);
+
+            Assert.assertEquals(astTxt, PrettyPrinter.stringify(ast2));
+        }
     }
 }
