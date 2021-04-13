@@ -1,170 +1,264 @@
 package compiler.visitor;
 
+import compiler.IdentifierContext;
+import compiler.Utility;
 import compiler.ast.*;
 import java.util.*;
 
-// reference material:
-//     https://www.cs.cornell.edu/courses/cs3110/2016fa/l/17-inference/notes.html
-
 public class TypeInferencer {
     final HashMap<Identifier, IdentifierDeclarationNode> declMap;
+    final TypeVarGenerator varGen = new TypeVarGenerator();
 
     public TypeInferencer(HashMap<Identifier, IdentifierDeclarationNode> declMap) {
         this.declMap = declMap;
     }
-
-    public void run(ProgramNode p) throws VisitorException{
-        new PreliminaryTypeSetter().visit(p);
-        var uni = new TypeUnifier();
-        uni.visitProgram(p);
+    public IdentifierContext run(ProgramNode n) throws VisitorException {
+        var v = new InferenceVisitor();
+        v.visitProgram(n);
+        
         declMap.forEach((i, decl) -> {
             if (decl.type == null) {
-                decl.type = uni.subber.sub(decl.identifier.inferredType);
+                decl.type = v.ctx.get(decl.identifier.value);
             }
         });
+        return v.ctx;
     }
 
-    class TypeUnifier extends VisitorVoid {
-        final HashMap<Identifier, TypeNode> idTypeMap;
-        final Substituter subber = new Substituter();
-        final List<TypePair> constraints = new ArrayList<>();
+    class InferenceVisitor extends VisitorT<TypeNode> {
+        final IdentifierContext ctx;
+        final Substitution subst;
 
-        public TypeUnifier() {
-            var idTypeMap = Utility.createPrelude();
-            declMap.forEach((id, decl) -> {
-                idTypeMap.put(id, decl.identifier.inferredType);
-            });
-            this.idTypeMap = idTypeMap;
+        public InferenceVisitor() {
+            ctx = Utility.createPrelude();
+            subst = new Substitution();
+        }
+        InferenceVisitor(IdentifierContext ctx, Substitution subst) {
+            this.ctx = ctx;
+            this.subst = subst;
         }
 
-        void addConstraint(TypeNode a, TypeNode b) {
-            constraints.add(new TypePair(a, b));
+        public TypeNode run(ExpressionNode n) throws VisitorException {
+            var typeResult = visit(n);
+            return subst.apply(typeResult);
         }
-
-        void unify() {
-            var cs = constraints;
-            for (var i = 0; i < cs.size(); i++) {
-                var c = cs.get(i);
-                if (c.type1.equals(c.type2)) {
-                    continue;
-                }
-                if (c.type1 instanceof VariableTypeNode && !typeContains(c.type2, (VariableTypeNode)c.type1)) {
-                    subber.addMapping(c.type1, c.type2);
-                    subFromIdx(cs, i);
-                    continue;
-                }
-                if (c.type2 instanceof VariableTypeNode && !typeContains(c.type1, (VariableTypeNode)c.type2)) {
-                    subber.addMapping(c.type2, c.type1);
-                    subFromIdx(cs, i);
-                    continue;
-                }
-                if (c.type1 instanceof FunctionTypeNode && c.type2 instanceof FunctionTypeNode) {
-                    var t1 = (FunctionTypeNode)c.type1;
-                    var t2 = (FunctionTypeNode)c.type2;
-                    if (t1.parameters.size() != t2.parameters.size()) {
-                        throw new Error("arity mismatch between function types \"" + t1 + "\" and \"" + t2 + "\"");
-                    }
-                    for (var j = 0; j < t1.parameters.size() && j < t2.parameters.size(); j++) {
-                        cs.add(new TypePair(t1.parameters.get(j), t2.parameters.get(j)));
-                    }
-                    cs.add(new TypePair(t1.return_, t2.return_));
-                    continue;
-                }
-                throw new Error("Unification between \"" + c.type1 + "\" and \"" + c.type2 + "\" is untypeable");
+        
+        @Override
+        TypeNode visitIdentifier(IdentifierNode n) {
+            var scheme = ctx.get(n.value);
+            if (scheme == null) {
+                throw new Error("unbound variable: " + n.value);
             }
+            return instantiate(scheme);
         }
-
-        void subFromIdx(List<TypePair> cs, int idx) {
-            for (var i = idx; i < cs.size(); i++) {
-                cs.set(i, subber.sub(cs.get(i)));
+        @Override
+        TypeNode visitBool(BoolNode n) {
+            return new SimpleTypeNode(n.source, SimpleType.Bool);
+        }
+        @Override
+        TypeNode visitNumber(NumberNode n) {
+            return new SimpleTypeNode(n.source, SimpleType.Number);
+        }
+        @Override
+        TypeNode visitString(StringNode n) {
+            return new SimpleTypeNode(n.source, SimpleType.String);
+        }
+        @Override
+        TypeNode visitFunction(FunctionNode n) throws VisitorException {
+            var visitor = new InferenceVisitor(ctx.clone(), subst);
+            var t = visitor.visitFunctionInner(n);
+            addFromCtx(visitor.ctx);
+            return t;
+        }
+        TypeNode visitFunctionInner(FunctionNode n) throws VisitorException {
+            var params = new ArrayList<TypeNode>();
+            for (var p : n.parameters) {
+                var scheme = new TypeScheme(new HashSet<>(), varGen.next());
+                ctx.put(p.identifier.value, scheme);
+                params.add(scheme.type);
             }
-        }
-
-        TypeNode assertPreliminary(TypeNode t, String location) {
-            if (t == null) {
-                throw new Error(location + ": preliminary type not set");
+            var t = new FunctionTypeNode(n.source);
+            t.return_ = visit(n.return_);
+            for (var p : params) {
+                t.parameters.add(subst.apply(p));
             }
             return t;
         }
-
         @Override
-        protected void visitProgram(ProgramNode n) throws VisitorException {
-            for (var b : n.bindings) {
-                visit(b.declaration);
-            }
-            for (var b : n.bindings) {
-                visit(b.expr);
-                addConstraint( 
-                    b.declaration.identifier.inferredType,
-                    b.expr.inferredType
-                );
-            }
-            unify();
+        TypeNode visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
+            var visitor = new InferenceVisitor(subst.apply(ctx), subst);
+            var t = visitor.visitFunctionInvocationInner(n);
+            addFromCtx(visitor.ctx);
+            return t;
         }
+        TypeNode visitFunctionInvocationInner(FunctionInvocationNode n) throws VisitorException {
+            var tyRes = varGen.next();
+            var identifierT = visitIdentifier(n.identifier);
 
-        @Override
-        protected void visitFunction(FunctionNode n) throws VisitorException {
-            var tEq = new FunctionTypeNode(n.source);
-            n.parameters.forEach(param -> {
-                tEq.parameters.add(
-                    assertPreliminary(param.identifier.inferredType, "function param")
-                );
-            });
-            tEq.return_ = assertPreliminary(n.return_.inferredType, "function return");
-            addConstraint(n.inferredType, tEq);
-
-            for (var p : n.parameters) {
-                visit(p);
+            var tf = new FunctionTypeNode(n.source);
+            for (var a : n.arguments) {
+                tf.parameters.add(visit(a));
             }
-            for (var b : n.body) {
-                visit(b.declaration);
-            }
-            for (var b : n.body) {
-                visit(b.expr);
-                addConstraint( 
-                    b.declaration.identifier.inferredType,
-                    b.expr.inferredType
-                );
-            }
-            visit(n.return_);
-            unify();
+            tf.return_ = tyRes;
+            subst.unify(identifierT, tf);
+            return subst.apply(tyRes);
         }
-
         @Override
-        protected void visitIfElse(IfElseNode n) throws VisitorException {
-            super.visitIfElse(n);
-            addConstraint(n.boolExpr.inferredType, new SimpleTypeNode(n.boolExpr.source, SimpleType.Bool));
-            addConstraint(n.inferredType, n.trueCase.inferredType);
-            addConstraint(n.trueCase.inferredType, n.elseCase.inferredType);
+        TypeNode visitIfElse(IfElseNode n) throws VisitorException {
+            var conditionT = visit(n.boolExpr);
+            subst.unify(new SimpleTypeNode(null, SimpleType.Bool), conditionT);
+
+            var branch1 = visit(n.trueCase);
+            var branch2 = visit(n.elseCase);
+            subst.unify(branch1, branch2);
+            
+            return subst.apply(branch1);
         }
-
         @Override
-        protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
-            super.visitFunctionInvocation(n);
-            var t = idTypeMap.get(n.identifier.value);
-            if (t instanceof FunctionTypeNode) {
-                var tf = (FunctionTypeNode)t;
-                addConstraint(n.inferredType, tf.return_);
-                if (n.arguments.size() != tf.parameters.size()) {
-                    throw new Error("arity mismatch between definition and invocation");
-                }
-                for (var i = 0; i < n.arguments.size() && i < tf.parameters.size(); i++) {
-                    addConstraint(n.arguments.get(i).inferredType, tf.parameters.get(i));
-                }
-            } else if (t instanceof VariableTypeNode) {
-                var f = new FunctionTypeNode(n.source);
-                for (var arg : n.arguments) {
-                    f.parameters.add(
-                        assertPreliminary(arg.inferredType, "functionInvocation arg")
-                    );
-                }
-                f.return_ = assertPreliminary(n.inferredType, "functionInvocation return");
-                addConstraint(f, t);
-            } else if (t == null) {
-                throw new Error("no declaration found for invoked function");
+        TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
+            // identifier needs to be declared beforehand for the recursive case
+            ctx.put(n.declaration.identifier.value, generalize(ctx, varGen.next()));
+            var t = visit(n.expr);
+            if (n.declaration.type != null) {
+                ctx.put(n.declaration.identifier.value, n.declaration.type);
             } else {
-                throw new Error("unexpected type for " + n + " found: " + t);
+                ctx.put(n.declaration.identifier.value, generalize(ctx, t));
             }
+            return null;
+        }
+        @Override
+        TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
+            var t = visit(n.expr);
+            if (n.declaration.type != null) {
+                ctx.put(n.declaration.identifier.value, n.declaration.type);
+            } else {
+                ctx.put(n.declaration.identifier.value, generalize(ctx, t));
+            }
+            var visitor = new InferenceVisitor(subst.apply(ctx), subst);
+            var tNext = visitor.visit(n.next);
+            addFromCtx(visitor.ctx);
+            return tNext;
+        }
+        @Override
+        TypeNode visitProgram(ProgramNode n) throws VisitorException {
+            for (var x: n.bindings) {
+                // we don't strictly need to clear the substitution set, but all existing substitutions are irrelevant to the next global binding
+                // so this helps with performance and debuggability
+                subst.clear();
+                visitLetBinding(x);
+            }
+            return null;
+        }
+        @Override
+        TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+            throw new Error("Shouldn't be visited");
+        }
+        @Override
+        TypeNode visitRange(RangeNode n) throws VisitorException {
+            throw new Error("Not implemented yet");
+        }
+
+        /**
+         * add keys that only exist in {@code other} to {@code this.ctx}
+         */
+        void addFromCtx(IdentifierContext other) {
+            for (var k : except(other.keySet(), ctx.keySet())) {
+                ctx.put(k, generalize(ctx, other.get(k).type));
+            }
+        }
+    }
+
+    class Substitution extends HashMap<VariableTypeNode, TypeNode> {
+        static final long serialVersionUID = 1L;
+        public Substitution() {
+            super();
+        }
+        public Substitution(Substitution sub) {
+            super(sub);
+        }
+
+        public TypeNode apply(TypeNode ty) {
+            if (ty instanceof VariableTypeNode) {
+                var t = (VariableTypeNode)ty;
+                var t2 = get(t);
+                if (t2 != null) {
+                    return t2;
+                }
+            } else if (ty instanceof FunctionTypeNode) {
+                var t = (FunctionTypeNode)ty;
+                var tf = new FunctionTypeNode(ty.source);
+                for (var p : t.parameters) {
+                    tf.parameters.add(apply(p));
+                }
+                tf.return_ = apply(t.return_);
+                return tf;
+            }
+            return ty;
+        }
+    
+        public TypeScheme apply(TypeScheme scheme) {
+            var nextSubst = new Substitution(this);
+            for (var v : scheme.vars) {
+                nextSubst.remove(v);
+            }
+            var t = nextSubst.apply(scheme.type);
+            return new TypeScheme(scheme.vars, t);
+        }
+
+        public IdentifierContext apply(IdentifierContext ctx) {
+            var nextCtx = ctx.clone();
+            for (var x : ctx.entrySet()) {
+                nextCtx.put(x.getKey(), apply(x.getValue()));
+            }
+            return nextCtx;
+        }
+
+        void bindIdent(VariableTypeNode v, TypeNode ty) {
+            if (freeTypeVars(ty).contains(v)) {
+                throw new Error("occurs check failed");
+            }
+            put(v, ty);
+        }
+        public void unify(TypeNode t1, TypeNode t2) {
+            t1 = apply(t1);
+            t2 = apply(t2);
+            if (t1.equals(t2)) {
+                // do nothing
+            } else if (t1 instanceof VariableTypeNode) {
+                bindIdent((VariableTypeNode)t1, t2);
+            } else if (t2 instanceof VariableTypeNode) {
+                bindIdent((VariableTypeNode)t2, t1);
+            } else if (t1 instanceof FunctionTypeNode && t2 instanceof FunctionTypeNode) {
+                var t1t = (FunctionTypeNode)t1;
+                var t2t = (FunctionTypeNode)t2;
+                if (t1t.parameters.size() != t2t.parameters.size()) {
+                    System.out.println("arity mismatch between " + t1t + " and " + t2t);
+                }
+                for (var i = 0; i < Math.min(t1t.parameters.size(), t2t.parameters.size()); i++) {
+                    unify(t1t.parameters.get(i), t2t.parameters.get(i));
+                }
+                unify(apply(t1t.return_), apply(t2t.return_));
+            } else {
+                System.out.println("types do not unify: " + t1 + " and " + t2);
+            }
+        }
+
+        @Override
+        public String toString() {
+            var s = new StringBuilder();
+            s.append("{");
+            this.entrySet().stream().limit(1).forEach(x -> {
+                s.append(x.getKey());
+                s.append(" => ");
+                s.append(x.getValue());
+            });
+            this.entrySet().stream().skip(1).forEach(x -> {
+                s.append(" ; ");
+                s.append(x.getKey());
+                s.append(" => ");
+                s.append(x.getValue());
+            });
+            s.append("}");
+            return s.toString();
         }
     }
 
@@ -172,213 +266,79 @@ public class TypeInferencer {
         int nextTypeVarId = 1;
 
         public VariableTypeNode next() {
-            return new VariableTypeNode(nextTypeVarId++);
+            return new VariableTypeNode("u" + nextTypeVarId++);
         }
     }
 
-    class PreliminaryTypeSetter extends VisitorVoid {
-        final HashMap<Identifier, TypeNode> prelude;
-        final TypeVarGenerator typeGen;
-
-        public PreliminaryTypeSetter() {
-            this.prelude = Utility.createPrelude();
-            this.typeGen = new TypeVarGenerator();
+    TypeNode instantiate(TypeScheme scheme) {
+        var subst = new Substitution();
+        for (var v : scheme.vars) {
+            subst.put(v, varGen.next());
         }
-        
-        @Override
-        protected void visitBool(BoolNode n) {
-            n.inferredType = new SimpleTypeNode(n.source, SimpleType.Bool);
-        }
-    
-        @Override
-        protected void visitNumber(NumberNode n) {
-            n.inferredType = new SimpleTypeNode(n.source, SimpleType.Number);
-        }
-    
-        @Override
-        protected void visitString(StringNode n) {
-            n.inferredType = new SimpleTypeNode(n.source, SimpleType.String);
-        }
-    
-        @Override
-        protected void visitIdentifier(IdentifierNode n) {
-            var decl = declMap.get(n.value);
-            if (decl != null) {
-                n.inferredType = decl.identifier.inferredType;
-            } else if (!prelude.containsKey(n.value)) {
-                throw new Error("Identifier has no definition: " + n.value);
-            }
-        }
-    
-        @Override
-        protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) {
-            if (n.type != null) {
-                n.identifier.inferredType = n.type;
-            } else {
-                n.identifier.inferredType = typeGen.next();
-            }
-        }
-    
-        @Override
-        protected void visitExpression(ExpressionNode n) throws VisitorException {
-            n.inferredType = typeGen.next();
-            super.visitExpression(n);
-        }
-
-        @Override
-        protected void visitProgram(ProgramNode n) throws VisitorException {
-            for (var b : n.bindings) {
-                visit(b.declaration);
-            }
-            for (var b : n.bindings) {
-                visit(b.expr);
-            }
-        }
-        
-        @Override
-        protected void visitFunction(FunctionNode n) throws VisitorException {
-            for (var p : n.parameters) {
-                visit(p);
-            }
-            for (var b : n.body) {
-                visit(b.declaration);
-            }
-            for (var b : n.body) {
-                visit(b.expr);
-            }
-            visit(n.return_);
-
-            var t = new FunctionTypeNode(n.source);
-            n.parameters.forEach(param -> {
-                t.parameters.add(param.identifier.inferredType);
-            });
-            t.return_ = n.return_.inferredType;
-            n.inferredType = t;
-        }
-
-        @Override
-        protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
-            super.visitFunctionInvocation(n);
-            var t = new FunctionTypeNode(n.source);
-            n.arguments.forEach(arg -> {
-                t.parameters.add(arg.inferredType);
-            });
-            t.return_ = n.inferredType;
-            n.identifier.inferredType = t;
-        }
+        return subst.apply(scheme.type);
     }
 
-    class Substituter {
-        final Map<TypeNode, TypeNode> subs = new HashMap<>();
-
-        public void addMapping(TypeNode from, TypeNode to) {
-            subs.put(from, to);
-
-            var fromValueKeys = new ArrayList<TypePair>();
-            subs.forEach((k, v) -> {
-                var sVal = sub(v);
-                if (!sVal.equals(v)) {
-                    fromValueKeys.add(new TypePair(k, sVal));
-                }
-            });
-            for (var x : fromValueKeys) {
-                subs.put(x.type1, x.type2);
-            }
-        }
-        public TypeNode sub(TypeNode t) {
-            if (t == null) {
-                throw new Error("Attempt to substitute non-type null");
-            }
-            if (t instanceof FunctionTypeNode) {
-                var tf = (FunctionTypeNode)t;
-                var f = new FunctionTypeNode(tf.source);
-                tf.parameters.forEach(p -> {
-                    f.parameters.add(sub(p));
-                });
-                f.return_ = sub(tf.return_);
-                return f;
-            }
-            if (subs.containsKey(t)) {
-                t = subs.get(t);
-            }
-            return t;
-        }
-        public TypePair sub(TypePair t) {
-            return new TypePair(sub(t.type1), sub(t.type2));
-        }
-        public HashSet<TypePair> sub(Set<TypePair> ts) {
-            var next = new HashSet<TypePair>();
-            for (var t : ts) {
-                next.add(sub(t));
-            } 
-            return next;
-        }
-        public ArrayList<TypePair> sub(ArrayList<TypePair> ts) {
-            var next = new ArrayList<TypePair>();
-            for (var t : ts) {
-                var newT = sub(t);
-                if (!next.contains(newT)) {
-                    next.add(newT);
-                }
-            }
-            return next;
-        }
-    }
-
-    class TypePair {
-        final TypeNode type1;
-        final TypeNode type2;
-        
-        public TypePair(TypeNode type1, TypeNode type2) {
-            this.type1 = type1;
-            this.type2 = type2;
-        }
-    
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof TypePair)) {
-                return false;
-            }
-    
-            var other = (TypePair)o;
-            return (this.type1.equals(other.type1) && this.type2.equals(other.type2))
-                || (this.type1.equals(other.type2) && this.type2.equals(other.type1));
-        }
-        
-        @Override
-        public int hashCode() {
-            var h1 = type1.hashCode();
-            var h2 = type2.hashCode();
-            if (h1 < h2) {
-                return Objects.hash(h1, h2);
-            } else {
-                return Objects.hash(h2, h1);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "" + type1 + " <-> " + type2;
-        }
+    static TypeScheme generalize(IdentifierContext ctx, TypeNode t) {
+        var vars = except(freeTypeVars(t), freeTypeVarsCtx(ctx));
+        var sch = new TypeScheme(vars, t);
+        return sch;
     }
     
-    static boolean typeContains(TypeNode t, VariableTypeNode v) {
-        if (t instanceof SimpleTypeNode) {
-            return false;
-        }
+    static Set<VariableTypeNode> freeTypeVars(TypeNode t) {
+        var s = new HashSet<VariableTypeNode>();
+        freeTypeVars(t, s);
+        return s;
+    }
+    
+    static void freeTypeVars(TypeNode t, Set<VariableTypeNode> s) {
         if (t instanceof VariableTypeNode) {
-            return ((VariableTypeNode)t).id == v.id;
-        }
-        if (t instanceof FunctionTypeNode) {
-            var t_ = (FunctionTypeNode)t;
-
-            for (var p : t_.parameters) {
-                if (typeContains(p, v)) {
-                    return true;
-                }
+            s.add((VariableTypeNode)t);
+        } else if (t instanceof FunctionTypeNode) {
+            var tf = (FunctionTypeNode)t;
+            for (var p : tf.parameters) {
+                freeTypeVars(p, s);
             }
-            return typeContains(t_.return_, v);
+            freeTypeVars(tf.return_, s);
         }
-        throw new Error("unexpected type: " + t);
+    }
+
+    static Set<VariableTypeNode> freeTypeVarsScheme(TypeScheme scheme) {
+        return except(scheme.vars, freeTypeVars(scheme.type));
+    }
+
+    static Set<VariableTypeNode> freeTypeVarsCtx(IdentifierContext ctx) {
+        Set<VariableTypeNode> s = new HashSet<VariableTypeNode>();
+        var vals = ctx.values();
+        for (var sch : vals) {
+            s.addAll(freeTypeVarsScheme(sch));
+        }
+        return s;
+    }
+
+    static<T> Set<T> difference(Set<T> s1, Set<T> s2) {
+        var s3 = new HashSet<T>(s1);
+        for (var val : s2) {
+            if (s3.contains(val)) {
+                s3.remove(val);
+            } else {
+                s3.add(val);
+            }
+        }
+        return s3;
+    }
+
+    /**
+     * returns the set of elements that appear in {@code s1}, but not in {@code s2}.
+     * 
+     * @param s1 
+     * @param s2 
+     * @param <T> type of elements in the set
+     */
+    static<T> Set<T> except(Set<T> s1, Set<T> s2) {
+        var s3 = new HashSet<T>(s1);
+        for (var val : s2) {
+            s3.remove(val);
+        }
+        return s3;
     }
 }

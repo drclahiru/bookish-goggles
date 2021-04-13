@@ -35,11 +35,14 @@ public abstract class VisitorT<T> {
             return visitString((StringNode)n);
         } else if (n instanceof RangeNode) {
             return visitRange((RangeNode)n);   
+        } else if (n instanceof LetExpressionNode) {
+            return visitLetExpression((LetExpressionNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
     }
     abstract T visitLetBinding(LetBindingNode n)  throws VisitorException;
+    abstract T visitLetExpression(LetExpressionNode n)  throws VisitorException;
     abstract T visitBool(BoolNode n)  throws VisitorException;
     abstract T visitFunctionInvocation(FunctionInvocationNode n)  throws VisitorException;
     abstract T visitFunction(FunctionNode n)  throws VisitorException;

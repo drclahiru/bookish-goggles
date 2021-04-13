@@ -1,5 +1,7 @@
 package compiler.visitor;
 
+import compiler.IdentifierContext;
+import compiler.Utility;
 import compiler.ast.*;
 import java.util.*;
 
@@ -11,7 +13,7 @@ import java.util.*;
 public class ScopeResolver extends VisitorVoid {
     final IdentifierMap idTable;
     final HashMap<Identifier, IdentifierDeclarationNode> flatIdTable;      
-    final HashMap<Identifier, TypeNode> prelude;
+    final IdentifierContext prelude;
     public ScopeResolver() {
         this.prelude = Utility.createPrelude();
         this.idTable = new IdentifierMap();
@@ -22,18 +24,11 @@ public class ScopeResolver extends VisitorVoid {
         return flatIdTable;
     }
     @Override
-    protected void visitFunction(FunctionNode node) throws VisitorException {
+    protected void visitLetExpression(LetExpressionNode n) throws VisitorException {
         idTable.enterScope();
-        for (var p : node.parameters) {
-            visit(p);
-        }
-        for (var b : node.body) {
-            visit(b.declaration);
-        }
-        for (var b : node.body) {
-            visit(b.expr);
-        }
-        visit(node.return_);
+        visit(n.declaration);
+        visit(n.expr);
+        visit(n.next);
         idTable.exitScope();
     }
     @Override
