@@ -88,9 +88,7 @@ public class PrettyPrinter extends VisitorVoid {
 
     @Override
     protected void visitString(StringNode node) {
-        print("\"");
-        print(node.value.replace("\\", "\\\\").replace("\"", "\\\""));
-        print("\"");
+        print(node.value);
     }
 
     @Override
