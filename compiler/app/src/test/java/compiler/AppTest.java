@@ -16,7 +16,7 @@ public class AppTest {
     @Test
 <<<<<<< HEAD
     public void testAppHasAGreeting() throws IOException {
-        var ast = App.readAndParse("./examples/example1.bg");
+        var ast = App.readAndParse("./examples/example3.bg");
         App.check(ast);
 =======
     public void typeCheckExample1() throws Exception {
