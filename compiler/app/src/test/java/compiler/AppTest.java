@@ -10,7 +10,7 @@ import org.junit.Test;
 public class AppTest {
     @Test
     public void testAppHasAGreeting() throws IOException {
-        var ast = App.readAndParse("./examples/example1.bg");
+        var ast = App.readAndParse("./examples/example3.bg");
         App.check(ast);
     }
 }

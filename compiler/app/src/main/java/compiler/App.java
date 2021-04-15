@@ -32,11 +32,14 @@ class App {
 
     public static void print(ProgramNode ast) throws VisitorException {
         new PrettyPrinter(System.out).run(ast);
+        System.out.println("\n\n-------- Haskel Code Generated  --------\n\n");
+        System.out.println();
+        new CodeGenPretty(System.out).run(ast);
     }
 
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/error.bg");
+            var ast = readAndParse("./examples/example1.bg");
             System.out.println("\n\n-------- Parsed --------\n\n");
             print(ast);
             check(ast);
