@@ -24,10 +24,17 @@ class App {
         return ast;
     }
 
-    public static void check(ProgramNode ast) throws VisitorException, VisitorExceptionAggregate {
+    public static IdentifierContext infer(ProgramNode ast) throws VisitorExceptionAggregate {
         var idMap = new ScopeResolver().run(ast);
-        // new TypeInferencer(idMap).run(ast);
-        new TypeChecker(idMap).run(ast);
+        var idCtx = new TypeInferencer(idMap).run(ast);
+        return idCtx;
+    }
+
+    public static void check(
+        IdentifierContext idCtx,
+        ProgramNode ast
+    ) throws VisitorExceptionAggregate {
+        new TypeChecker(idCtx).run(ast);
     }
 
     public static void print(ProgramNode ast) throws VisitorException {
@@ -36,25 +43,34 @@ class App {
         System.out.println();
         new CodeGenPretty(System.out).run(ast);
     }
+    
+    public static void codeGen(ProgramNode ast) throws VisitorException {
+        new CodeGenVisitor(System.out).run(ast);
+    }
 
     public static void main(String[] args) {
         try {
+<<<<<<< HEAD
             var ast = readAndParse("./examples/example1.bg");
+=======
+            var ast = readAndParse("./examples/example2.bg");
+>>>>>>> 597d6eacfb67adda78ac1f20ac0cf7535cf76776
             System.out.println("\n\n-------- Parsed --------\n\n");
             print(ast);
-            check(ast);
+            var idMap = infer(ast);
             System.out.println("\n\n-------- Types inferenced --------\n\n");
             print(ast);
-        } catch (VisitorExceptionAggregate exAggr) {
+            check(idMap, ast);
+            System.out.println("--------------------------------------");
+            codeGen(ast);
+        } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");
-            for (var ex : exAggr.exceptions) {
-                printError(ex);
-            }
+            System.out.println(ex);
         } catch (VisitorException ex) {
             System.out.println("-------------------------------------");
             System.out.println("Compilation aborted because of error:");
-            printError(ex);
+            System.out.println(ex);
         } catch (Exception ex) {
             System.out.println();
             ex.printStackTrace(System.err);
@@ -62,21 +78,5 @@ class App {
             System.out.println();
             ex.printStackTrace(System.err);
         }
-    }
-    static void printError(VisitorException ex) {
-        var sourceNode = ex.source;
-        var source = sourceNode.source;
-        var start = source.getStart();
-        var stop = source.getStop();
-        System.out.print("[");
-        System.out.print(start.getLine());
-        System.out.print(":");
-        System.out.print(start.getCharPositionInLine());
-        System.out.print("..");
-        System.out.print(stop.getLine());
-        System.out.print(":");
-        System.out.print(stop.getCharPositionInLine());
-        System.out.print("] ");
-        System.out.println(ex.message);
     }
 }

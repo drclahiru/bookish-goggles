@@ -37,6 +37,12 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLet_binding(gParser.Let_bindingContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link gParser#let_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLet_expr(gParser.Let_exprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code expr_lambda}
 	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
@@ -50,6 +56,13 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpr_invoke(gParser.Expr_invokeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code expr_let}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr_let(gParser.Expr_letContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code expr_value}
 	 * labeled alternative in {@link gParser#expr}.

@@ -50,6 +50,16 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitLet_binding(gParser.Let_bindingContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link gParser#let_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterLet_expr(gParser.Let_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#let_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitLet_expr(gParser.Let_exprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code expr_lambda}
 	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
@@ -73,6 +83,18 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpr_invoke(gParser.Expr_invokeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code expr_let}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpr_let(gParser.Expr_letContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code expr_let}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpr_let(gParser.Expr_letContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code expr_value}
 	 * labeled alternative in {@link gParser#expr}.

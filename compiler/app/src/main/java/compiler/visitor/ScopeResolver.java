@@ -1,5 +1,7 @@
 package compiler.visitor;
 
+import compiler.IdentifierContext;
+import compiler.Utility;
 import compiler.ast.*;
 import java.util.*;
 
@@ -11,33 +13,38 @@ import java.util.*;
 public class ScopeResolver extends VisitorVoid {
     final IdentifierMap idTable;
     final HashMap<Identifier, IdentifierDeclarationNode> flatIdTable;      
-    final HashMap<Identifier, TypeNode> prelude;
+    final IdentifierContext prelude;
     public ScopeResolver() {
         this.prelude = Utility.createPrelude();
         this.idTable = new IdentifierMap();
         flatIdTable = new HashMap<>();
     }
-    public HashMap<Identifier, IdentifierDeclarationNode> run(ProgramNode n) throws VisitorException {
-        visit(n);
+    public HashMap<Identifier, IdentifierDeclarationNode> run(ProgramNode pn) throws VisitorExceptionAggregate {
+        idTable.enterScope();
+        var exceptions = new ArrayList<VisitorException>();
+        for (var bind : pn.bindings) {
+            try {
+                visit(bind);
+            } catch (VisitorException ex) {
+                exceptions.add(ex);
+            }
+        }
+        if (exceptions.size() > 0) {
+            throw new VisitorExceptionAggregate(exceptions);
+        }
+        idTable.exitScope();
         return flatIdTable;
     }
     @Override
-    protected void visitFunction(FunctionNode node) throws VisitorException {
+    protected void visitLetExpression(LetExpressionNode n) throws VisitorException {
         idTable.enterScope();
-        for (var p : node.parameters) {
-            visit(p);
-        }
-        for (var b : node.body) {
-            visit(b.declaration);
-        }
-        for (var b : node.body) {
-            visit(b.expr);
-        }
-        visit(node.return_);
+        visit(n.declaration);
+        visit(n.expr);
+        visit(n.next);
         idTable.exitScope();
     }
     @Override
-    protected void visitIdentifier(IdentifierNode node) {
+    protected void visitIdentifier(IdentifierNode node) throws VisitorException {
         var decl = idTable.get(node.value.name);
         if (decl != null) {
             node.value = decl.identifier.value;
@@ -46,7 +53,7 @@ public class ScopeResolver extends VisitorVoid {
             while (ctx.depth() > 2) {
                 ctx = ctx.getParent();
             }
-            throw new Error("Use of undeclared identifier: \"" + node.value.name + "\" at " + node.source.getParent().getSourceInterval() + " in the token stream");
+            throw new VisitorException(node, "Use of undeclared identifier: \"" + node.value.name);
         }
     }
     @Override
@@ -54,17 +61,6 @@ public class ScopeResolver extends VisitorVoid {
         idTable.declare(node);
         node.identifier.value = new Identifier(node.identifier.value.name, idTable.scopeId());
         flatIdTable.put(node.identifier.value, node);
-    }
-    @Override
-    protected void visitProgram(ProgramNode node) throws VisitorException {
-        idTable.enterScope();
-        for (var b : node.bindings) {
-            visit(b.declaration);
-        }
-        for (var b : node.bindings) {
-            visit(b.expr);
-        }
-        idTable.exitScope();
     }
 
     class IdentifierMap {

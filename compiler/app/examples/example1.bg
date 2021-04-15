@@ -2,29 +2,30 @@ let id = (x) {
     x
 }
 
-let apply ((Number) -> Number, Number) -> Number = (f, x) {
-    f(x)
-}
-
-let apply2 = (f, x) {
+let apply = (f, x) {
     f(x)
 }
 
 let a Number = 2
 
-let b = apply(square, a)
-
-let c = apply2(id, square)
-
 let square = (x) {
     x * x
 }
 
+let b = apply(square, a)
+
+let c = apply(id, square)
+
 let fact = (n) {
+    let mul = (x) { n * x } in
+    let prevN = n - 1 in
     if n == 0 {
         1
      } else {
-        n * fact(n - 1)
+        mul(fact(prevN))
      }
 }
 
+let f = let y = id(a) in (x) {
+    a + x
+}

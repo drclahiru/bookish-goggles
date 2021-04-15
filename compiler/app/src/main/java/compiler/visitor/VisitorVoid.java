@@ -27,6 +27,9 @@ public abstract class VisitorVoid {
     protected void visitLetBinding(LetBindingNode n) throws VisitorException {
         defaultVisit(n);
     }
+    protected void visitLetExpression(LetExpressionNode n) throws VisitorException {
+        defaultVisit(n);
+    }
     protected void visitBool(BoolNode n) throws VisitorException {
         defaultVisit(n);
     }
@@ -47,6 +50,8 @@ public abstract class VisitorVoid {
             visitString((StringNode)n);
         } else if (n instanceof RangeNode) {
             visitRange((RangeNode)n);   
+        } else if (n instanceof LetExpressionNode) {
+            visitLetExpression((LetExpressionNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }

@@ -1,18 +1,17 @@
 package compiler.visitor;
 
+import compiler.*;
 import compiler.ast.*;
 import java.util.*;
 
 public class TypeChecker extends VisitorVoid {
-    final HashMap<Identifier, TypeNode> map = Utility.createPrelude(); 
+    final IdentifierContext map; 
     private TypeNode previousType;
-    public TypeChecker(HashMap<Identifier, IdentifierDeclarationNode> hm) {
-        hm.forEach((i,id)-> {
-            map.put(i,id.type);
-        });
+    public TypeChecker(IdentifierContext map) {
+        this.map = map;
     }
 
-    public void run(ProgramNode pn) throws VisitorException, VisitorExceptionAggregate {
+    public void run(ProgramNode pn) throws VisitorExceptionAggregate {
         var exceptions = new ArrayList<VisitorException>();
         for (var bind : pn.bindings) {
             try {
@@ -39,15 +38,11 @@ public class TypeChecker extends VisitorVoid {
     }
     @Override
     public void visitIdentifier(IdentifierNode n) {
-    	previousType=map.get(n.value);
+    	previousType = map.get(n.value).type;
     	
     }
     @Override 
     public void visitFunction(FunctionNode n) throws VisitorException {
-    	for(var x : n.body) {
-            visit(x);
-        }
-    	
         var t = new FunctionTypeNode(n.source);
         for (var k : n.parameters) {
             visit(k);
@@ -78,6 +73,14 @@ public class TypeChecker extends VisitorVoid {
     	if (!n.declaration.type.equals(previousType)) {
             throw new VisitorException(n, "type mismatch");
     	}
+    }
+    @Override
+    public void visitLetExpression(LetExpressionNode n) throws VisitorException {
+    	visit(n.expr);
+    	if (!n.declaration.type.equals(previousType)) {
+            throw new VisitorException(n, "type mismatch");
+    	}
+        visit(n.next);
     }
     @Override
     public void visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {

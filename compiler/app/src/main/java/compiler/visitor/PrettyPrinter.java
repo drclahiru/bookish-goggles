@@ -1,12 +1,25 @@
 package compiler.visitor;
 
 import compiler.ast.*;
+
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 public class PrettyPrinter extends VisitorVoid {
+    public static String stringify(AbstractNode n) {
+        try {
+            var baos = new ByteArrayOutputStream();
+            new PrettyPrinter(baos).run(n);
+            return new String(baos.toByteArray());
+        } catch (VisitorException ex) {
+            return "Error: " + ex.message;
+        }
+    }
     Integer indentLevel = 0;
     Boolean isNewline = true;
     OutputStream out;
+
+    public boolean printScopeNumber = false;
 
     public PrettyPrinter(OutputStream out) {
         super();
@@ -28,14 +41,11 @@ public class PrettyPrinter extends VisitorVoid {
             visit(arg.identifier);
         }
         print(") {");
-        println();
         indentLevel++;
-        for (var binding : node.body) {
-            visit(binding);
-        }
-        visit(node.return_);
         println();
+        visit(node.return_);
         indentLevel--;
+        println();
         print("}");
     }
 
@@ -43,9 +53,23 @@ public class PrettyPrinter extends VisitorVoid {
     protected void visitLetBinding(LetBindingNode node) throws VisitorException {
         print("let ");
         visit(node.declaration);
+        print(" =");
+        println();
+        indentLevel++;
+        visit(node.expr);
+        indentLevel--;
+        println();
+    }
+
+    @Override
+    protected void visitLetExpression(LetExpressionNode node) throws VisitorException {
+        print("let ");
+        visit(node.declaration);
         print(" = ");
         visit(node.expr);
+        print(" in");
         println();
+        visit(node.next);
     }
 
     @Override
@@ -64,18 +88,16 @@ public class PrettyPrinter extends VisitorVoid {
 
     @Override
     protected void visitString(StringNode node) {
-        print("\"");
-        print(node.value.replace("\\", "\\\\").replace("\"", "\\\""));
-        print("\"");
+        print(node.value);
     }
 
     @Override
     protected void visitIdentifier(IdentifierNode node) {
-        // if (node.value.scopeId != null) {
-        //     print(Integer.toString(node.value.scopeId));
-        //     print("_");
-        // }
-        print(node.value.name);
+        if (printScopeNumber) {
+            print(node.value.toString());
+        } else {
+            print(node.value.name);
+        }
     }
     
     @Override
@@ -83,7 +105,7 @@ public class PrettyPrinter extends VisitorVoid {
         visit(n.identifier);
         if (n.type != null) {
             print(" ");
-            visit(n.type);
+            print(n.type.toString());
         }
     };
 
@@ -128,19 +150,19 @@ public class PrettyPrinter extends VisitorVoid {
     protected void visitIfElse(IfElseNode node) throws VisitorException {
         print("if ");
         visit(node.boolExpr);
-        print(" { ");
+        print(" {");
         println();
         indentLevel++;
         visit(node.trueCase);
         indentLevel--;
         println();
-        print(" } else { ");
+        print("} else { ");
         println();
         indentLevel++;
         visit(node.elseCase);
         indentLevel--;
         println();
-        print(" }");
+        print("}");
     }
 
     @Override
@@ -178,7 +200,6 @@ public class PrettyPrinter extends VisitorVoid {
     protected void println() {
         try {
             out.write("\n".getBytes());
-            // System.out.println();
             isNewline = true;
         } catch (Exception e) {
             throw new Error(e);

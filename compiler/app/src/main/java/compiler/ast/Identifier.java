@@ -38,6 +38,6 @@ public class Identifier {
         if (scopeId == null) {
             return name;
         }
-        return scopeId + "_" + name;
+        return name + "`" + scopeId;
     }
 }
