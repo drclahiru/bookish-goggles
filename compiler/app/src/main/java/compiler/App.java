@@ -39,9 +39,6 @@ class App {
 
     public static void print(ProgramNode ast) throws VisitorException {
         new PrettyPrinter(System.out).run(ast);
-        System.out.println("\n\n-------- Haskel Code Generated  --------\n\n");
-        System.out.println();
-        new CodeGenPretty(System.out).run(ast);
     }
     
     public static void codeGen(ProgramNode ast) throws VisitorException {
@@ -51,10 +48,14 @@ class App {
     public static void main(String[] args) {
         try {
 <<<<<<< HEAD
+<<<<<<< HEAD
             var ast = readAndParse("./examples/example1.bg");
 =======
             var ast = readAndParse("./examples/example2.bg");
 >>>>>>> 597d6eacfb67adda78ac1f20ac0cf7535cf76776
+=======
+            var ast = readAndParse("./examples/error.bg");
+>>>>>>> parent of fd9e8ad (cool commit)
             System.out.println("\n\n-------- Parsed --------\n\n");
             print(ast);
             var idMap = infer(ast);
