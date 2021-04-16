@@ -1,8 +1,6 @@
 package compiler.visitor;
 
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import compiler.*;
 import compiler.ast.*;
 
 public class CodeGenVisitor extends VisitorVoid {

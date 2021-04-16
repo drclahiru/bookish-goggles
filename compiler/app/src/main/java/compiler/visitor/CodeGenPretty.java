@@ -29,9 +29,6 @@ public class CodeGenPretty extends VisitorVoid {
         }
         print("->");
        
-               for (var binding : node.body) {
-            visit(binding);
-        }
         visit(node.return_);
         println();
         

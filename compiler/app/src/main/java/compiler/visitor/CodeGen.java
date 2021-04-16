@@ -12,6 +12,7 @@ import compiler.ast.IdentifierDeclarationNode;
 import compiler.ast.IdentifierNode;
 import compiler.ast.IfElseNode;
 import compiler.ast.LetBindingNode;
+import compiler.ast.LetExpressionNode;
 import compiler.ast.NumberNode;
 import compiler.ast.ProgramNode;
 import compiler.ast.RangeNode;
@@ -112,7 +113,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 
 	@Override
 	TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
-		visit(n.type);
+		visit(n.type.type);
         try {
 			br.newLine();
 		} catch (IOException e) {
@@ -167,6 +168,11 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 
 	@Override
 	TypeNode visitRange(RangeNode n) throws VisitorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
 		// TODO Auto-generated method stub
 		return null;
 	}

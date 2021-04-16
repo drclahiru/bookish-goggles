@@ -4,9 +4,8 @@ import compiler.*;
 import compiler.ast.*;
 import java.util.*;
 
-public class TypeChecker extends VisitorVoid {
+public class TypeChecker extends VisitorT<TypeNode> {
     final IdentifierContext map; 
-    private TypeNode previousType;
     public TypeChecker(IdentifierContext map) {
         this.map = map;
     }
@@ -25,84 +24,119 @@ public class TypeChecker extends VisitorVoid {
         }
     }
     @Override
-    public void visitNumber(NumberNode n) {
-    	previousType = new SimpleTypeNode(n.source, SimpleType.Number);
+    public TypeNode visitNumber(NumberNode n) {
+    	return new SimpleTypeNode(n.source, SimpleType.Number);
     }
     @Override
-    public void visitBool(BoolNode n) {
-    	previousType = new SimpleTypeNode(n.source, SimpleType.Bool);
+    public TypeNode visitBool(BoolNode n) {
+    	return new SimpleTypeNode(n.source, SimpleType.Bool);
     }
     @Override
-    public void visitString(StringNode n) {
-    	previousType = new SimpleTypeNode(n.source, SimpleType.String);
+    public TypeNode visitString(StringNode n) {
+    	return new SimpleTypeNode(n.source, SimpleType.String);
     }
     @Override
-    public void visitIdentifier(IdentifierNode n) {
-    	previousType = map.get(n.value).type;
+    public TypeNode visitIdentifier(IdentifierNode n) {
+    	return map.get(n.value).type;
     	
     }
     @Override 
-    public void visitFunction(FunctionNode n) throws VisitorException {
+    public TypeNode visitFunction(FunctionNode n) throws VisitorException {
         var t = new FunctionTypeNode(n.source);
         for (var k : n.parameters) {
-            visit(k);
-            t.parameters.add(previousType);
+            t.parameters.add(visit(k));
          }
-        visit(n.return_);
-        t.return_= previousType;
+        t.return_= visit(n.return_);
 
-    	previousType = t;
+    	return t;
     }
     @Override 
-    public void visitIfElse(IfElseNode n) throws VisitorException {
-    	visit(n.boolExpr);
-    	if (!(new SimpleTypeNode(null, SimpleType.Bool)).equals(previousType)) {
+    public TypeNode visitIfElse(IfElseNode n) throws VisitorException {
+        var boolT = new SimpleTypeNode(null, SimpleType.Bool);
+    	if (!typesUnify(boolT, visit(n.boolExpr))) {
             throw new VisitorException(n, "Not a boolean");
         }
-    	visit(n.trueCase);
-    	var t = previousType;
-    	visit(n.elseCase);
-    	if (!t.equals(previousType)) {
+    	var trueBranch = visit(n.trueCase);
+    	var elseBranch = visit(n.elseCase);
+    	if (!typesUnify(trueBranch, elseBranch)) {
             throw new VisitorException(n, "mismatching types");
         }
-    	
+    	return trueBranch;
     }
     @Override
-    public void visitLetBinding(LetBindingNode n) throws VisitorException {
-    	visit(n.expr);
-    	if (!n.declaration.type.equals(previousType)) {
+    public TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
+    	if (!typesUnify(visit(n.declaration), visit(n.expr))) {
             throw new VisitorException(n, "type mismatch");
     	}
+        return null;
     }
     @Override
-    public void visitLetExpression(LetExpressionNode n) throws VisitorException {
-    	visit(n.expr);
-    	if (!n.declaration.type.equals(previousType)) {
+    public TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
+    	if (!typesUnify(n.declaration.type.type, visit(n.expr))) {
             throw new VisitorException(n, "type mismatch");
     	}
-        visit(n.next);
+        return visit(n.next);
     }
     @Override
-    public void visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {
-       visit(fn.identifier);
-    	var t = previousType;
+    public TypeNode visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {
+    	var t = visit(fn.identifier);
 
         if (!(t instanceof FunctionTypeNode)) {
-            throw new VisitorException(fn, "Identifier is not a function" + t);
+            throw new VisitorException(fn, "Expected function type, but found: " + t);
         }
 
-        var tf = (FunctionTypeNode) t;
+        var tf = (FunctionTypeNode)t;
 
         if (tf.parameters.size() != fn.arguments.size()) {
             throw new VisitorException(fn, "Arity mismatch");
         }
         for (int e = 0; e < tf.parameters.size(); e++) {
-        	visit(fn.arguments.get(e));
-            if (!tf.parameters.get(e).equals(previousType)) {
+            if (!typesUnify(tf.parameters.get(e), visit(fn.arguments.get(e)))) {
                 throw new VisitorException(fn, "Type mismatch of the function and the arguments");
             }
          }
-        previousType = tf.return_;
+        return tf.return_;
+    }
+
+    @Override
+    TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+    	if (!typesUnify(visit(n.identifier), n.type.type)) {
+            throw new VisitorException(n, "type mismatch");
+    	}
+        return visit(n.identifier);
+    }
+
+    @Override
+    TypeNode visitProgram(ProgramNode n) throws VisitorException {
+        throw new Error("should not be visited");
+    }
+
+    @Override
+    TypeNode visitRange(RangeNode n) throws VisitorException {
+        throw new Error("todo: implement");
+    }
+
+    boolean typesUnify(TypeNode t1, TypeNode t2) {
+        // TODO: type variables need to be tracked. if there is a type 
+        //   (a, a) -> b
+        // then we should ensure that both instances of 'a' are equal.
+        if (t1 instanceof VariableTypeNode || t2 instanceof VariableTypeNode) {
+            return true;
+        }
+        if (t1 instanceof FunctionTypeNode && t2 instanceof FunctionTypeNode) {
+            var tf1 = (FunctionTypeNode)t1;
+            var tf2 = (FunctionTypeNode)t2;
+            if (tf1.parameters.size() != tf2.parameters.size()) {
+                return false;
+            }
+            for (var i = 0; i < tf1.parameters.size(); i++) {
+                if (!typesUnify(tf1.parameters.get(i), tf2.parameters.get(i))) {
+                    return false;
+                }
+            }
+            return typesUnify(tf1.return_, tf2.return_);
+        }
+        return t1.equals(t2);
     }
 }  
 
