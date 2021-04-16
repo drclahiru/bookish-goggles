@@ -14,6 +14,6 @@ public class LetExpressionNode extends ExpressionNode {
     }
 
     public Stream<AbstractNode> children() {
-        return Stream.of(this.declaration, this.expr);
+        return Stream.of(this.declaration, this.expr, this.next);
     }
 }

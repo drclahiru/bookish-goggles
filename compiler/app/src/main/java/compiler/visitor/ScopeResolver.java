@@ -38,9 +38,13 @@ public class ScopeResolver extends VisitorVoid {
     @Override
     protected void visitLetExpression(LetExpressionNode n) throws VisitorException {
         idTable.enterScope();
-        visit(n.declaration);
-        visit(n.expr);
-        visit(n.next);
+        super.visitLetExpression(n);
+        idTable.exitScope();
+    }
+    @Override
+    protected void visitFunction(FunctionNode n) throws VisitorException {
+        idTable.enterScope();
+        super.visitFunction(n);
         idTable.exitScope();
     }
     @Override

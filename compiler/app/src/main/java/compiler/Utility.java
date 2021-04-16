@@ -34,6 +34,7 @@ public class Utility {
         var nnbTs = new TypeScheme(nnb);
         var bbbTs = new TypeScheme(bbb);
         var xxbTs = new TypeScheme(xxb);
+        xxbTs.vars.add(x);
 
         map.put(new Identifier("+"), nnnTs);
         map.put(new Identifier("-"), nnnTs);

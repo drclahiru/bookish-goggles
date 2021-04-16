@@ -18,9 +18,6 @@ public class TypeInferencer {
         var v = new InferenceVisitor();
         for (var bind : pn.bindings) {
             try {
-                // we don't strictly need to clear the substitution set, but all existing substitutions are irrelevant to the next global binding
-                // so this helps with performance and debuggability
-                v.subst.clear();
                 v.visitLetBinding(bind);
             } catch (VisitorException ex) {
                 exceptions.add(ex);
@@ -29,12 +26,31 @@ public class TypeInferencer {
         if (exceptions.size() > 0) {
             throw new VisitorExceptionAggregate(exceptions);
         }
+        var ctx = v.subst.apply(v.ctx);
         declMap.forEach((i, decl) -> {
             if (decl.type == null) {
-                decl.type = v.ctx.get(decl.identifier.value);
+                decl.type = ctx.get(decl.identifier.value);
             }
         });
+        for (var bind : pn.bindings) {
+            try {
+                new ApplyInferred(v.subst).visit(bind);
+            } catch (VisitorException ex) {
+            }
+        }
         return v.ctx;
+    }
+
+    class ApplyInferred extends VisitorVoid {
+        final Substitution subst;
+        public ApplyInferred(Substitution subst) {
+            this.subst = subst;
+        }
+        @Override
+        protected void visitExpression(ExpressionNode n) throws VisitorException {
+            n.inferredType = subst.apply(n.inferredType);
+            super.visitExpression(n);
+        }
     }
 
     class InferenceVisitor extends VisitorT<TypeNode> {
@@ -55,6 +71,11 @@ public class TypeInferencer {
             return subst.apply(typeResult);
         }
         
+        @Override
+        TypeNode visitExpression(ExpressionNode n) throws VisitorException {
+            return n.inferredType = super.visitExpression(n);
+        }
+
         @Override
         TypeNode visitIdentifier(IdentifierNode n) {
             var scheme = ctx.get(n.value);
@@ -98,12 +119,6 @@ public class TypeInferencer {
         }
         @Override
         TypeNode visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
-            var visitor = new InferenceVisitor(subst.apply(ctx), subst);
-            var t = visitor.visitFunctionInvocationInner(n);
-            addFromCtx(visitor.ctx);
-            return t;
-        }
-        TypeNode visitFunctionInvocationInner(FunctionInvocationNode n) throws VisitorException {
             var tyRes = varGen.next();
             var identifierT = visitIdentifier(n.identifier);
 
@@ -133,6 +148,7 @@ public class TypeInferencer {
             var t = visit(n.expr);
             if (n.declaration.type != null) {
                 ctx.put(n.declaration.identifier.value, n.declaration.type);
+                subst.unify(t, n.declaration.type.type);
             } else {
                 ctx.put(n.declaration.identifier.value, generalize(ctx, t));
             }
@@ -143,6 +159,7 @@ public class TypeInferencer {
             var t = visit(n.expr);
             if (n.declaration.type != null) {
                 ctx.put(n.declaration.identifier.value, n.declaration.type);
+                subst.unify(t, n.declaration.type.type);
             } else {
                 ctx.put(n.declaration.identifier.value, generalize(ctx, t));
             }
@@ -169,7 +186,7 @@ public class TypeInferencer {
          */
         void addFromCtx(IdentifierContext other) {
             for (var k : except(other.keySet(), ctx.keySet())) {
-                ctx.put(k, generalize(ctx, other.get(k).type));
+                ctx.put(k, new TypeScheme(other.get(k).type));
             }
         }
     }
@@ -273,7 +290,7 @@ public class TypeInferencer {
         int nextTypeVarId = 1;
 
         public VariableTypeNode next() {
-            return new VariableTypeNode("u" + nextTypeVarId++);
+            return new VariableTypeNode(Integer.toString(nextTypeVarId++));
         }
     }
 
