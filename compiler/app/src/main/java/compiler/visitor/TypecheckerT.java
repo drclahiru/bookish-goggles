@@ -3,47 +3,35 @@ package compiler.visitor;
 import compiler.ast.*;
 import java.util.*;
 
-public class TypeCheckerT extends VisitorT {
+public class TypecheckerT extends VisitorT<TypeNode> {
     final HashMap<Identifier, TypeNode> map = Utility.createPrelude(); 
     private TypeNode previousType;
-    public TypeCheckerT(HashMap<Identifier, IdentifierDeclarationNode> hm) {
+    public TypecheckerT(HashMap<Identifier, IdentifierDeclarationNode> hm) {
         hm.forEach((i,id)-> {
             map.put(i,id.type);
         });
     }
 
-    public void run(ProgramNode pn) throws VisitorException, VisitorExceptionAggregate {
-        var exceptions = new ArrayList<VisitorException>();
-        for (var bind : pn.bindings) {
-            try {
-                visit(bind);
-            } catch (VisitorException ex) {
-                exceptions.add(ex);
-            }
-        }
-        if (exceptions.size() > 0) {
-            throw new VisitorExceptionAggregate(exceptions);
-        }
-    }
+    
     @Override
-    public Object visitNumber(NumberNode n) {
+    public TypeNode visitNumber(NumberNode n) {
     	 return  new SimpleTypeNode(n.source, SimpleType.Number);
     }
     @Override
-    public Object visitBool(BoolNode n) {
+    public TypeNode visitBool(BoolNode n) {
     	return new SimpleTypeNode(n.source, SimpleType.Bool);
     }
     @Override
-    public Object visitString(StringNode n) {
+    public TypeNode visitString(StringNode n) {
     	return  new SimpleTypeNode(n.source, SimpleType.String);
     }
     @Override
-    public Object visitIdentifier(IdentifierNode n) {
+    public TypeNode visitIdentifier(IdentifierNode n) {
     	return map.get(n.value);
     	
     }
     @Override 
-    public Object visitFunction(FunctionNode n) throws VisitorException {
+    public TypeNode visitFunction(FunctionNode n) throws VisitorException {
     	for(var x : n.body) {
             visit(x);
         }
@@ -59,7 +47,7 @@ public class TypeCheckerT extends VisitorT {
     	return  t;
     }
     @Override 
-    public Object visitIfElse(IfElseNode n) throws VisitorException {
+    public TypeNode visitIfElse(IfElseNode n) throws VisitorException {
     	
     	if (!(new SimpleTypeNode(null, SimpleType.Bool)).equals(visit(n.boolExpr))) {
             throw new VisitorException(n, "Not a boolean");
@@ -73,7 +61,7 @@ public class TypeCheckerT extends VisitorT {
     	return null;
     }
     @Override
-    public Object visitLetBinding(LetBindingNode n) throws VisitorException {
+    public TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
     	
     	if (!n.declaration.type.equals(visit(n.expr))) {
             throw new VisitorException(n, "type mismatch");
@@ -81,7 +69,7 @@ public class TypeCheckerT extends VisitorT {
     	return null;
     }
     @Override
-    public Object visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {
+    public TypeNode visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {
        visit(fn.identifier);
     	var t = previousType;
 
@@ -102,5 +90,34 @@ public class TypeCheckerT extends VisitorT {
          }
         return tf.return_;
     }
+
+	@Override
+	TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	TypeNode visitProgram(ProgramNode pn) throws VisitorException {
+		 var exceptions = new ArrayList<VisitorException>();
+	        for (var bind : pn.bindings) {
+	            try {
+	                visit(bind);
+	            } catch (VisitorException ex) {
+	                exceptions.add(ex);
+	            }
+	        }
+	        if (exceptions.size() > 0) {
+	            throw new Error("opa");
+	        }
+
+		return null;
+	}
+
+	@Override
+	TypeNode visitRange(RangeNode n) throws VisitorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }  
 
