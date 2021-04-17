@@ -105,9 +105,9 @@ public class PrettyPrinter extends VisitorVoid {
     @Override
     protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
         visit(n.identifier);
-        if (n.type != null) {
+        if (n.typeScheme != null) {
             print(" ");
-            print(n.type.toString());
+            print(n.typeScheme.toString());
         }
     };
 

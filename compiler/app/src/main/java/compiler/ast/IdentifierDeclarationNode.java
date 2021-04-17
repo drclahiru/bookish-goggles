@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class IdentifierDeclarationNode extends AbstractNode {
     public IdentifierNode identifier;
-    public TypeScheme type;
+    public TypeScheme typeScheme;
 
     public IdentifierDeclarationNode(ParserRuleContext source, IdentifierNode node) {
         super(source);

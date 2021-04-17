@@ -29,7 +29,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         var letNode = new LetBindingNode(ctx, idNode);
         var t = ctx.type();
         if (t != null) {
-            letNode.declaration.type = new TypeScheme(visitType(t));
+            letNode.declaration.typeScheme = new TypeScheme(visitType(t));
         }
         letNode.expr = visitExpr(ctx.expr());
         return letNode;
@@ -41,7 +41,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         var letExpr = new LetExpressionNode(ctx, idNode);
         var t = ctx.type();
         if (t != null) {
-            letExpr.declaration.type = new TypeScheme(visitType(t));
+            letExpr.declaration.typeScheme = new TypeScheme(visitType(t));
         }
         letExpr.expr = visitExpr(ctx.expr(0));
         letExpr.next = visitExpr(ctx.expr(1));

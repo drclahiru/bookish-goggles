@@ -3,8 +3,8 @@ package compiler;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.CharStreams;
 
-import compiler.ast.ProgramNode;
-import compiler.codegen.CodeGenVisitor;
+import compiler.ast.*;
+import compiler.codegen.*;
 import compiler.parser.CSTtoAST;
 import compiler.parser.gLexer;
 import compiler.parser.gParser;
@@ -33,13 +33,6 @@ class App {
         return idCtx;
     }
 
-    public static void check(
-        IdentifierContext idCtx,
-        ProgramNode ast
-    ) throws VisitorExceptionAggregate {
-        new TypeChecker(idCtx).run(ast);
-    }
-
     public static void codeGen(ProgramNode ast) throws VisitorException {
         new CodeGenVisitor(System.out).run(ast);
     }
@@ -53,7 +46,7 @@ class App {
             System.out.println("\n\n-------- Types inferenced --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             new ClosureResolver().run(ast);
-            // check(idMap, ast);
+            // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
             codeGen(ast);
         } catch (VisitorExceptionAggregate ex) {

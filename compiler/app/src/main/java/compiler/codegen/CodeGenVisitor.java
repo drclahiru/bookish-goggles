@@ -41,7 +41,7 @@ public class CodeGenVisitor extends VisitorVoid {
 		
 	@Override
 	protected void visitLetBinding(LetBindingNode node) throws VisitorException {
-		print(toJavaType(node.declaration.type.type));
+		print(toJavaType(node.declaration.typeScheme.type));
 		print(" ");
 		visit(node.declaration.identifier);
 		print(" = ");

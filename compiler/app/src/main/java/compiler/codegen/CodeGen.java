@@ -98,7 +98,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 
 	@Override
 	protected TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
-		visit(n.type.type);
+		visit(n.typeScheme.type);
         try {
 			br.newLine();
 		} catch (IOException e) {

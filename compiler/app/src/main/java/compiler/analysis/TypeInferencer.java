@@ -33,8 +33,8 @@ public class TypeInferencer {
         }
         var ctx = v.subst.apply(v.ctx);
         declMap.forEach((i, decl) -> {
-            if (decl.type == null) {
-                decl.type = ctx.get(decl.identifier.value);
+            if (decl.typeScheme == null) {
+                decl.typeScheme = ctx.get(decl.identifier.value);
             }
         });
         for (var bind : pn.bindings) {
@@ -53,7 +53,7 @@ public class TypeInferencer {
         }
         @Override
         protected void visitExpression(ExpressionNode n) throws VisitorException {
-            n.inferredType = subst.apply(n.inferredType);
+            n.type = subst.apply(n.type);
             super.visitExpression(n);
         }
     }
@@ -78,7 +78,7 @@ public class TypeInferencer {
         
         @Override
         protected TypeNode visitExpression(ExpressionNode n) throws VisitorException {
-            return n.inferredType = super.visitExpression(n);
+            return n.type = super.visitExpression(n);
         }
 
         @Override
@@ -151,9 +151,9 @@ public class TypeInferencer {
             // identifier needs to be declared beforehand for the recursive case
             ctx.put(n.declaration.identifier.value, generalize(ctx, varGen.next()));
             var t = visit(n.expr);
-            if (n.declaration.type != null) {
-                ctx.put(n.declaration.identifier.value, n.declaration.type);
-                subst.unify(t, n.declaration.type.type);
+            if (n.declaration.typeScheme != null) {
+                ctx.put(n.declaration.identifier.value, n.declaration.typeScheme);
+                subst.unify(t, n.declaration.typeScheme.type);
             } else {
                 ctx.put(n.declaration.identifier.value, generalize(ctx, t));
             }
@@ -162,9 +162,9 @@ public class TypeInferencer {
         @Override
         protected TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
             var t = visit(n.expr);
-            if (n.declaration.type != null) {
-                ctx.put(n.declaration.identifier.value, n.declaration.type);
-                subst.unify(t, n.declaration.type.type);
+            if (n.declaration.typeScheme != null) {
+                ctx.put(n.declaration.identifier.value, n.declaration.typeScheme);
+                subst.unify(t, n.declaration.typeScheme.type);
             } else {
                 ctx.put(n.declaration.identifier.value, generalize(ctx, t));
             }

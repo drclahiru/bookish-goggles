@@ -9,6 +9,7 @@ public class StringNode extends ExpressionNode {
     public StringNode(ParserRuleContext source, String value) {
         super(source);
         this.value = value;
+        this.type = new SimpleTypeNode(source, SimpleType.String);
     }
 
     public Stream<AbstractNode> children() {

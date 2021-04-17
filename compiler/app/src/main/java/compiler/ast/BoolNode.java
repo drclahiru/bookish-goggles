@@ -9,6 +9,7 @@ public class BoolNode extends ExpressionNode {
     public BoolNode(ParserRuleContext source, boolean value) {
         super(source);
         this.value = value;
+        this.type = new SimpleTypeNode(source, SimpleType.Bool);
     }
 
     public Stream<AbstractNode> children() {

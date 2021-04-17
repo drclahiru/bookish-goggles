@@ -1,17 +1,11 @@
 package compiler.analysis;
 
-import compiler.*;
 import compiler.ast.*;
 import compiler.visitor.*;
 
 import java.util.*;
 
-public class TypeChecker extends VisitorT<TypeNode> {
-    final IdentifierContext map; 
-    public TypeChecker(IdentifierContext map) {
-        this.map = map;
-    }
-
+public class TypeChecker extends VisitorVoid {
     public void run(ProgramNode pn) throws VisitorExceptionAggregate {
         var exceptions = new ArrayList<VisitorException>();
         for (var bind : pn.bindings) {
@@ -25,96 +19,69 @@ public class TypeChecker extends VisitorT<TypeNode> {
             throw new VisitorExceptionAggregate(exceptions);
         }
     }
-    @Override
-    public TypeNode visitNumber(NumberNode n) {
-    	return new SimpleTypeNode(n.source, SimpleType.Number);
-    }
-    @Override
-    public TypeNode visitBool(BoolNode n) {
-    	return new SimpleTypeNode(n.source, SimpleType.Bool);
-    }
-    @Override
-    public TypeNode visitString(StringNode n) {
-    	return new SimpleTypeNode(n.source, SimpleType.String);
-    }
-    @Override
-    public TypeNode visitIdentifier(IdentifierNode n) {
-    	return map.get(n.value).type;
-    	
-    }
     @Override 
-    public TypeNode visitFunction(FunctionNode n) throws VisitorException {
-        var t = new FunctionTypeNode(n.source);
-        for (var k : n.parameters) {
-            t.parameters.add(visit(k));
-         }
-        t.return_= visit(n.return_);
-
-    	return t;
-    }
-    @Override 
-    public TypeNode visitIfElse(IfElseNode n) throws VisitorException {
+    public void visitIfElse(IfElseNode n) throws VisitorException {
+        super.visitIfElse(n);
         var boolT = new SimpleTypeNode(null, SimpleType.Bool);
-    	if (!typesUnify(boolT, visit(n.boolExpr))) {
+    	if (!typesUnify(boolT, n.boolExpr.type)) {
             throw new VisitorException(n, "Not a boolean");
         }
-    	var trueBranch = visit(n.trueCase);
-    	var elseBranch = visit(n.elseCase);
+    	var trueBranch = n.trueCase.type;
+    	var elseBranch = n.elseCase.type;
     	if (!typesUnify(trueBranch, elseBranch)) {
             throw new VisitorException(n, "mismatching types");
         }
-    	return trueBranch;
     }
     @Override
-    public TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
-    	if (!typesUnify(visit(n.declaration), visit(n.expr))) {
+    public void visitLetBinding(LetBindingNode n) throws VisitorException {
+        super.visitLetBinding(n);
+    	if (!typesUnify(n.declaration.typeScheme.type, n.expr.type)) {
             throw new VisitorException(n, "type mismatch");
     	}
-        return null;
     }
     @Override
-    public TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
-    	if (!typesUnify(n.declaration.type.type, visit(n.expr))) {
+    public void visitLetExpression(LetExpressionNode n) throws VisitorException {
+        super.visitLetExpression(n);
+    	if (!typesUnify(n.declaration.typeScheme.type, n.expr.type)) {
             throw new VisitorException(n, "type mismatch");
     	}
-        return visit(n.next);
     }
     @Override
-    public TypeNode visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {
-    	var t = visit(fn.identifier);
+    public void visitFunctionInvocation(FunctionInvocationNode fn) throws VisitorException {
+    	super.visitFunctionInvocation(fn);
 
-        if (!(t instanceof FunctionTypeNode)) {
-            throw new VisitorException(fn, "Expected function type, but found: " + t);
+        var fnType = fn.identifier.type;
+
+        if (!(fnType instanceof FunctionTypeNode)) {
+            throw new VisitorException(fn, "Expected function type, but found: " + fnType);
         }
 
-        var tf = (FunctionTypeNode)t;
+        var tf = (FunctionTypeNode)fnType;
 
         if (tf.parameters.size() != fn.arguments.size()) {
             throw new VisitorException(fn, "Arity mismatch");
         }
         for (int e = 0; e < tf.parameters.size(); e++) {
-            if (!typesUnify(tf.parameters.get(e), visit(fn.arguments.get(e)))) {
+            if (!typesUnify(tf.parameters.get(e), fn.arguments.get(e).type)) {
                 throw new VisitorException(fn, "Type mismatch of the function and the arguments");
             }
-         }
-        return tf.return_;
+        }
     }
 
     @Override
-    protected TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
-    	if (!typesUnify(visit(n.identifier), n.type.type)) {
+    protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+    	if (!typesUnify(n.identifier.type, n.typeScheme.type)) {
             throw new VisitorException(n, "type mismatch");
     	}
-        return visit(n.identifier);
     }
 
     @Override
-    protected TypeNode visitProgram(ProgramNode n) throws VisitorException {
+    protected void visitProgram(ProgramNode n) throws VisitorException {
         throw new Error("should not be visited");
     }
 
     @Override
-    protected TypeNode visitRange(RangeNode n) throws VisitorException {
+    protected void visitRange(RangeNode n) throws VisitorException {
         throw new Error("todo: implement");
     }
 
