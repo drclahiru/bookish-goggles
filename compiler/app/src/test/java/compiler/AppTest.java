@@ -10,31 +10,30 @@ import org.junit.Assert;
 import org.junit.Test;
 // import static org.junit.Assert.*;
 
+import compiler.analysis.*;
 import compiler.visitor.*;
 
 public class AppTest {
     @Test
-<<<<<<< HEAD
-    public void testAppHasAGreeting() throws IOException {
-        var ast = App.readAndParse("./examples/example3.bg");
-        App.check(ast);
-=======
     public void typeCheckExample1() throws Exception {
         var ast = App.readAndParse("./examples/example1.bg");
-        App.check(App.infer(ast), ast);
+        App.infer(ast);
+        new TypeChecker().run(ast);
     }
 
     @Test
     public void typeCheckExample2() throws Exception {
         var ast = App.readAndParse("./examples/example2.bg");
-        App.check(App.infer(ast), ast);
+        App.infer(ast);
+        new TypeChecker().run(ast);
     }
 
     @Test
     public void typeCheckError() throws IOException {
         var ast = App.readAndParse("./examples/type_error.bg");
         Assert.assertThrows(VisitorExceptionAggregate.class, () -> {
-            App.check(App.infer(ast), ast);
+            App.infer(ast);
+            new TypeChecker().run(ast);
         });
     }
     
@@ -53,6 +52,5 @@ public class AppTest {
 
             Assert.assertEquals(astTxt, PrettyPrinter.stringify(ast2));
         }
->>>>>>> 597d6eacfb67adda78ac1f20ac0cf7535cf76776
     }
 }

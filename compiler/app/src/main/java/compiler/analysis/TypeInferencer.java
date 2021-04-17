@@ -52,9 +52,11 @@ public class TypeInferencer {
             this.subst = subst;
         }
         @Override
-        protected void visitExpression(ExpressionNode n) throws VisitorException {
-            n.type = subst.apply(n.type);
-            super.visitExpression(n);
+        public void visit(AbstractNode n) throws VisitorException {
+            if (n.type != null) {
+                n.type = subst.apply(n.type);
+            }
+            super.visit(n);
         }
     }
 
@@ -77,8 +79,8 @@ public class TypeInferencer {
         }
         
         @Override
-        protected TypeNode visitExpression(ExpressionNode n) throws VisitorException {
-            return n.type = super.visitExpression(n);
+        public TypeNode visit(AbstractNode n) throws VisitorException {
+            return n.type = super.visit(n);
         }
 
         @Override
