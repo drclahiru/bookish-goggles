@@ -1,8 +1,13 @@
-package compiler.visitor;
+package compiler.analysis;
 
 import compiler.IdentifierContext;
 import compiler.Utility;
 import compiler.ast.*;
+import compiler.visitor.VisitorException;
+import compiler.visitor.VisitorExceptionAggregate;
+import compiler.visitor.VisitorT;
+import compiler.visitor.VisitorVoid;
+
 import java.util.*;
 
 public class TypeInferencer {
@@ -72,12 +77,12 @@ public class TypeInferencer {
         }
         
         @Override
-        TypeNode visitExpression(ExpressionNode n) throws VisitorException {
+        protected TypeNode visitExpression(ExpressionNode n) throws VisitorException {
             return n.inferredType = super.visitExpression(n);
         }
 
         @Override
-        TypeNode visitIdentifier(IdentifierNode n) {
+        protected TypeNode visitIdentifier(IdentifierNode n) {
             var scheme = ctx.get(n.value);
             if (scheme == null) {
                 throw new Error("unbound variable: " + n.value);
@@ -85,25 +90,25 @@ public class TypeInferencer {
             return instantiate(scheme);
         }
         @Override
-        TypeNode visitBool(BoolNode n) {
+        protected TypeNode visitBool(BoolNode n) {
             return new SimpleTypeNode(n.source, SimpleType.Bool);
         }
         @Override
-        TypeNode visitNumber(NumberNode n) {
+        protected TypeNode visitNumber(NumberNode n) {
             return new SimpleTypeNode(n.source, SimpleType.Number);
         }
         @Override
-        TypeNode visitString(StringNode n) {
+        protected TypeNode visitString(StringNode n) {
             return new SimpleTypeNode(n.source, SimpleType.String);
         }
         @Override
-        TypeNode visitFunction(FunctionNode n) throws VisitorException {
+        protected TypeNode visitFunction(FunctionNode n) throws VisitorException {
             var visitor = new InferenceVisitor(ctx.clone(), subst);
             var t = visitor.visitFunctionInner(n);
             addFromCtx(visitor.ctx);
             return t;
         }
-        TypeNode visitFunctionInner(FunctionNode n) throws VisitorException {
+        protected TypeNode visitFunctionInner(FunctionNode n) throws VisitorException {
             var params = new ArrayList<TypeNode>();
             for (var p : n.parameters) {
                 var scheme = new TypeScheme(new HashSet<>(), varGen.next());
@@ -118,7 +123,7 @@ public class TypeInferencer {
             return t;
         }
         @Override
-        TypeNode visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
+        protected TypeNode visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
             var tyRes = varGen.next();
             var identifierT = visitIdentifier(n.identifier);
 
@@ -131,7 +136,7 @@ public class TypeInferencer {
             return subst.apply(tyRes);
         }
         @Override
-        TypeNode visitIfElse(IfElseNode n) throws VisitorException {
+        protected TypeNode visitIfElse(IfElseNode n) throws VisitorException {
             var conditionT = visit(n.boolExpr);
             subst.unify(new SimpleTypeNode(null, SimpleType.Bool), conditionT);
 
@@ -142,7 +147,7 @@ public class TypeInferencer {
             return subst.apply(branch1);
         }
         @Override
-        TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
+        protected TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
             // identifier needs to be declared beforehand for the recursive case
             ctx.put(n.declaration.identifier.value, generalize(ctx, varGen.next()));
             var t = visit(n.expr);
@@ -155,7 +160,7 @@ public class TypeInferencer {
             return null;
         }
         @Override
-        TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
+        protected TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
             var t = visit(n.expr);
             if (n.declaration.type != null) {
                 ctx.put(n.declaration.identifier.value, n.declaration.type);
@@ -169,15 +174,15 @@ public class TypeInferencer {
             return tNext;
         }
         @Override
-        TypeNode visitProgram(ProgramNode n) throws VisitorException {
+        protected TypeNode visitProgram(ProgramNode n) throws VisitorException {
             throw new Error("Shouldn't be visited");
         }
         @Override
-        TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+        protected TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
             throw new Error("Shouldn't be visited");
         }
         @Override
-        TypeNode visitRange(RangeNode n) throws VisitorException {
+        protected TypeNode visitRange(RangeNode n) throws VisitorException {
             throw new Error("Not implemented yet");
         }
 

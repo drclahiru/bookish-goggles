@@ -1,23 +1,8 @@
-package compiler.visitor;
+package compiler.codegen;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import compiler.ast.BoolNode;
-import compiler.ast.FunctionInvocationNode;
-import compiler.ast.FunctionNode;
-import compiler.ast.IdentifierDeclarationNode;
-import compiler.ast.IdentifierNode;
-import compiler.ast.IfElseNode;
-import compiler.ast.LetBindingNode;
-import compiler.ast.LetExpressionNode;
-import compiler.ast.NumberNode;
-import compiler.ast.ProgramNode;
-import compiler.ast.RangeNode;
-import compiler.ast.StringNode;
-import compiler.ast.TypeNode;
+import java.io.*;
+import compiler.ast.*;
+import compiler.visitor.*;
 
 public class CodeGen  extends VisitorT<TypeNode>  {
 
@@ -31,7 +16,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 		this.br = new BufferedWriter(fr);
 	}
 	@Override
-	TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
+	protected TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
 		try {
 			visit(n.declaration);
 			br.append("=");
@@ -47,7 +32,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitBool(BoolNode n) throws VisitorException {
+	protected TypeNode visitBool(BoolNode n) throws VisitorException {
 		if(n.value) {
 			try {
 				br.append("True");
@@ -69,7 +54,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
+	protected TypeNode visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
 		try {
 			br.append("(");
 			br.append(n.identifier.value.name);
@@ -89,7 +74,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitFunction(FunctionNode n) throws VisitorException {
+	protected TypeNode visitFunction(FunctionNode n) throws VisitorException {
 		try {
 			
 			br.newLine();
@@ -101,7 +86,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitIdentifier(IdentifierNode n) throws VisitorException {
+	protected TypeNode visitIdentifier(IdentifierNode n) throws VisitorException {
 		try {
 			br.append(n.value.name);
 		} catch (IOException e) {
@@ -112,7 +97,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+	protected TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
 		visit(n.type.type);
         try {
 			br.newLine();
@@ -126,7 +111,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitIfElse(IfElseNode n) throws VisitorException {
+	protected TypeNode visitIfElse(IfElseNode n) throws VisitorException {
 		try {
 			br.append(" if ");
 			visit(n.boolExpr);
@@ -143,7 +128,7 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitNumber(NumberNode n) throws VisitorException {
+	protected TypeNode visitNumber(NumberNode n) throws VisitorException {
 		try {
 			br.append(String.valueOf(n.value));
 			br.append("");
@@ -155,24 +140,24 @@ public class CodeGen  extends VisitorT<TypeNode>  {
 	}
 
 	@Override
-	TypeNode visitProgram(ProgramNode n) throws VisitorException {
+	protected TypeNode visitProgram(ProgramNode n) throws VisitorException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	TypeNode visitString(StringNode n) throws VisitorException {
+	protected TypeNode visitString(StringNode n) throws VisitorException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	TypeNode visitRange(RangeNode n) throws VisitorException {
+	protected TypeNode visitRange(RangeNode n) throws VisitorException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	@Override
-	TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
+	protected TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
 		// TODO Auto-generated method stub
 		return null;
 	}

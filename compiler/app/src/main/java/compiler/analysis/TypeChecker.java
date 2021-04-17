@@ -1,7 +1,9 @@
-package compiler.visitor;
+package compiler.analysis;
 
 import compiler.*;
 import compiler.ast.*;
+import compiler.visitor.*;
+
 import java.util.*;
 
 public class TypeChecker extends VisitorT<TypeNode> {
@@ -99,7 +101,7 @@ public class TypeChecker extends VisitorT<TypeNode> {
     }
 
     @Override
-    TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+    protected TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
     	if (!typesUnify(visit(n.identifier), n.type.type)) {
             throw new VisitorException(n, "type mismatch");
     	}
@@ -107,12 +109,12 @@ public class TypeChecker extends VisitorT<TypeNode> {
     }
 
     @Override
-    TypeNode visitProgram(ProgramNode n) throws VisitorException {
+    protected TypeNode visitProgram(ProgramNode n) throws VisitorException {
         throw new Error("should not be visited");
     }
 
     @Override
-    TypeNode visitRange(RangeNode n) throws VisitorException {
+    protected TypeNode visitRange(RangeNode n) throws VisitorException {
         throw new Error("todo: implement");
     }
 

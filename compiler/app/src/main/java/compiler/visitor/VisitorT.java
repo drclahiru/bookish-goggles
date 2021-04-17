@@ -3,7 +3,7 @@ package compiler.visitor;
 import compiler.ast.*;
 
 public abstract class VisitorT<T> {
-    T visit(AbstractNode n) throws VisitorException {
+    public T visit(AbstractNode n) throws VisitorException {
         if (n == null) {
             return null;
         } else if (n instanceof ExpressionNode) {
@@ -18,7 +18,7 @@ public abstract class VisitorT<T> {
             throw new Error("Unexpected type: " + n);
         }
     }
-    T visitExpression(ExpressionNode n) throws VisitorException {
+    protected T visitExpression(ExpressionNode n) throws VisitorException {
         if (n instanceof BoolNode) {
             return visitBool((BoolNode)n);
         } else if (n instanceof FunctionInvocationNode) {
@@ -41,16 +41,16 @@ public abstract class VisitorT<T> {
             throw new Error("Unexpected type: " + n);
         }
     }
-    abstract T visitLetBinding(LetBindingNode n)  throws VisitorException;
-    abstract T visitLetExpression(LetExpressionNode n)  throws VisitorException;
-    abstract T visitBool(BoolNode n)  throws VisitorException;
-    abstract T visitFunctionInvocation(FunctionInvocationNode n)  throws VisitorException;
-    abstract T visitFunction(FunctionNode n)  throws VisitorException;
-    abstract T visitIdentifier(IdentifierNode n)  throws VisitorException;
-    abstract T visitIdentifierDeclaration(IdentifierDeclarationNode n)  throws VisitorException;
-    abstract T visitIfElse(IfElseNode n)  throws VisitorException;
-    abstract T visitNumber(NumberNode n)  throws VisitorException;
-    abstract T visitProgram(ProgramNode n)  throws VisitorException;
-    abstract T visitString(StringNode n)  throws VisitorException;
-    abstract T visitRange(RangeNode n)  throws VisitorException;
+    protected abstract T visitLetBinding(LetBindingNode n)  throws VisitorException;
+    protected abstract T visitLetExpression(LetExpressionNode n)  throws VisitorException;
+    protected abstract T visitBool(BoolNode n)  throws VisitorException;
+    protected abstract T visitFunctionInvocation(FunctionInvocationNode n)  throws VisitorException;
+    protected abstract T visitFunction(FunctionNode n)  throws VisitorException;
+    protected abstract T visitIdentifier(IdentifierNode n)  throws VisitorException;
+    protected abstract T visitIdentifierDeclaration(IdentifierDeclarationNode n)  throws VisitorException;
+    protected abstract T visitIfElse(IfElseNode n)  throws VisitorException;
+    protected abstract T visitNumber(NumberNode n)  throws VisitorException;
+    protected abstract T visitProgram(ProgramNode n)  throws VisitorException;
+    protected abstract T visitString(StringNode n)  throws VisitorException;
+    protected abstract T visitRange(RangeNode n)  throws VisitorException;
 }

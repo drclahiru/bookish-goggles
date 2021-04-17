@@ -1,8 +1,10 @@
-package compiler.visitor;
+package compiler.analysis;
 
 import compiler.IdentifierContext;
 import compiler.Utility;
 import compiler.ast.*;
+import compiler.visitor.*;
+
 import java.util.*;
 
 /* 

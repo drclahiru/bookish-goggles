@@ -1,6 +1,5 @@
-package compiler.visitor;
+package compiler.parser;
 
-import compiler.parser.*;
 import compiler.ast.*;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 

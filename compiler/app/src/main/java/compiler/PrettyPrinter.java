@@ -1,6 +1,8 @@
-package compiler.visitor;
+package compiler;
 
 import compiler.ast.*;
+import compiler.visitor.VisitorException;
+import compiler.visitor.VisitorVoid;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;

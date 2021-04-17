@@ -1,6 +1,8 @@
-package compiler.visitor;
+package compiler.codegen;
 
 import compiler.ast.*;
+import compiler.visitor.*;
+
 import java.io.OutputStream;
 
 public class CodeGenPretty extends VisitorVoid {

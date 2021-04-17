@@ -8,7 +8,7 @@ public abstract class VisitorVoid {
             visit(x);
         }
     }
-    protected void visit(AbstractNode n) throws VisitorException {
+    public void visit(AbstractNode n) throws VisitorException {
         if (n == null) {
         } else if (n instanceof ExpressionNode) {
             visitExpression((ExpressionNode)n);

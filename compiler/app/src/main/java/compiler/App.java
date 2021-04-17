@@ -4,9 +4,12 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.CharStreams;
 
 import compiler.ast.ProgramNode;
+import compiler.codegen.CodeGenVisitor;
+import compiler.parser.CSTtoAST;
 import compiler.parser.gLexer;
 import compiler.parser.gParser;
 import compiler.visitor.*;
+import compiler.analysis.*;
 
 import java.io.IOException;
 
@@ -37,24 +40,21 @@ class App {
         new TypeChecker(idCtx).run(ast);
     }
 
-    public static void print(ProgramNode ast) throws VisitorException {
-        new PrettyPrinter(System.out).run(ast);
-    }
-    
     public static void codeGen(ProgramNode ast) throws VisitorException {
         new CodeGenVisitor(System.out).run(ast);
     }
 
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/example1.bg");
+            var ast = readAndParse("./examples/example2.bg");
             System.out.println("\n\n-------- Parsed --------\n\n");
-            print(ast);
+            new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
             System.out.println("\n\n-------- Types inferenced --------\n\n");
-            print(ast);
-            check(idMap, ast);
-            System.out.println("--------------------------------------");
+            new PrettyPrinter(System.out).run(ast);
+            new ClosureResolver().run(ast);
+            // check(idMap, ast);
+            System.out.println("\n\n----------------------------------\n\n");
             codeGen(ast);
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
