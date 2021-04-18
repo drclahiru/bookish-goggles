@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 public class FunctionNode extends ExpressionNode {
     public final ArrayList<IdentifierDeclarationNode> parameters = new ArrayList<>();
     public ExpressionNode return_;
-    public Set<Identifier> closure = new HashSet<>();
+    public Set<Identifier> captures = new HashSet<>();
 
     public FunctionNode(ParserRuleContext source) {
         super(source);

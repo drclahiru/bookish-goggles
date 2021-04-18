@@ -18,7 +18,7 @@ public class CodeGenVisitor extends VisitorVoid {
 		visit(n);
 	}
 	 
-	protected void print(String text) {
+	void print(String text) {
 		try {
 			if (isNewline) {
 				out.write(" ".repeat(this.indentLevel * 4).getBytes());
@@ -30,7 +30,7 @@ public class CodeGenVisitor extends VisitorVoid {
 		}
 	}
 
-	protected void println() {
+	void println() {
 		try {
 			out.write("\n".getBytes());
 			isNewline = true;
@@ -38,7 +38,19 @@ public class CodeGenVisitor extends VisitorVoid {
 			throw new Error(e);
 		}
 	}
-		
+
+	void startBlock() {
+		indentLevel++;
+		print("{");
+		println();
+	}
+
+	void endBlock() {
+		indentLevel--;
+		print("}");
+		println();
+	}
+
 	@Override
 	protected void visitLetBinding(LetBindingNode node) throws VisitorException {
 		print(toJavaType(node.declaration.typeScheme.type));
@@ -53,31 +65,25 @@ public class CodeGenVisitor extends VisitorVoid {
 	@Override
 	protected void visitIdentifier(IdentifierNode node) throws VisitorException {
 		print(node.value.name);
-		
 	}
-
 
 	@Override
 	protected void visitNumber(NumberNode node) throws VisitorException {
 		print(Double.toString(node.value));
-		
 	}
 
 	@Override
 	protected void visitProgram(ProgramNode node) throws VisitorException {
-		print("class Program {");
-		println();
-		indentLevel++;
+		print("class Program ");
+		startBlock();
 		for (var x: node.bindings) {
 			visit(x);
 		}	
-		print("public static void main(String[] args) {");
-		println();
+		print("public static void main(String[] args) ");
+		startBlock();
 		
-		print("}");
-		indentLevel--;
-		println();
-		print("}");
+		endBlock();
+		endBlock();
 	}
 
 	@Override
@@ -128,7 +134,7 @@ public class CodeGenVisitor extends VisitorVoid {
 			return s;
 		}
 		if (ty instanceof VariableTypeNode) {
-			// what to do?
+			return ((VariableTypeNode)ty).id;
 		}
 		throw new Error("unexpected type: " + ty);
 	}

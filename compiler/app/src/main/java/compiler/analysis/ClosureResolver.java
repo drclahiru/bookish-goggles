@@ -25,11 +25,11 @@ public class ClosureResolver extends VisitorVoid {
     protected void visitFunction(FunctionNode n) throws VisitorException {
         closures.add(n);
         super.visitFunction(n);
+        closures.pop();
     }
     protected void visitIdentifier(IdentifierNode n) throws VisitorException {
-        var c = closures.peek();
-        if (c != null) {
-            c.closure.add(n.value);
+        if (!closures.empty()) {
+            closures.peek().captures.add(n.value);
         }
     }
     protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
