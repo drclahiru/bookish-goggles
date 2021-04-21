@@ -1,0 +1,21 @@
+
+===== source code =====
+
+let apply  = (f, x) { f(x) }
+let square = (x) { let x2 = apply((y) {y}, x) in x * x2 }
+let main   = apply(square, 2)
+
+===== desugar let =====
+
+let apply     = (f, x) { f(x) }
+let square$x2 = (x) { apply((y) {y}, x) }
+let square    = (x) { x * square$x2(x) }
+let main      = apply(square, 2)
+
+===== lift lambdas =====
+
+let apply        = (f, x) { f(x) }
+let square$x2$f1 = (y) { y }
+let square$x2    = (x) { apply(square$x2$f1, x) }
+let square       = (x) { x * square$x2(x) }
+let main         = apply(square, 2)

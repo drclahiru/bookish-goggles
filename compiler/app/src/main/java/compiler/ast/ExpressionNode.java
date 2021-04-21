@@ -6,4 +6,7 @@ public abstract class ExpressionNode extends AbstractNode {
     public ExpressionNode(ParserRuleContext source) {
         super(source);
     }
+
+    @Override
+    public abstract ExpressionNode clone();
 }

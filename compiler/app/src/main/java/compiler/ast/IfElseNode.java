@@ -15,4 +15,14 @@ public class IfElseNode extends ExpressionNode {
     public Stream<AbstractNode> children() {
         return Stream.of(boolExpr, trueCase, elseCase);
     }
+
+    @Override
+    public IfElseNode clone() {
+        var n = new IfElseNode(source);
+        n.type = type;
+        n.boolExpr = boolExpr.clone();
+        n.trueCase = trueCase.clone();
+        n.elseCase = elseCase.clone();
+        return n;
+    }
 }

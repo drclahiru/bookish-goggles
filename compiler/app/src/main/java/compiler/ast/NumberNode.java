@@ -15,4 +15,11 @@ public class NumberNode extends ExpressionNode {
     public Stream<AbstractNode> children() {
         return Stream.empty();
     }
+
+    @Override
+    public NumberNode clone() {
+        var n = new NumberNode(source, value);
+        n.type = type;
+        return n;
+    }
 }

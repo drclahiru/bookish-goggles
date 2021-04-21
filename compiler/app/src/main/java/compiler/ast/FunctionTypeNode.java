@@ -59,4 +59,15 @@ public class FunctionTypeNode extends TypeNode {
     public int hashCode() {
         return Objects.hash(parameters, return_);
     }
+    
+    @Override
+    public FunctionTypeNode clone() {
+        var n = new FunctionTypeNode(source);
+        n.type = type;
+        n.return_ = return_.clone();
+        for (var param : parameters) {
+            n.parameters.add(param.clone());
+        }
+        return n;
+    }
 }

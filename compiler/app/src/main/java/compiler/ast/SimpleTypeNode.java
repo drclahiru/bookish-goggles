@@ -36,4 +36,10 @@ public class SimpleTypeNode extends TypeNode {
     public int hashCode() {
         return Objects.hash(type);
     }
+
+    @Override
+    public SimpleTypeNode clone() {
+        var n = new SimpleTypeNode(source, type);
+        return n;
+    }
 }

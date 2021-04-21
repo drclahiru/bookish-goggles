@@ -17,15 +17,17 @@ let b = apply(square, a)
 let c = apply(id, square)
 
 let fact = (n) {
-    let mul = (x) { n * x } in
-    let prevN = n - 1 in
+    let mul = id((x) { n * x }) in
+    let prev_n = n - 1 in
     if n == 0 {
         1
      } else {
-        mul(fact(prevN))
+        mul(fact(prev_n))
      }
 }
 
 let f = let y = id(a) in (x) {
     a + x
 }
+
+let main = fact(4)

@@ -4,28 +4,42 @@ import compiler.ast.*;
 import compiler.visitor.VisitorException;
 import compiler.visitor.VisitorVoid;
 
+import java.util.function.Consumer;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 public class PrettyPrinter extends VisitorVoid {
+    public class Options {
+        public boolean printScopeNumber = false;
+        public boolean printTypes = true;
+        public boolean useNewLine = true;
+    }
     public static String stringify(AbstractNode n) {
+        return stringify(n, x -> {});
+    }
+    public static String stringify(AbstractNode n, Consumer<Options> f) {
         try {
             var baos = new ByteArrayOutputStream();
-            new PrettyPrinter(baos).run(n);
+            new PrettyPrinter(baos, f).run(n);
             return new String(baos.toByteArray());
         } catch (VisitorException ex) {
             return "Error: " + ex.message;
         }
     }
+    TypeVariableRenamer typeRenamer = TypeVariableRenamer.empty();
     Integer indentLevel = 0;
     Boolean isNewline = true;
+    Options opts = new Options();
     OutputStream out;
-
-    public boolean printScopeNumber = false;
 
     public PrettyPrinter(OutputStream out) {
         super();
         this.out = out;
+    }
+    public PrettyPrinter(OutputStream out, Consumer<Options> f) {
+        super();
+        this.out = out;
+        f.accept(opts);
     }
 
     public void run(AbstractNode n) throws VisitorException {
@@ -36,15 +50,15 @@ public class PrettyPrinter extends VisitorVoid {
     protected void visitFunction(FunctionNode node) throws VisitorException {
         print("(");
         for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().limit(1)::iterator) {
-            visit(arg.identifier);
+            visit(arg);
         }
         for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().skip(1)::iterator) {
             print(", ");
-            visit(arg.identifier);
+            visit(arg);
         }
         print(") {");
-        indentLevel++;
         println();
+        indentLevel++;
         visit(node.return_);
         indentLevel--;
         println();
@@ -53,24 +67,32 @@ public class PrettyPrinter extends VisitorVoid {
 
     @Override
     protected void visitLetBinding(LetBindingNode node) throws VisitorException {
+        var prevRenamer = typeRenamer;
+        if (node.declaration.typeScheme != null) {
+            typeRenamer = node.declaration.typeScheme.createRenamer();
+        }
         print("let ");
         visit(node.declaration);
-        print(" =");
         println();
         indentLevel++;
+        print("= ");
         visit(node.expr);
         indentLevel--;
         println();
+        typeRenamer = prevRenamer;
     }
 
     @Override
     protected void visitLetExpression(LetExpressionNode node) throws VisitorException {
         print("let ");
         visit(node.declaration);
-        print(" = ");
-        visit(node.expr);
-        print(" in");
         println();
+        indentLevel++;
+        print("= ");
+        visit(node.expr);
+        indentLevel--;
+        println();
+        print("in ");
         visit(node.next);
     }
 
@@ -95,7 +117,7 @@ public class PrettyPrinter extends VisitorVoid {
 
     @Override
     protected void visitIdentifier(IdentifierNode node) {
-        if (printScopeNumber) {
+        if (opts.printScopeNumber) {
             print(node.value.toString());
         } else {
             print(node.value.name);
@@ -105,9 +127,9 @@ public class PrettyPrinter extends VisitorVoid {
     @Override
     protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
         visit(n.identifier);
-        if (n.typeScheme != null) {
+        if (opts.printTypes && n.typeScheme != null) {
             print(" ");
-            print(n.typeScheme.toString());
+            print(typeRenamer.rename(n.typeScheme.type).toString());
         }
     };
 
@@ -173,7 +195,8 @@ public class PrettyPrinter extends VisitorVoid {
             visit(x);
         }
         for (var x : (Iterable<LetBindingNode>) node.bindings.stream().skip(1)::iterator) {
-            println();
+            print("\n");
+            isNewline = true;
             visit(x);
         }
     }
@@ -200,11 +223,9 @@ public class PrettyPrinter extends VisitorVoid {
     }
 
     protected void println() {
-        try {
-            out.write("\n".getBytes());
+        if (opts.useNewLine) {
+            print("\n");
             isNewline = true;
-        } catch (Exception e) {
-            throw new Error(e);
         }
     }
 }

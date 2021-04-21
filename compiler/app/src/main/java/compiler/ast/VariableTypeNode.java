@@ -34,4 +34,11 @@ public class VariableTypeNode extends TypeNode {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Override
+    public VariableTypeNode clone() {
+        var n = new VariableTypeNode(id);
+        n.type = type;
+        return n;
+    }
 }

@@ -43,7 +43,7 @@ public class TypeInferencer {
             } catch (VisitorException ex) {
             }
         }
-        return v.ctx;
+        return ctx;
     }
 
     class ApplyInferred extends VisitorVoid {
@@ -53,9 +53,7 @@ public class TypeInferencer {
         }
         @Override
         public void visit(AbstractNode n) throws VisitorException {
-            if (n.type != null) {
-                n.type = subst.apply(n.type);
-            }
+            n.type = subst.apply(n.type);
             super.visit(n);
         }
     }
@@ -113,7 +111,7 @@ public class TypeInferencer {
         protected TypeNode visitFunctionInner(FunctionNode n) throws VisitorException {
             var params = new ArrayList<TypeNode>();
             for (var p : n.parameters) {
-                var scheme = new TypeScheme(new HashSet<>(), varGen.next());
+                var scheme = new TypeScheme(varGen.next());
                 ctx.put(p.identifier.value, scheme);
                 params.add(scheme.type);
             }
@@ -150,7 +148,12 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
-            // identifier needs to be declared beforehand for the recursive case
+            var visitor = new InferenceVisitor(ctx.clone(), subst);
+            var t = visitor.visitLetBindingInner(n);
+            addFromCtx(visitor.ctx);
+            return t;
+        }
+        protected TypeNode visitLetBindingInner(LetBindingNode n) throws VisitorException {
             ctx.put(n.declaration.identifier.value, generalize(ctx, varGen.next()));
             var t = visit(n.expr);
             if (n.declaration.typeScheme != null) {
@@ -164,12 +167,9 @@ public class TypeInferencer {
         @Override
         protected TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
             var t = visit(n.expr);
-            if (n.declaration.typeScheme != null) {
-                ctx.put(n.declaration.identifier.value, n.declaration.typeScheme);
-                subst.unify(t, n.declaration.typeScheme.type);
-            } else {
-                ctx.put(n.declaration.identifier.value, generalize(ctx, t));
-            }
+            var tyVar = varGen.next();
+            ctx.put(n.declaration.identifier.value, new TypeScheme(tyVar));
+            subst.unify(t, tyVar);
             var visitor = new InferenceVisitor(subst.apply(ctx), subst);
             var tNext = visitor.visit(n.next);
             addFromCtx(visitor.ctx);
@@ -193,7 +193,7 @@ public class TypeInferencer {
          */
         void addFromCtx(IdentifierContext other) {
             for (var k : except(other.keySet(), ctx.keySet())) {
-                ctx.put(k, new TypeScheme(other.get(k).type));
+                ctx.put(k, other.get(k));
             }
         }
     }
@@ -205,6 +205,21 @@ public class TypeInferencer {
         }
         public Substitution(Substitution sub) {
             super(sub);
+        }
+
+        @Override
+        public TypeNode put(VariableTypeNode key, TypeNode value) {
+            var out = super.put(key, value);
+            var keyToUpdate = new Vector<VariableTypeNode>();
+            super.forEach((k, v) -> {
+                if (v == key) {
+                    keyToUpdate.add(k);
+                }
+            });
+            for (var k : keyToUpdate) {
+                super.put(k, value);
+            }
+            return out;
         }
 
         public TypeNode apply(TypeNode ty) {
