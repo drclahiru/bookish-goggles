@@ -35,15 +35,13 @@ class App {
         return idCtx;
     }
 
-<<<<<<< Updated upstream
-=======
+
     public static void codeGen(ProgramNode ast) throws VisitorException {
         new CodeGenVisitor(System.out).run(ast);
         System.out.println("\n\n-------- Haskell --------\n\n");
         new CodeGen(System.out).run(ast);
     }
 
->>>>>>> Stashed changes
     public static void main(String[] args) {
         try {
             var ast = readAndParse("./examples/example2.bg");
