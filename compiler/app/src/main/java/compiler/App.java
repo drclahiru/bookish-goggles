@@ -59,6 +59,8 @@ class App {
             new LambdaLifter(idMap, idGen).run(ast);
             new PrettyPrinter(System.out).run(ast);
             new JavaCodeGen(fOut, idMap).run(ast);
+            System.out.println("\n\n--------CODE GEN--------------------\n\n");
+            codeGen(ast);
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");

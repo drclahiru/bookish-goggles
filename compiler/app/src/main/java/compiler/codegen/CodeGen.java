@@ -54,7 +54,7 @@ public class CodeGen  extends VisitorVoid  {
 
     @Override
     protected void visitLetExpression(LetExpressionNode node) throws VisitorException {
-
+    	print(" let ");
         visit(node.declaration);
         print(" = ");
         visit(node.expr);
