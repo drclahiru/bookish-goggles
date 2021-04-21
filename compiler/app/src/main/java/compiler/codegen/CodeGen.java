@@ -4,162 +4,194 @@ import java.io.*;
 import compiler.ast.*;
 import compiler.visitor.*;
 
-public class CodeGen  extends VisitorT<TypeNode>  {
-
-	
-	private File file;
-	private FileWriter fr;
-	private BufferedWriter br;
-	public CodeGen() throws IOException{
-		this.file = new File("append.hs");
-		this.fr = new FileWriter(file, true);
-		this.br = new BufferedWriter(fr);
-	}
-	@Override
-	protected TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
-		try {
-			visit(n.declaration);
-			br.append("=");
-            visitExpression(n.expr);
-            
-            br.newLine();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
-	@Override
-	protected TypeNode visitBool(BoolNode n) throws VisitorException {
-		if(n.value) {
-			try {
-				br.append("True");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else {
-			try {
-				br.append("False");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		}
-		return null;
-	}
-
-	@Override
-	protected TypeNode visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
-		try {
-			br.append("(");
-			br.append(n.identifier.value.name);
-			
-			for(var i:n.arguments) {
-				br.append(" ");
-				visit(i);
-				
-			}
-			br.append(")");
-		 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
-	protected TypeNode visitFunction(FunctionNode n) throws VisitorException {
-		try {
-			
-			br.newLine();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
-	protected TypeNode visitIdentifier(IdentifierNode n) throws VisitorException {
-		try {
-			br.append(n.value.name);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
-	protected TypeNode visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
-		visit(n.typeScheme.type);
+public class CodeGen  extends VisitorVoid  {
+    public static String stringify(AbstractNode n) {
         try {
-			br.newLine();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		visitIdentifier(n.identifier);
-		
-		return null;
-	}
+            var baos = new ByteArrayOutputStream();
+            new CodeGen(baos).run(n);
+            return new String(baos.toByteArray());
+        } catch (VisitorException ex) {
+            return "Error: " + ex.message;
+        }
+    }
+    Integer indentLevel = 0;
+    Boolean isNewline = true;
+    OutputStream out;
 
-	@Override
-	protected TypeNode visitIfElse(IfElseNode n) throws VisitorException {
-		try {
-			br.append(" if ");
-			visit(n.boolExpr);
-			br.append(" then ");
-			visit(n.trueCase);
-			br.append(" else ");
-			visit(n.elseCase);
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
+    public boolean printScopeNumber = false;
 
-	@Override
-	protected TypeNode visitNumber(NumberNode n) throws VisitorException {
-		try {
-			br.append(String.valueOf(n.value));
-			br.append("");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
+    public CodeGen(OutputStream out) {
+        super();
+        this.out = out;
+    }
 
-	@Override
-	protected TypeNode visitProgram(ProgramNode n) throws VisitorException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void run(AbstractNode n) throws VisitorException {
+        visit(n);
+    }
 
-	@Override
-	protected TypeNode visitString(StringNode n) throws VisitorException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    protected void visitFunction(FunctionNode node) throws VisitorException {
+        print("\\");
+        for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().limit(1)::iterator) {
+            visit(arg.identifier);
+        }
+        for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().skip(1)::iterator) {
+            print(" ");
+            visit(arg.identifier);
+        }
+        print("->");
+        visit(node.return_);
+    }
 
-	@Override
-	protected TypeNode visitRange(RangeNode n) throws VisitorException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	protected TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    protected void visitLetBinding(LetBindingNode node) throws VisitorException {
+       
+        visit(node.declaration);
+        print(" = ");
+        visit(node.expr);
+        println();
+    }
 
+    @Override
+    protected void visitLetExpression(LetExpressionNode node) throws VisitorException {
+
+        visit(node.declaration);
+        print(" = ");
+        visit(node.expr);
+        print(" in");
+        println();
+        visit(node.next);
+    }
+
+    @Override
+    protected void visitBool(BoolNode node) {
+        if(node.value)
+        	print("True");
+        else
+        	print("False");
+    }
+
+    @Override
+    protected void visitNumber(NumberNode node) {
+        if (node.value == Math.round(node.value)) {
+            print(Long.toString((long)node.value));
+        } else {
+            print(Double.toString(node.value));
+        }
+    }
+
+    @Override
+    protected void visitString(StringNode node) {
+        print(node.value);
+    }
+
+    @Override
+    protected void visitIdentifier(IdentifierNode node) {
+        if (printScopeNumber) {
+            print(node.value.toString());
+        } else {
+            print(node.value.name);
+        }
+    }
+    
+    @Override
+    protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
+        visit(n.identifier);
+       
+    };
+
+    @Override
+    protected void visitSimpleType(SimpleTypeNode node) {
+         
+    }
+
+    @Override
+    protected void visitFunctionType(FunctionTypeNode node) {
+        
+    }
+
+    @Override
+    protected void visitVariableType(VariableTypeNode node) {
+         
+    }
+
+    @Override
+    protected void visitFunctionInvocation(FunctionInvocationNode node) throws VisitorException {
+        if (node.isOperator()) {
+        	print("(");
+            visit(node.arguments.get(0));
+            print(" ");
+            visit(node.identifier);
+            print(" ");
+            visit(node.arguments.get(1));
+           	print(")");
+        } else {
+        	   print("(");
+            visit(node.identifier);
+            print(" ");
+
+            for (var x : (Iterable<ExpressionNode>) node.arguments.stream().limit(1)::iterator) {
+                visit(x);
+            }
+            for (var x : (Iterable<ExpressionNode>) node.arguments.stream().skip(1)::iterator) {
+                print("  ");
+                visit(x);
+            }
+            print(")");
+        }
+    }
+
+    @Override
+    protected void visitIfElse(IfElseNode node) throws VisitorException {
+        print(" if ");
+        visit(node.boolExpr);
+        print(" ");
+        
+        visit(node.trueCase);
+        
+        print(" else  ");
+   
+        visit(node.elseCase);
+       
+    }
+
+    @Override
+    protected void visitProgram(ProgramNode node) throws VisitorException {
+    	    	for (var x: node.bindings) {
+    		visit(x);
+    	}	
+    	print("main::IO()");
+    	println();
+    	
+    }
+
+    @Override
+    protected void visitRange(RangeNode node) {
+        print(node.startCol);
+        print(Integer.toString(node.startRow));
+        print(":");
+        print(node.endCol);
+        print(Integer.toString(node.endRow));
+    }
+
+    protected void print(String text) {
+        try {
+            if (isNewline) {
+                out.write(" ".repeat(this.indentLevel * 4).getBytes());
+                isNewline = false;
+            }
+            out.write(text.getBytes());
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+
+    protected void println() {
+        try {
+            out.write("\n".getBytes());
+            isNewline = true;
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
 }
