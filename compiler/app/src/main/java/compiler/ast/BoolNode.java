@@ -15,4 +15,11 @@ public class BoolNode extends ExpressionNode {
     public Stream<AbstractNode> children() {
         return Stream.empty();
     }
+
+    @Override
+    public BoolNode clone() {
+        var n = new BoolNode(source, value);
+        n.type = type;
+        return n;
+    }
 }

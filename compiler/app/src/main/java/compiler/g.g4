@@ -17,7 +17,7 @@ range_binding: range ASSIGN OPAR (value (COMMA value)*)? CPAR;
  */
 let_binding: LET ID type? ASSIGN expr;
 
-let_expr: LET ID type? ASSIGN expr IN expr;
+let_expr: LET ID ASSIGN expr IN expr;
 
 /*there is an issue with the operator_expression as it is defined in the grammar because
  it

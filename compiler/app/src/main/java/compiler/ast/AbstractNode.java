@@ -11,4 +11,6 @@ public abstract class AbstractNode {
         this.source = source;
     }
     public abstract Stream<AbstractNode> children();
+
+    public abstract AbstractNode clone();
 }

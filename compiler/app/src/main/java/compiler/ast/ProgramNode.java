@@ -14,4 +14,14 @@ public class ProgramNode extends AbstractNode {
     public Stream<AbstractNode> children() {
         return this.bindings.stream().map((x) -> (AbstractNode)x);
     }
+
+    @Override
+    public ProgramNode clone() {
+        var n = new ProgramNode(source);
+        n.type = type;
+        for (var b : bindings) {
+            n.bindings.add(b.clone());
+        }
+        return n;
+    }
 }

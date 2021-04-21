@@ -15,4 +15,11 @@ public class StringNode extends ExpressionNode {
     public Stream<AbstractNode> children() {
         return Stream.empty();
     }
+
+    @Override
+    public StringNode clone() {
+        var n = new StringNode(source, value);
+        n.type = type;
+        return n;
+    }
 }

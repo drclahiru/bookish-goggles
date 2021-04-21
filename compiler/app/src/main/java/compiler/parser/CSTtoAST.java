@@ -39,10 +39,6 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         var id = ctx.ID();
         var idNode = new IdentifierNode(ctx, id.getText());
         var letExpr = new LetExpressionNode(ctx, idNode);
-        var t = ctx.type();
-        if (t != null) {
-            letExpr.declaration.typeScheme = new TypeScheme(visitType(t));
-        }
         letExpr.expr = visitExpr(ctx.expr(0));
         letExpr.next = visitExpr(ctx.expr(1));
         return letExpr;

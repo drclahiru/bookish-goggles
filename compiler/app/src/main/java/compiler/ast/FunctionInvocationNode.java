@@ -19,4 +19,15 @@ public class FunctionInvocationNode extends ExpressionNode {
     public boolean isOperator() {
         return arguments.size() == 2 && identifier.value.name.matches("^[^[a-z_]].*");
     }
+
+    @Override
+    public FunctionInvocationNode clone() {
+        var n = new FunctionInvocationNode(source);
+        n.type = type;
+        n.identifier = identifier.clone();
+        for (var arg : arguments) {
+            n.arguments.add(arg.clone());
+        }
+        return n;
+    }
 }

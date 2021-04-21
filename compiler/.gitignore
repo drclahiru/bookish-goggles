@@ -13,3 +13,6 @@
 
 # Ignore eclipse stuff
 /app/.metadata
+
+# Generated java code
+/app/examples/*.tmp.java

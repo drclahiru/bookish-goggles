@@ -15,4 +15,12 @@ public class IdentifierDeclarationNode extends AbstractNode {
     public Stream<AbstractNode> children() {
         return Stream.of(this.identifier);
     }
+
+    @Override
+    public IdentifierDeclarationNode clone() {
+        var n = new IdentifierDeclarationNode(source, identifier.clone());
+        n.type = type;
+        n.typeScheme = typeScheme;
+        return n;
+    }
 }

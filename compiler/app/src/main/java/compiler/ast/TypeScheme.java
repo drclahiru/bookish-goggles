@@ -1,5 +1,6 @@
 package compiler.ast;
 
+import compiler.TypeVariableRenamer;
 import compiler.Utility;
 import java.util.*;
 
@@ -19,43 +20,30 @@ public class TypeScheme {
     public String toString() {
         var b = new StringBuilder();
 
-        var varMap = new HashMap<VariableTypeNode, String>();
+        var renamer = createRenamer();
+        for (var e : vars) {
+            b.append(e);
+            b.append(" ");
+        }
+        if (!vars.isEmpty()){
+            b.append("=> ");
+        }
 
+        b.append(renamer.rename(type).toString());
+
+        return b.toString();
+    }
+
+    public TypeVariableRenamer createRenamer() {
+        var varMap = new HashMap<VariableTypeNode, String>();
         if (!vars.isEmpty()) {
             var i = 0;
             for (var v : vars) {
                 var s = Utility.intToAlphabetic(i++);
                 varMap.put(v, s);
-                b.append(s);
-                b.append(" ");
             }
-        
-            b.append("=> ");
         }
-
-        var t = type;
-        for (var e : varMap.entrySet()) {
-            t = renameVar(t, e.getKey().id, e.getValue());
-        }
-        b.append(t.toString());
-
-        return b.toString();
-    }
-    
-    TypeNode renameVar(TypeNode t, String from, String to) {
-        if (t instanceof VariableTypeNode && ((VariableTypeNode)t).id.equals(from)) {
-            return new VariableTypeNode(to);
-        }
-        if (t instanceof FunctionTypeNode) {
-            var ft = (FunctionTypeNode)t;
-            var ftNext = new FunctionTypeNode(null);
-            for (var p : ft.parameters) {
-                ftNext.parameters.add(renameVar(p, from, to));
-            }
-            ftNext.return_ = renameVar(ft.return_, from, to);
-            return ftNext;
-        }
-        return t;
+        return new TypeVariableRenamer(varMap);
     }
 
     @Override

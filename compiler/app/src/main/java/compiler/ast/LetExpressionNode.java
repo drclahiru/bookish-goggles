@@ -16,4 +16,14 @@ public class LetExpressionNode extends ExpressionNode {
     public Stream<AbstractNode> children() {
         return Stream.of(this.declaration, this.expr, this.next);
     }
+
+    @Override
+    public LetExpressionNode clone() {
+        var n = new LetExpressionNode(source, declaration.identifier);
+        n.type = type;
+        n.declaration = declaration.clone();
+        n.expr = expr.clone();
+        n.next = next.clone();
+        return n;
+    }
 }

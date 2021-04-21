@@ -15,4 +15,13 @@ public class LetBindingNode extends AbstractNode {
     public Stream<AbstractNode> children() {
         return Stream.of(this.declaration, this.expr);
     }
+
+    @Override
+    public LetBindingNode clone() {
+        var n = new LetBindingNode(source, declaration.identifier);
+        n.type = type;
+        n.declaration = declaration.clone();
+        n.expr = expr.clone();
+        return n;
+    }
 }
