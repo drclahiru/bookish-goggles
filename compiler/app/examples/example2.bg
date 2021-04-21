@@ -1,17 +1,14 @@
-let id = (x) {
-    x
-}
+let apply = (f, x) {f(x)}
 
-let apply = (f, x) {
-    f(x)
-}
-
-let a Number = 2
+let a Number = 3
 
 let square = (x) {
-    x * x
+    let x1 = x in
+    let x2 = 
+        let x3 = apply((y) {y}, x) in
+        x3 * 1
+    in
+    x1 * x2
 }
 
-let b = apply(square, a)
-
-let c = apply(id, square)
+let main = apply(square, a)

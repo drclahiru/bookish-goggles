@@ -11,7 +11,7 @@ import compiler.parser.gParser;
 import compiler.visitor.*;
 import compiler.analysis.*;
 
-import java.io.IOException;
+import java.io.*;
 
 class App {
     public static ProgramNode readAndParse(String path) throws IOException {
@@ -27,14 +27,12 @@ class App {
         return ast;
     }
 
-    public static IdentifierContext infer(ProgramNode ast) throws VisitorExceptionAggregate {
+    public static IdentifierContext infer(ProgramNode ast) throws VisitorException, VisitorExceptionAggregate {
         var idMap = new ScopeResolver().run(ast);
         var idCtx = new TypeInferencer(idMap).run(ast);
+        // System.out.println("\n\n-------- Types inferenced --------\n\n");
+        // print(ast, true);
         return idCtx;
-    }
-
-    public static void codeGen(ProgramNode ast) throws VisitorException {
-        new CodeGenVisitor(System.out).run(ast);
     }
 
     public static void main(String[] args) {
@@ -43,12 +41,17 @@ class App {
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
-            System.out.println("\n\n-------- Types inferenced --------\n\n");
-            new PrettyPrinter(System.out).run(ast);
-            new ClosureResolver().run(ast);
+            System.out.println("\n\n-------- Inferred --------\n\n");
+            new PrettyPrinter(System.out, x -> x.printScopeNumber = false).run(ast);
             // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
-            codeGen(ast);
+            var file = new File("./examples/example2.tmp.java");
+            var fOut = new FileOutputStream(file);
+            var idGen = new IdentifierGenerator();
+            new LetExpressionDesugarer(idMap, idGen).run(ast);
+            new LambdaLifter(idMap, idGen).run(ast);
+            new PrettyPrinter(System.out).run(ast);
+            new JavaCodeGen(fOut, idMap).run(ast);
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");
