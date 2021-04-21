@@ -20,4 +20,11 @@ public class RangeNode extends ExpressionNode {
     public Stream<AbstractNode> children() {
         return Stream.empty();
     }
+
+    @Override
+    public RangeNode clone() {
+        var n = new RangeNode(source, startCol, startRow, endCol, endRow);
+        n.type = type;
+        return n;
+    }
 }

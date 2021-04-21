@@ -23,4 +23,7 @@ public abstract class TypeNode extends AbstractNode {
 
         return false;
     }
+
+    @Override
+    public abstract TypeNode clone();
 }
