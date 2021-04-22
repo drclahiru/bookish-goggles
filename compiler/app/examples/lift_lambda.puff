@@ -1,0 +1,7 @@
+
+let apply = (f, x) { f(x) }
+
+let a = apply((x) { x }, 9)
+let b = apply((x) { apply((y) { y }, x) }, a)
+
+let main = b

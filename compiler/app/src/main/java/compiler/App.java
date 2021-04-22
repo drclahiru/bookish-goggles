@@ -44,7 +44,8 @@ class App {
 
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/example2.bg");
+            var fileName = "lift_lambda";
+            var ast = readAndParse("./examples/" + fileName + ".puff");
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
@@ -52,7 +53,7 @@ class App {
             new PrettyPrinter(System.out, x -> x.printScopeNumber = false).run(ast);
             // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
-            var file = new File("./examples/example2.tmp.java");
+            var file = new File("./examples/" + fileName + ".tmp.java");
             var fOut = new FileOutputStream(file);
             var idGen = new IdentifierGenerator();
             new LetExpressionDesugarer(idMap, idGen).run(ast);

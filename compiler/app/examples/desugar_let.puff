@@ -1,0 +1,14 @@
+
+let a = 9
+let b = let g = 3 in 8
+
+let f = (c) {
+    let d = c + a in
+    let e = 
+        let f = c - b in
+        f * 1
+    in
+    d * e
+}
+
+let main = f(33)
