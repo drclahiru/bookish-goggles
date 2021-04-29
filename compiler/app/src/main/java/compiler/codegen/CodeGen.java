@@ -88,9 +88,9 @@ public class CodeGen  extends VisitorVoid  {
     @Override
     protected void visitIdentifier(IdentifierNode node) {
         if (printScopeNumber) {
-            print(node.value.toString());
+            print(node.value.toString().replace('$', 's'));
         } else {
-            print(node.value.name);
+            print(node.value.name.replace('$', 's'));
         }
     }
     
