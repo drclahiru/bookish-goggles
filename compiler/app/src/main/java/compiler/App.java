@@ -41,10 +41,17 @@ class App {
         System.out.println("\n\n-------- Haskell --------\n\n");
         new CodeGen(System.out).run(ast);
     }
+    
+    public static void codeGen2(ProgramNode ast) throws VisitorException {
+        new JVM_CodeGen(System.out).run(ast);
+        System.out.println("\n\n-------- JVM --------\n\n");
+        new JVM_CodeGen(System.out).run(ast);
+    }
+    
 
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/example2.bg");
+            var ast = readAndParse("./examples/example3.bg");
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
@@ -52,15 +59,15 @@ class App {
             new PrettyPrinter(System.out, x -> x.printScopeNumber = false).run(ast);
             // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
-            var file = new File("./examples/example2.tmp.java");
-            var fOut = new FileOutputStream(file);
+         //   var file = new File("./examples/example2.tmp.java");
+        //    var fOut = new FileOutputStream(file);
             var idGen = new IdentifierGenerator();
             new LetExpressionDesugarer(idMap, idGen).run(ast);
             new LambdaLifter(idMap, idGen).run(ast);
             new PrettyPrinter(System.out).run(ast);
-            new JavaCodeGen(fOut, idMap).run(ast);
+          //  new JavaCodeGen(fOut, idMap).run(ast);
             System.out.println("\n\n--------CODE GEN--------------------\n\n");
-            codeGen(ast);
+            codeGen2(ast);
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");
