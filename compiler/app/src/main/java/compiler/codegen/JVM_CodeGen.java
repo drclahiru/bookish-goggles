@@ -4,7 +4,6 @@ package compiler.codegen;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,24 +11,26 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import compiler.IdentifierContext;
 import compiler.Utility;
 import compiler.ast.*;
 import compiler.visitor.*;
 
 public class JVM_CodeGen extends VisitorVoid {
-	    Integer indentLevel = 0;
+	IdentifierContext idCtx;
 	    Boolean isNewline = true;   
 	    Set<Integer> arities = new HashSet<Integer>();
 	    //Map<String, String> operatorNameMap = getOperatorNameMap();
-	    HashSet<Identifier> globalIds = new HashSet<Identifier>(getOperatorNameMap().values().stream().map(x->new Identifier(x)).collect(Collectors.toSet()));
+	    HashSet<Identifier> globalIds = new HashSet<Identifier>(Utility.createPrelude().keySet());
 	    
 	// OutputStream out;
 	// Boolean isNewline = true;
 	// Integer indentLevel = 0;
 	   HelperClasses helper;
 
-public JVM_CodeGen() {
+public JVM_CodeGen(IdentifierContext idCtx) {
     super();
+	this.idCtx = idCtx;
     arities.add(0);
     arities.add(2);
 	var file = new File("./examples/jvmInstructions/Program.j");
@@ -69,7 +70,6 @@ public void visitProgram(ProgramNode node) throws VisitorException {
 	  for (var b : node.bindings) {
           globalIds.add(b.declaration.identifier.value);
       }
-	new RenameOperators().visit(node);;
 	printComment("test");
 	println();
 	String className = ".class public Test/Program";
@@ -82,14 +82,14 @@ public void visitProgram(ProgramNode node) throws VisitorException {
 	println();
 	print(".method public <init>()V");
 	println();
-	indentLevel++;
+	helper.indentLevel++;
 	print("aload_0");
 	skip(1);
 	print("invokenonvirtual java/lang/Object/<init>()V");   //or invokespecial?
 	println();
 	print("return");
 	println();
-	indentLevel--;
+	helper.indentLevel--;
 	print(".end method");
 	println();
 	
@@ -192,17 +192,18 @@ public void ClassGeneratorFunction(IdentifierDeclarationNode decl, FunctionNode 
 	println();
 	print(".method public <init>()V");
 	println();
-	indentLevel++;
+	helper.indentLevel++;
 	print("aload_0");
 	skip(1);
 	print("invokenonvirtual java/lang/Object/<init>()V");  
 	println();
 	print("return");
 	println();
-	indentLevel--;
+	helper.indentLevel--;
 	print(".end method");
 	println();
 	print(".method public eval(");
+	helper.indentLevel++;
 	
 	 if (f.parameters.size() > 0) {
          print("Ljava/lang/Object");
@@ -218,6 +219,7 @@ public void ClassGeneratorFunction(IdentifierDeclarationNode decl, FunctionNode 
 	new ExpressionGenerator().visit(f.return_);
 	print("areturn");
 	println();
+	helper.indentLevel--;
 	print(".end method");
 }
 
@@ -254,22 +256,33 @@ class ExpressionGenerator extends VisitorVoid {
      }
      @Override
      protected void visitIdentifier(IdentifierNode n) throws VisitorException {
-    	  var construct = globalIds.contains(n.value) && n.type instanceof FunctionTypeNode;
+		var type = idCtx.get(n.value).type;
+    	  var construct = globalIds.contains(n.value) && type instanceof FunctionTypeNode;
     	  
     	  if(construct) {
-    		  print("new " + n.value.name);
-    		  println();
-    		  print("dup");
-    		  println();
-    		  print("invokespecial " +  n.value.name + "/<init>()V");
-    		  println();
+			  var name = getOperatorNameMap().get(n.value.name);
+			  if (name != null) {
+				print("new " + name);
+				println();
+				print("dup");
+				println();
+				print("invokespecial " +  name + "/<init>()V");
+				println();
+			  } else {
+				print("new " + n.value.name);
+				println();
+				print("dup");
+				println();
+				print("invokespecial " +  n.value.name + "/<init>()V");
+				println();
+			  }
     	  }
     	 
     	 print("aload_" + counter);   	  
           println();
 	      print("checkcast ");
-    	 if (n.type instanceof SimpleTypeNode) {
- 			var t = (SimpleTypeNode)n.type;
+    	 if (type instanceof SimpleTypeNode) {
+ 			var t = (SimpleTypeNode)type;
  			switch (t.type) {
  			case Bool:
  			print("java/lang/Boolean");
@@ -281,8 +294,8 @@ class ExpressionGenerator extends VisitorVoid {
  			print("java/lang/String");
  			break;
  			}
- 		} else if (n.type instanceof FunctionTypeNode) {
- 			var t = (FunctionTypeNode)n.type;
+ 		} else if (type instanceof FunctionTypeNode) {
+ 			var t = (FunctionTypeNode)type;
  			var s = "Eval" + t.parameters.size() + "(";
  			if (t.parameters.size() > 0) {
  				s += "Ljava/lang/Object";
@@ -302,6 +315,8 @@ class ExpressionGenerator extends VisitorVoid {
      
      @Override
      protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
+		visit(n.identifier);
+
     	 var args = n.arguments.size(); 
     	 for (var x:n.arguments ) {
     		 visit(x);
