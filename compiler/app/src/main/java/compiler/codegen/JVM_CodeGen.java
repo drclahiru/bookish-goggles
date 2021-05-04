@@ -1,9 +1,17 @@
 package compiler.codegen;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import compiler.Utility;
 import compiler.ast.*;
 import compiler.visitor.*;
@@ -12,19 +20,26 @@ public class JVM_CodeGen extends VisitorVoid {
 	    Integer indentLevel = 0;
 	    Boolean isNewline = true;   
 	    Set<Integer> arities = new HashSet<Integer>();
-	 //   Map<String, String> operatorNameMap = getOperatorNameMap();
-	    HashSet<Identifier> globalIds = new HashSet<>(Utility.createPrelude().keySet());
+	    //Map<String, String> operatorNameMap = getOperatorNameMap();
+	    HashSet<Identifier> globalIds = new HashSet<Identifier>(getOperatorNameMap().values().stream().map(x->new Identifier(x)).collect(Collectors.toSet()));
 	    
 	// OutputStream out;
 	// Boolean isNewline = true;
 	// Integer indentLevel = 0;
 	   HelperClasses helper;
 
-public JVM_CodeGen(OutputStream out) {
+public JVM_CodeGen() {
     super();
     arities.add(0);
     arities.add(2);
-    this.helper = new HelperClasses(out);
+	var file = new File("./examples/jvmInstructions/Program.j");
+    try {
+		this.helper = new HelperClasses(new FileOutputStream(file));
+	} catch (FileNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+    
 	 }
 
 public void run(AbstractNode n) throws VisitorException {
@@ -50,12 +65,16 @@ protected void skip(int num) {
 }
 
 @Override
-protected void visitProgram(ProgramNode node) throws VisitorException {
+public void visitProgram(ProgramNode node) throws VisitorException {
+	  for (var b : node.bindings) {
+          globalIds.add(b.declaration.identifier.value);
+      }
+	new RenameOperators().visit(node);;
 	printComment("test");
 	println();
-	
+	String className = ".class public Test/Program";
 	//how to get the main class name?
-	print(".class public Test/Program");
+	print(className);
 	println();
 	print(".super java/lang/Object");
 	skip(2);
@@ -75,7 +94,21 @@ protected void visitProgram(ProgramNode node) throws VisitorException {
 	println();
 	
 	for (var x: node.bindings) {
-		visit(x);
+		if (x.expr instanceof FunctionNode) {					
+			var file = new File("./examples/jvmInstructions/" + x.declaration.identifier.value.name + ".j");
+	          try {
+				var out = helper.out;
+				helper.out = new FileOutputStream(file);
+				ClassGeneratorFunction(x.declaration, (FunctionNode)x.expr);
+				helper.out = out;
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+		else {
+			visit(x);
+		}	
 	}	
 	
 	//skip(2);
@@ -85,37 +118,239 @@ protected void visitProgram(ProgramNode node) throws VisitorException {
 //	indentLevel--;
 //	println();
 //	print(".end method");
-	skip(2);
-	helper.mod();
-	skip(2);
-	helper.div();
-	skip(2);
-	helper.mul();
-	skip(2);
-	helper.sub();
-	skip(2);
-	helper.lt();
-	skip(2);
-	helper.gt();
-	skip(2);
-	helper.lte();
-	skip(2);
-	helper.gte();
-	skip(2);
-	helper.eq();
-	skip(2);
-	helper.neq();
-	skip(2);
-	helper.add();
-	skip(2);
-	helper.eval0Interface();
-	skip(2);
-	helper.eval1Interface();
-	skip(2);
-	helper.eval2Interface();
-	skip(2);
+	newFile("$mod", a->helper.mod());
+	newFile("$div", a->helper.div());
+	newFile("$mul", a->helper.mul());
+	newFile("$sub", a->helper.sub());
+	newFile("$lt", a->helper.lt());
+	newFile("$gt", a->helper.gt());
+	newFile("$lte", a->helper.lte());
+	newFile("$gte", a->helper.gte());
+	newFile("$eq", a->helper.eq());
+	newFile("$neq", a->helper.neq());
+	newFile("$add", a->helper.add());
+	newFile("$Eval0", a->helper.eval0Interface());
+	newFile("$Eval1", a->helper.eval1Interface());
+	newFile("$Eval2", a->helper.eval2Interface());
+//	helper.mod();
+//	skip(2);
+//	helper.div();
+//	skip(2);
+//	helper.mul();
+//	skip(2);
+//	helper.sub();
+//	skip(2);
+//	helper.lt();
+//	skip(2);
+//	helper.gt();
+//	skip(2);
+//	helper.lte();
+//	skip(2);
+//	helper.gte();
+//	skip(2);
+//	helper.eq();
+//	skip(2);
+//	helper.neq();
+//	skip(2);
+//	helper.add();
+//	skip(2);
+//	helper.eval0Interface();
+//	skip(2);
+//	helper.eval1Interface();
+//	skip(2);
+//	helper.eval2Interface();
+//	skip(2);
 	println();
 }
+
+public void newFile(String name, Consumer<Object> f) throws VisitorException {
+	 var file = new File("./examples/jvmInstructions/" + name + ".j");
+     try {
+		var out = helper.out;
+		helper.out = new FileOutputStream(file);
+		f.accept(null);
+		helper.out = out;
+	} catch (FileNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+public void ClassGenerator(IdentifierDeclarationNode decl, ExpressionNode expr) throws VisitorException {
+	if (!(decl.typeScheme.type instanceof FunctionTypeNode)) {
+		ClassGeneratorFunction(decl, (FunctionNode)expr);
+	} else {
+		
+	}
+	}
+	
+
+public void ClassGeneratorFunction(IdentifierDeclarationNode decl, FunctionNode f) throws VisitorException {
+	print(".class public " + decl.identifier.value.name);
+	println();
+	print(".super java/lang/Object");
+	println();
+	print(".method public <init>()V");
+	println();
+	indentLevel++;
+	print("aload_0");
+	skip(1);
+	print("invokenonvirtual java/lang/Object/<init>()V");  
+	println();
+	print("return");
+	println();
+	indentLevel--;
+	print(".end method");
+	println();
+	print(".method public eval(");
+	
+	 if (f.parameters.size() > 0) {
+         print("Ljava/lang/Object");
+     }
+     for (var i = 1; i < f.parameters.size(); i++) {
+         print(";Ljava/lang/Object");
+     }
+    
+	
+	print(")a");
+	println();
+	
+	new ExpressionGenerator().visit(f.return_);
+	print("areturn");
+	println();
+	print(".end method");
+}
+
+class ExpressionGenerator extends VisitorVoid {
+	int counter = 1;
+	 @Override
+     protected void visitBool(BoolNode n) throws VisitorException {
+		
+		 if (n.value) {
+			 print("iconst_1");
+			 println();
+		 } else {
+			 print("iconst_0");
+			 println();
+		 }
+		 print("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean");
+		 }
+	 
+     @Override
+     protected void visitNumber(NumberNode n) throws VisitorException { 	
+    	 print("ldc_w " + n.value);
+         println();
+         print("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+         println();
+     }
+     @Override
+     protected void visitString(StringNode n) throws VisitorException {   	 
+    	 print("ldc " + n.value);
+         println();      
+     }
+     @Override
+     protected void visitRange(RangeNode n) throws VisitorException {
+         throw new Error("todo");
+     }
+     @Override
+     protected void visitIdentifier(IdentifierNode n) throws VisitorException {
+    	  var construct = globalIds.contains(n.value) && n.type instanceof FunctionTypeNode;
+    	  
+    	  if(construct) {
+    		  print("new " + n.value.name);
+    		  println();
+    		  print("dup");
+    		  println();
+    		  print("invokespecial " +  n.value.name + "/<init>()V");
+    		  println();
+    	  }
+    	 
+    	 print("aload_" + counter);   	  
+          println();
+	      print("checkcast ");
+    	 if (n.type instanceof SimpleTypeNode) {
+ 			var t = (SimpleTypeNode)n.type;
+ 			switch (t.type) {
+ 			case Bool:
+ 			print("java/lang/Boolean");
+ 			break;
+ 			case Number:
+ 			print("java/lang/Double");
+ 			break;
+ 			case String:
+ 			print("java/lang/String");
+ 			break;
+ 			}
+ 		} else if (n.type instanceof FunctionTypeNode) {
+ 			var t = (FunctionTypeNode)n.type;
+ 			var s = "Eval" + t.parameters.size() + "(";
+ 			if (t.parameters.size() > 0) {
+ 				s += "Ljava/lang/Object";
+ 			}
+ 			for (var i = 1; i < t.parameters.size(); i++) {
+ 				s += ";Ljava/lang/Object";
+ 			}
+ 			s += ")a";
+ 			print(s);
+ 		} else {
+ 			print("java/lang/Object");
+ 		} 
+           println();   
+           counter++;
+           
+     }	
+     
+     @Override
+     protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
+    	 var args = n.arguments.size(); 
+    	 for (var x:n.arguments ) {
+    		 visit(x);
+    	 }
+    	  		  	   	
+    	 print("invokeinterface Eval" + args + "/eval(");
+    	 if (args > 0) {
+             print("Ljava/lang/Object");
+         }
+         for (var i = 1; i < args; i++) {
+             print(";Ljava/lang/Object");
+         }
+         print(")a");
+         println();
+     }
+     
+}
+public class RenameOperators extends VisitorVoid {
+	
+	protected void visitIdentifier(IdentifierNode n) {
+		var m =  getOperatorNameMap();
+		var name = m.get(n.value.name);
+		if (name != null) {
+			n.value = new Identifier(name);
+			
+		}
+		
+	}
+	
+
+}
+Map<String, String> getOperatorNameMap() {
+    var map = new HashMap<String, String>();
+    map.put("+", "$eq");
+    map.put("-", "$sub");
+    map.put("*", "$mul");
+    map.put("/", "$div");
+    map.put("%", "$mod");
+    map.put(">", "$gt");
+    map.put(">=", "$gte");
+    map.put("<", "$lt");
+    map.put("<=", "$lte");
+    map.put("==", "$eq");
+    map.put("!=", "$neq");
+    return map;
+}
+
+
+
 
 
 
@@ -142,8 +377,8 @@ protected void visitProgram(ProgramNode node) throws VisitorException {
 //
 //@Override
 //protected void visitNumber(NumberNode node) throws VisitorException {
-//	  print(Double.toString(node.value));
-//
+//	  print("");
+
 //}
 //
 //

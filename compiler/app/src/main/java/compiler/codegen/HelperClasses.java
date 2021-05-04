@@ -7,7 +7,7 @@ import compiler.visitor.*;
 
 public class HelperClasses extends VisitorVoid {
 
-	 OutputStream out;
+	 public OutputStream out;
 	 Boolean isNewline = true;
 	 Integer indentLevel = 0;
 
@@ -401,7 +401,7 @@ public void implementsInterface() {
 public void operatorInit() {
 		implementsInterface();   
 		 standardInitializer();
-		 print(".method public eval(Ljava.lang.Object;Ljava.lang.Object)a");
+		 print(".method public eval(Ljava/lang/Object;Ljava/lang/Object)a");
 		 println();
 		 indentLevel++;
 	}
