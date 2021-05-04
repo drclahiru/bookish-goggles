@@ -215,8 +215,11 @@ public void ClassGeneratorFunction(IdentifierDeclarationNode decl, FunctionNode 
 	
 	print(")a");
 	println();
-	
-	new ExpressionGenerator().visit(f.return_);
+	var argMap  = new HashMap<Identifier, Integer>();
+	for (var i = 0; i < f.parameters.size(); i++) {
+		argMap.put(f.parameters.get(i).identifier.value, i+1);
+	} 
+	new ExpressionGenerator(argMap).visit(f.return_);
 	print("areturn");
 	println();
 	helper.indentLevel--;
@@ -224,7 +227,12 @@ public void ClassGeneratorFunction(IdentifierDeclarationNode decl, FunctionNode 
 }
 
 class ExpressionGenerator extends VisitorVoid {
-	int counter = 1;
+	HashMap<Identifier, Integer> map;
+	
+	public ExpressionGenerator(HashMap<Identifier, Integer> map) {
+		this.map = map;
+	}
+
 	 @Override
      protected void visitBool(BoolNode n) throws VisitorException {
 		
@@ -276,42 +284,63 @@ class ExpressionGenerator extends VisitorVoid {
 				print("invokespecial " +  n.value.name + "/<init>()V");
 				println();
 			  }
-    	  }
-    	 
-    	 print("aload_" + counter);   	  
-          println();
-	      print("checkcast ");
-    	 if (type instanceof SimpleTypeNode) {
- 			var t = (SimpleTypeNode)type;
- 			switch (t.type) {
- 			case Bool:
- 			print("java/lang/Boolean");
- 			break;
- 			case Number:
- 			print("java/lang/Double");
- 			break;
- 			case String:
- 			print("java/lang/String");
- 			break;
- 			}
- 		} else if (type instanceof FunctionTypeNode) {
- 			var t = (FunctionTypeNode)type;
- 			var s = "Eval" + t.parameters.size() + "(";
- 			if (t.parameters.size() > 0) {
- 				s += "Ljava/lang/Object";
- 			}
- 			for (var i = 1; i < t.parameters.size(); i++) {
- 				s += ";Ljava/lang/Object";
- 			}
- 			s += ")a";
- 			print(s);
- 		} else {
- 			print("java/lang/Object");
- 		} 
-           println();   
-           counter++;
-           
+    	  } else {
+    		//  print("aload_" + n.value);   	  
+    	    	 print("aload_" + map.get(n.value));  
+    	          println();
+    		      print("checkcast ");
+    	    	 if (type instanceof SimpleTypeNode) {
+    	 			var t = (SimpleTypeNode)type;
+    	 			switch (t.type) {
+    	 			case Bool:
+    	 			print("java/lang/Boolean");
+    	 			break;
+    	 			case Number:
+    	 			print("java/lang/Double");
+    	 			break;
+    	 			case String:
+    	 			print("java/lang/String");
+    	 			break;
+    	 			}
+    	 		} else if (type instanceof FunctionTypeNode) {
+    	 			var t = (FunctionTypeNode)type;
+    	 			var s = "Eval" + t.parameters.size() + "(";
+    	 			if (t.parameters.size() > 0) {
+    	 				s += "Ljava/lang/Object";
+    	 			}
+    	 			for (var i = 1; i < t.parameters.size(); i++) {
+    	 				s += ";Ljava/lang/Object";
+    	 			}
+    	 			s += ")a";
+    	 			print(s);
+    	 		} else {
+    	 			print("java/lang/Object");
+    	 		} 
+    		  println();
+    	  }        
      }	
+     
+     @Override
+     protected void visitIfElse(IfElseNode n) throws VisitorException {
+         print("aload_1");
+         println();
+         print("checkcast java/lang/Boolean");
+         println();
+         print("invokevirtual java/lang/Boolean/booleanValue()Z");
+         println();
+         print("ifne LabelFalse");
+         println();
+         visit(n.trueCase);
+         print("goto LabelEnd");
+         println();
+         print("LabelFalse:");
+         println();
+         visit(n.elseCase);
+         print("LabelEnd:");
+         println();
+         
+     }
+     
      
      @Override
      protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
@@ -329,7 +358,7 @@ class ExpressionGenerator extends VisitorVoid {
          for (var i = 1; i < args; i++) {
              print(";Ljava/lang/Object");
          }
-         print(")a");
+         print(")a " + args);
          println();
      }
      
@@ -348,6 +377,7 @@ public class RenameOperators extends VisitorVoid {
 	
 
 }
+
 Map<String, String> getOperatorNameMap() {
     var map = new HashMap<String, String>();
     map.put("+", "$eq");
