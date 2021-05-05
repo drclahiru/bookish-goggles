@@ -1,6 +1,7 @@
 package compiler.parser;
 
 import compiler.ast.*;
+import java.util.ArrayList;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements gVisitor<AbstractNode> {
@@ -56,7 +57,16 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     }
     @Override
 	public ExpressionNode visitExpr_range(gParser.Expr_rangeContext ctx) {
-        return visitRange(ctx.range());
+        var smth = new ArrayList<ExpressionNode>();
+        for (var arg : ctx.range_expr().value()) {
+            smth.add((ExpressionNode) visit(arg));
+        }
+        var ran = visitRange(ctx.range_expr().range());
+        return new RangeNodeExpression(ctx, ran, smth);
+    }
+    @Override
+    public ExpressionNode visitRange_expr(gParser.Range_exprContext ctx) {
+        throw new Error("RangeNode shouldn't be used");
     }
     @Override
 	public ExpressionNode visitExpr_if_else(gParser.Expr_if_elseContext ctx) {
@@ -81,6 +91,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         return x;
     }
 	public ExpressionNode visitExpr(gParser.ExprContext ctx) {
+
         return (ExpressionNode)visit(ctx);
     }
     @Override
@@ -163,7 +174,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         return new StringNode(ctx, s.getText());
     }
     @Override
-	public ExpressionNode visitRange(gParser.RangeContext ctx) {
+	public RangeNode visitRange(gParser.RangeContext ctx) {
         return new RangeNode(ctx,
             ctx.CELL_COL(0).getText(),
             Integer.parseInt(ctx.CELL_ROW(0).getText()),

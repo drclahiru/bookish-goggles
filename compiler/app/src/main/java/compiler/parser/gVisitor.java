@@ -78,19 +78,19 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpr_if_else(gParser.Expr_if_elseContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code expr_range}
-	 * labeled alternative in {@link gParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExpr_range(gParser.Expr_rangeContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code id}
 	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitId(gParser.IdContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code expr_range}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr_range(gParser.Expr_rangeContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code operator}
 	 * labeled alternative in {@link gParser#expr}.
@@ -122,6 +122,12 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitRange_type(gParser.Range_typeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#range_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRange_expr(gParser.Range_exprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#lambda}.
 	 * @param ctx the parse tree
