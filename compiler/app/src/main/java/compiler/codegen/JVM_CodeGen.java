@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import compiler.IdentifierContext;
 import compiler.Utility;
@@ -75,9 +74,9 @@ public class JVM_CodeGen extends VisitorVoid {
 		println();
 		println(".method public static main([Ljava/lang/String;)V");
 		helper.indentLevel++;
-		println("getstatic java/lang/System/out Ljava/io/PrintStream");
-		println("getfield Program/main Ljava/lang/Object");
-		println("invokevirtual java/lang/Object/toString()Ljava/lang/String");
+		println("getstatic java/lang/System/out Ljava/io/PrintStream;");
+		println("getfield Program/main Ljava/lang/Object;");
+		println("invokevirtual java/lang/Object/toString()Ljava/lang/String;");
 		println("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
 		println("return");
 		helper.indentLevel--;
@@ -102,27 +101,27 @@ public class JVM_CodeGen extends VisitorVoid {
 		
 		classNumberNumber("$add", a -> {
 			println("dadd");
-			println("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		});
 		classNumberNumber("$mod", a -> {
 			println("drem");
-			println("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		});
 		classNumberNumber("$div", a -> {
 			println("ddiv");
-			println("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		});
 		classNumberNumber("$mul", a -> {
 			println("dmul");
-			println("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		});
 		classNumberNumber("$sub", a -> {
 			println("dsub");
-			println("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		});
 		classNumberNumber("$lt", a -> {
 			println("dsub");
-			println("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		});
 		classBoolBool("$lt", "iflt");
 		classBoolBool("$gt", "ifgt");
@@ -163,16 +162,10 @@ public class JVM_CodeGen extends VisitorVoid {
 		println();
 		print(".method public eval(");
 		helper.indentLevel++;
-		
-		if (f.parameters.size() > 0) {
-			print("Ljava/lang/Object");
+		for (var i = 0; i < f.parameters.size(); i++) {
+			print("Ljava/lang/Object;");
 		}
-		for (var i = 1; i < f.parameters.size(); i++) {
-			print(";Ljava/lang/Object");
-		}
-		
-		
-		println(")a");
+		println(")Ljava/lang/Object;");
 		var argMap  = new HashMap<Identifier, Integer>();
 		for (var i = 0; i < f.parameters.size(); i++) {
 			argMap.put(f.parameters.get(i).identifier.value, i+1);
@@ -197,13 +190,13 @@ public class JVM_CodeGen extends VisitorVoid {
 			} else {
 				println("iconst_0");
 			}
-			println("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean");
+			println("invokestatic java/lang/Boolean.valueOf(Z)Ljava/lang/Boolean;");
 		}
 		
 		@Override
 		protected void visitNumber(NumberNode n) throws VisitorException { 	
 			println("ldc_w " + n.value);
-			println("invokestatic java/lang/Double/valueOf(D)Ljava/lang/Double");
+			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		}
 		@Override
 		protected void visitString(StringNode n) throws VisitorException {   	 
@@ -245,13 +238,10 @@ public class JVM_CodeGen extends VisitorVoid {
 				} else if (type instanceof FunctionTypeNode) {
 					var t = (FunctionTypeNode)type;
 					print("Eval" + t.parameters.size() + "(");
-					if (t.parameters.size() > 0) {
-						print("Ljava/lang/Object");
+					for (var i = 0; i < t.parameters.size(); i++) {
+						print("Ljava/lang/Object;");
 					}
-					for (var i = 1; i < t.parameters.size(); i++) {
-						print(";Ljava/lang/Object");
-					}
-					println(")a");
+					println(")Ljava/lang/Object;");
 				} else {
 					println("java/lang/Object");
 				}
@@ -264,7 +254,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			var labelEnd = "LabelEnd" + labelCount++;
 			println("aload_1");
 			println("checkcast java/lang/Boolean");
-			println("invokevirtual java/lang/Boolean/booleanValue()Z");
+			println("invokevirtual java/lang/Boolean.booleanValue()Z");
 			println("ifne " + labelFalse);
 			visit(n.trueCase);
 			println("goto " + labelEnd);
@@ -284,13 +274,10 @@ public class JVM_CodeGen extends VisitorVoid {
 			}
 							
 			print("invokeinterface Eval" + args + "/eval(");
-			if (args > 0) {
-				print("Ljava/lang/Object");
+			for (var i = 0; i < args; i++) {
+				print("Ljava/lang/Object;");
 			}
-			for (var i = 1; i < args; i++) {
-				print(";Ljava/lang/Object");
-			}
-			println(")a " + args);
+			println(")Ljava/lang/Object; " + args);
 		}
 	}
 
@@ -316,13 +303,10 @@ public class JVM_CodeGen extends VisitorVoid {
 			println(".super java/lang/Object");
 			println();
 			print(".method abstract eval(");
-			if (n > 0) {
-				print("Ljava/lang/Object");
+			for (var i = 0; i < n; i++) {
+				print("Ljava/lang/Object;");
 			}
-			for (var i = 1; i < n; i++) {
-				print(";Ljava/lang/Object");
-			}
-			println(")a");
+			println(")Ljava/lang/Object;");
 			println(".end method");
 		});	
 	}
@@ -341,7 +325,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			helper.indentLevel--;
 			println(".end method");
 			println();
-			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object)a");
+			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
 			println("aload_1");
 			println("checkcast java/lang/Double");
@@ -350,9 +334,9 @@ public class JVM_CodeGen extends VisitorVoid {
 			println("checkcast java/lang/Double");
 			println("astore 4");
 			println("aload_3");
-			println("invokevirtual java/lang/Double/doubleValue()D");
+			println("invokevirtual java/lang/Double.doubleValue()D");
 			println("aload 4");
-			println("invokevirtual java/lang/Double/doubleValue()D");
+			println("invokevirtual java/lang/Double.doubleValue()D");
 			op.accept(null);
 			println("areturn"); 
 			helper.indentLevel--;
@@ -374,7 +358,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			helper.indentLevel--;
 			println(".end method");
 			println();
-			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object)a");
+			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
 			println("aload_1");
 			println("checkcast java/lang/Boolean");
@@ -383,9 +367,9 @@ public class JVM_CodeGen extends VisitorVoid {
 			println("checkcast java/lang/Boolean");
 			println("astore 4");
 			println("aload_3");
-			println("invokevirtual java/lang/Boolean/booleanValue()Z");
+			println("invokevirtual java/lang/Boolean.booleanValue()Z");
 			println("aload 4");
-			println("invokevirtual java/lang/Boolean/booleanValue()Z");
+			println("invokevirtual java/lang/Boolean.booleanValue()Z");
 			println("dcmpl");
 			println(eqType + " Label1");
 			println("iconst_1");
@@ -393,7 +377,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			println("Label1:");
 			println("iconst_0");
 			println("Label2:");
-			println("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean");
+			println("invokestatic java/lang/Boolean.valueOf(Z)Ljava/lang/Boolean;");
 			println("areturn"); 
 			helper.indentLevel--;
 			println(".end method");
