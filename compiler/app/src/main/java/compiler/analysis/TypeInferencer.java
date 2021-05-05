@@ -66,10 +66,6 @@ public class TypeInferencer {
             ctx = Utility.createPrelude();
             subst = new Substitution();
         }
-        InferenceVisitor(IdentifierContext ctx, Substitution subst) {
-            this.ctx = ctx;
-            this.subst = subst;
-        }
 
         public TypeNode run(ExpressionNode n) throws VisitorException {
             var typeResult = visit(n);
@@ -103,12 +99,6 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitFunction(FunctionNode n) throws VisitorException {
-            var visitor = new InferenceVisitor(ctx.clone(), subst);
-            var t = visitor.visitFunctionInner(n);
-            addFromCtx(visitor.ctx);
-            return t;
-        }
-        protected TypeNode visitFunctionInner(FunctionNode n) throws VisitorException {
             var params = new ArrayList<TypeNode>();
             for (var p : n.parameters) {
                 var scheme = new TypeScheme(varGen.next());
@@ -148,12 +138,6 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
-            var visitor = new InferenceVisitor(ctx.clone(), subst);
-            var t = visitor.visitLetBindingInner(n);
-            addFromCtx(visitor.ctx);
-            return t;
-        }
-        protected TypeNode visitLetBindingInner(LetBindingNode n) throws VisitorException {
             ctx.put(n.declaration.identifier.value, generalize(ctx, varGen.next()));
             var t = visit(n.expr);
             if (n.declaration.typeScheme != null) {
@@ -170,9 +154,7 @@ public class TypeInferencer {
             var tyVar = varGen.next();
             ctx.put(n.declaration.identifier.value, new TypeScheme(tyVar));
             subst.unify(t, tyVar);
-            var visitor = new InferenceVisitor(subst.apply(ctx), subst);
-            var tNext = visitor.visit(n.next);
-            addFromCtx(visitor.ctx);
+            var tNext = visit(n.next);
             return tNext;
         }
         @Override
@@ -186,15 +168,6 @@ public class TypeInferencer {
         @Override
         protected TypeNode visitRange(RangeNode n) throws VisitorException {
             throw new Error("Not implemented yet");
-        }
-
-        /**
-         * add keys that only exist in {@code other} to {@code this.ctx}
-         */
-        void addFromCtx(IdentifierContext other) {
-            for (var k : except(other.keySet(), ctx.keySet())) {
-                ctx.put(k, other.get(k));
-            }
         }
     }
 
