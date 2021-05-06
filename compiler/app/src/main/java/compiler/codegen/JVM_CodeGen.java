@@ -166,6 +166,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			print("Ljava/lang/Object;");
 		}
 		println(")Ljava/lang/Object;");
+		println(".limit locals " + (f.parameters.size() + 1));
 		var argMap  = new HashMap<Identifier, Integer>();
 		for (var i = 0; i < f.parameters.size(); i++) {
 			argMap.put(f.parameters.get(i).identifier.value, i+1);
@@ -277,7 +278,8 @@ public class JVM_CodeGen extends VisitorVoid {
 			for (var i = 0; i < args; i++) {
 				print("Ljava/lang/Object;");
 			}
-			println(")Ljava/lang/Object; " + args);
+			// the interface takes an instance of itself as the implicit first argument, hence +1
+			println(")Ljava/lang/Object; " + (args + 1));
 		}
 	}
 
