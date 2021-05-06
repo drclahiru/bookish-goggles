@@ -302,7 +302,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			println(".interface Eval" + n);
 			println(".super java/lang/Object");
 			println();
-			print(".method abstract eval(");
+			print(".method public abstract eval(");
 			for (var i = 0; i < n; i++) {
 				print("Ljava/lang/Object;");
 			}
