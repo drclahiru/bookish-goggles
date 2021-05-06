@@ -259,6 +259,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			println("checkcast java/lang/Boolean");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
 			println("ifne " + labelFalse);
+			helper.indentLevel++;
 			visit(n.trueCase);
 			println("goto " + labelEnd);
 			helper.indentLevel--;
@@ -267,7 +268,6 @@ public class JVM_CodeGen extends VisitorVoid {
 			visit(n.elseCase);
 			helper.indentLevel--;
 			println(labelEnd + ":");
-			helper.indentLevel++;
 		}
 		
 		
