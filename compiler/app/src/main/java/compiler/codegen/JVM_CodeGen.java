@@ -12,7 +12,7 @@ import compiler.Utility;
 import compiler.ast.*;
 import compiler.visitor.*;
 
-public class JVM_CodeGen extends VisitorVoid {
+public class JVM_CodeGen {
 	IdentifierContext idCtx;
 	HashSet<Identifier> globalIds = new HashSet<Identifier>(Utility.createPrelude().keySet());
 	HelperClasses helper;
@@ -29,34 +29,7 @@ public class JVM_CodeGen extends VisitorVoid {
 		}
 	}
 
-	public void run(AbstractNode n) throws VisitorException {
-		visit(n);
-	}
-
-	protected void print(String text) {
-		helper.print(text);
-	}
-
-	protected void println() {
-		helper.println();
-	}
-	protected void println(String text) {
-		print(text);
-		println();
-	}
-
-	protected void printComment(String s) {
-		print("; " + s);
-	}
-
-
-	protected void skip(int num) {
-		for (int i = 0; i < num; ++i)
-			println();
-	}
-
-	@Override
-	public void visitProgram(ProgramNode node) throws VisitorException {
+	public void run(ProgramNode node) throws VisitorException {
 		for (var b : node.bindings) {
 			globalIds.add(b.declaration.identifier.value);
 		}
@@ -64,25 +37,32 @@ public class JVM_CodeGen extends VisitorVoid {
 		println(".class public Program");
 		println(".super java/lang/Object");
 		println();
+		for (var x : node.bindings) {
+			if (!(x.expr instanceof FunctionNode)) {
+				println(".field public " + x.declaration.identifier.value.name + " Ljava/lang/Object;");
+			}
+		}
+		println();
 		println(".method public <init>()V");
 		helper.indentLevel++;
+		// TODO: dynamically set the stack size; but how?
+		println(".limit stack 10");
 		println("aload_0");
-		println("invokenonvirtual java/lang/Object/<init>()V");   //or invokespecial?
+		println("invokenonvirtual java/lang/Object/<init>()V");
+		for (var x : node.bindings) {
+			var ident = x.declaration.identifier.value;
+			if (!(x.expr instanceof FunctionNode)) {
+				println("aload_0");
+				new ExpressionGenerator(new HashMap<>()).visit(x.expr);
+				println("putfield Program/" + ident.name + " Ljava/lang/Object;");
+			}
+		}
 		println("return");
 		helper.indentLevel--;
 		println(".end method");
 		println();
-		println(".method public static main([Ljava/lang/String;)V");
-		helper.indentLevel++;
-		println("getstatic java/lang/System/out Ljava/io/PrintStream;");
-		println("getfield Program/main Ljava/lang/Object;");
-		println("invokevirtual java/lang/Object/toString()Ljava/lang/String;");
-		println("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
-		println("return");
-		helper.indentLevel--;
-		println(".end method");
 		
-		for (var x: node.bindings) {
+		for (var x : node.bindings) {
 			if (x.expr instanceof FunctionNode) {				
 				var file = new File("./examples/jvmInstructions/" + x.declaration.identifier.value.name + ".j");
 				try {
@@ -93,11 +73,24 @@ public class JVM_CodeGen extends VisitorVoid {
 				} catch (FileNotFoundException e) {
 					throw new Error("failed to create file");
 				}
-			}	
-			else {
-				visit(x);
-			}	
-		}	
+			}
+		}
+
+		println(".method public static main([Ljava/lang/String;)V");
+		helper.indentLevel++;
+		
+		// TODO: dynamically set the stack size; but how?
+		println(".limit stack 10");
+		println("getstatic java/lang/System/out Ljava/io/PrintStream;");
+		println("new Program");
+		println("dup");
+		println("invokespecial Program/<init>()V");
+		println("getfield Program/main Ljava/lang/Object;");
+		println("invokevirtual java/lang/Object/toString()Ljava/lang/String;");
+		println("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
+		println("return");
+		helper.indentLevel--;
+		println(".end method");
 		
 		classNumberNumber("$add", a -> {
 			println("dadd");
@@ -132,6 +125,28 @@ public class JVM_CodeGen extends VisitorVoid {
 		evalInterface(0);
 		evalInterface(1);
 		evalInterface(2);
+	}
+
+	protected void print(String text) {
+		helper.print(text);
+	}
+
+	protected void println() {
+		helper.println();
+	}
+	protected void println(String text) {
+		print(text);
+		println();
+	}
+
+	protected void printComment(String s) {
+		print("; " + s);
+	}
+
+
+	protected void skip(int num) {
+		for (int i = 0; i < num; ++i)
+			println();
 	}
 
 	void newFile(String name, Consumer<Object> f) {
@@ -198,7 +213,7 @@ public class JVM_CodeGen extends VisitorVoid {
 		
 		@Override
 		protected void visitNumber(NumberNode n) throws VisitorException { 	
-			println("ldc_w " + n.value);
+			println("ldc2_w " + n.value);
 			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		}
 		@Override
@@ -335,6 +350,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
+			println(".limit locals 5");
 			println("aload_1");
 			println("checkcast java/lang/Double");
 			println("astore_3");
@@ -368,6 +384,7 @@ public class JVM_CodeGen extends VisitorVoid {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
+			println(".limit locals 5");
 			println("aload_1");
 			println("checkcast java/lang/Boolean");
 			println("astore_3");

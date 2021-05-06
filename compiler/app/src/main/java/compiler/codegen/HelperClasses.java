@@ -58,8 +58,8 @@ public class HelperClasses extends VisitorVoid {
 		
 		println("aload_1");
 		println("aload_2");
-		println("invokevirtual java/lang/Object/equals(Ljava/lang/Object;)Z");
-		println("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean");
+		println("invokevirtual java/lang/Object.equals(Ljava/lang/Object;)Z");
+		println("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
 		println("areturn");
 		indentLevel--;
 		println(".end method");
@@ -71,7 +71,7 @@ public class HelperClasses extends VisitorVoid {
 		
 		println("aload_1");
 		println("aload_2");
-		println("invokevirtual java/lang/Object/equals(Ljava/lang/Object;)Z");
+		println("invokevirtual java/lang/Object.equals(Ljava/lang/Object;)Z");
 		println("ifne Label1");
 		println("iconst_1");
 		println("goto Label2");
@@ -82,7 +82,7 @@ public class HelperClasses extends VisitorVoid {
 		indentLevel--;
 		println("Label2:");
 		indentLevel++;
-		println("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean");
+		println("invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;");
 		println("areturn");
 		indentLevel--;
 		println(".end method");
@@ -100,8 +100,10 @@ public class HelperClasses extends VisitorVoid {
 		indentLevel--;
 		println(".end method");
 		skip(2);
-		println(".method public eval(Ljava/lang/Object;Ljava/lang/Object)a");
+		println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 		indentLevel++;
+		println(".limit locals 3");
+		println(".limit stack 2");
 	}
 }
 
