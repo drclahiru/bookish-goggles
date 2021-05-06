@@ -30,8 +30,6 @@ class App {
     public static IdentifierContext infer(ProgramNode ast) throws VisitorException, VisitorExceptionAggregate {
         var idMap = new ScopeResolver().run(ast);
         var idCtx = new TypeInferencer(idMap).run(ast);
-        // System.out.println("\n\n-------- Types inferenced --------\n\n");
-        // print(ast, true);
         return idCtx;
     }
 
@@ -41,17 +39,10 @@ class App {
         System.out.println("\n\n-------- Haskell --------\n\n");
         new CodeGen(System.out).run(ast);
     }
-    
-//    public static void codeGen2(ProgramNode ast) throws VisitorException {
-//        new JVM_CodeGen(System.out).run(ast);
-//        System.out.println("\n\n-------- JVM --------\n\n");
-//        new JVM_CodeGen(System.out).run(ast);
-//    }
-    
 
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/example3.bg");
+            var ast = readAndParse("./examples/example2.bg");
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
@@ -60,19 +51,11 @@ class App {
             // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
             
-           // var file = new File("./generated/" + className + ".j");
-          //  this.fout = new FileOutputStream(file);
-            
-            var file = new File("./examples/jvmInstructions/test.bg");
-            var fOut = new FileOutputStream(file);
-            
             var idGen = new IdentifierGenerator();
             new LetExpressionDesugarer(idMap, idGen).run(ast);
             new LambdaLifter(idMap, idGen).run(ast);
             new PrettyPrinter(System.out).run(ast);
-            new JVM_CodeGen(fOut).run(ast);
-            System.out.println("\n\n--------CODE GEN--------------------\n\n");
-            //codeGen2(ast);
+            new JVM_CodeGen(idMap).run(ast);
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");

@@ -45,8 +45,7 @@ public class JVM_CodeGen {
 		println();
 		println(".method public <init>()V");
 		helper.indentLevel++;
-		// TODO: dynamically set the stack size; but how?
-		println(".limit stack 10");
+		stackAndLocals();
 		println("aload_0");
 		println("invokenonvirtual java/lang/Object/<init>()V");
 		for (var x : node.bindings) {
@@ -79,8 +78,7 @@ public class JVM_CodeGen {
 		println(".method public static main([Ljava/lang/String;)V");
 		helper.indentLevel++;
 		
-		// TODO: dynamically set the stack size; but how?
-		println(".limit stack 10");
+		stackAndLocals();
 		println("getstatic java/lang/System/out Ljava/io/PrintStream;");
 		println("new Program");
 		println("dup");
@@ -181,9 +179,7 @@ public class JVM_CodeGen {
 			print("Ljava/lang/Object;");
 		}
 		println(")Ljava/lang/Object;");
-		println(".limit locals " + (f.parameters.size() + 1));
-		// TODO: dynamically set the stack size; but how?
-		println(".limit stack 100");
+		stackAndLocals();
 		var argMap  = new HashMap<Identifier, Integer>();
 		for (var i = 0; i < f.parameters.size(); i++) {
 			argMap.put(f.parameters.get(i).identifier.value, i+1);
@@ -273,7 +269,8 @@ public class JVM_CodeGen {
 			visit(n.boolExpr);
 			println("checkcast java/lang/Boolean");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
-			println("ifne " + labelFalse);
+			// TODO: is this correct?
+			println("ifeq " + labelFalse);
 			helper.indentLevel++;
 			visit(n.trueCase);
 			println("goto " + labelEnd);
@@ -350,16 +347,12 @@ public class JVM_CodeGen {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
-			println(".limit locals 5");
+			stackAndLocals();
 			println("aload_1");
 			println("checkcast java/lang/Double");
-			println("astore_3");
+			println("invokevirtual java/lang/Double.doubleValue()D");
 			println("aload_2");
 			println("checkcast java/lang/Double");
-			println("astore 4");
-			println("aload_3");
-			println("invokevirtual java/lang/Double.doubleValue()D");
-			println("aload 4");
 			println("invokevirtual java/lang/Double.doubleValue()D");
 			op.accept(null);
 			println("areturn"); 
@@ -384,28 +377,30 @@ public class JVM_CodeGen {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
-			println(".limit locals 5");
+			stackAndLocals();
 			println("aload_1");
 			println("checkcast java/lang/Boolean");
-			println("astore_3");
+			println("invokevirtual java/lang/Boolean.booleanValue()Z");
 			println("aload_2");
 			println("checkcast java/lang/Boolean");
-			println("astore 4");
-			println("aload_3");
-			println("invokevirtual java/lang/Boolean.booleanValue()Z");
-			println("aload 4");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
 			println("dcmpl");
-			println(eqType + " Label1");
+			println(eqType + " LabelFalse");
 			println("iconst_1");
-			println("goto Label2");
-			println("Label1:");
+			println("goto LabelEnd");
+			println("LabelFalse:");
 			println("iconst_0");
-			println("Label2:");
+			println("LabelEnd:");
 			println("invokestatic java/lang/Boolean.valueOf(Z)Ljava/lang/Boolean;");
 			println("areturn"); 
 			helper.indentLevel--;
 			println(".end method");
 		});
+	}
+
+	void stackAndLocals() {
+		// TODO: we should dynamically calculate what the maximum stack size and local count would be for any given expression
+		println(".limit locals 10");
+		println(".limit stack 10");
 	}
 }

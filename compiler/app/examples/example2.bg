@@ -1,14 +1,10 @@
-let apply = (f, x) {f(x)}
 
-let a Number = 3
-
-let square = (x) {
-    let x1 = x in
-    let x2 = 
-        let x3 = apply((y) {y}, x) in
-        x3 * 1
-    in
-    x1 * x2
+let fact = (n) {
+    if n == 0 {
+        1
+     } else {
+        n * fact(n - 1)
+     }
 }
 
-let main = apply(square, a)
+let main = fact(4)
