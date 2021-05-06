@@ -167,6 +167,8 @@ public class JVM_CodeGen extends VisitorVoid {
 		}
 		println(")Ljava/lang/Object;");
 		println(".limit locals " + (f.parameters.size() + 1));
+		// TODO: dynamically set the stack size; but how?
+		println(".limit stack 100");
 		var argMap  = new HashMap<Identifier, Integer>();
 		for (var i = 0; i < f.parameters.size(); i++) {
 			argMap.put(f.parameters.get(i).identifier.value, i+1);
@@ -253,15 +255,19 @@ public class JVM_CodeGen extends VisitorVoid {
 		protected void visitIfElse(IfElseNode n) throws VisitorException {
 			var labelFalse = "LabelFalse" + labelCount++;
 			var labelEnd = "LabelEnd" + labelCount++;
-			println("aload_1");
+			visit(n.boolExpr);
 			println("checkcast java/lang/Boolean");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
 			println("ifne " + labelFalse);
 			visit(n.trueCase);
 			println("goto " + labelEnd);
+			helper.indentLevel--;
 			println(labelFalse + ":");
+			helper.indentLevel++;
 			visit(n.elseCase);
+			helper.indentLevel--;
 			println(labelEnd + ":");
+			helper.indentLevel++;
 		}
 		
 		
