@@ -36,10 +36,10 @@ expr:
 	| lambda										# expr_lambda
 	| if_else										# expr_if_else /*accepts IDs starting with small letters or _ */
 	| value											# expr_value /* accepts booleans, numbers and strings: True/False, "String", 4 */
-	| range											# expr_range /* A1:B5 */
 	| ID											# id /*accepts IDs starting with small letters or _ */
 	| lambda_invocation                             # expr_invoke
-	| let_expr										# expr_let;
+	| let_expr										# expr_let
+	| range_expr									# expr_range;
 
 /* example use:
  if x==3 {4/2 } else {7 }
@@ -52,7 +52,9 @@ basic_type: BASIC_TYPE;
 /* not sure if the type definition belongs to lexer or parser rules*/
 
 /* Range (String) */
-range_type: RANGE_NAME OPAR BASIC_TYPE CPAR;
+range_type: range BASIC_TYPE;
+
+range_expr : range OBRACE (value (COMMA value)*)? CBRACE;
 
 /* x(y,z) - invoking lambda*/
 /* (String, String) -> Number (x) { let x (String) = 4*4 4*x} */
