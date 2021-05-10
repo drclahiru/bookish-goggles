@@ -10,7 +10,7 @@ statements:
 	range_binding NEWLINE*
 	| let_binding NEWLINE* /* expr and type under let_binding*/;
 
-range_binding: range ASSIGN OPAR (value (COMMA value)*)? CPAR;
+range_binding: range ASSIGN range_expr;
 
 /* types are optional part of let binding.
  let x (String) = 4*4
@@ -51,10 +51,10 @@ type: range_type | basic_type | lambda_type;
 basic_type: BASIC_TYPE;
 /* not sure if the type definition belongs to lexer or parser rules*/
 
-/* Range (String) */
-range_type: range BASIC_TYPE;
+/* Range type */
+range_type: RANGE_NAME OPAR type CPAR;
 
-range_expr : range OBRACE (value (COMMA value)*)? CBRACE;
+range_expr : OBRACE (value (COMMA value)*)? CBRACE;
 
 /* x(y,z) - invoking lambda*/
 /* (String, String) -> Number (x) { let x (String) = 4*4 4*x} */
@@ -72,7 +72,7 @@ lambda_invocation:
 
 value: NUMBER # number | BOOL # bool | STRING # string;
 
-range: CELL_COL CELL_ROW ':' CELL_COL CELL_ROW;
+range: CELL_ADDRESS ':' CELL_ADDRESS;
 
 BASIC_TYPE: 'String' | 'Bool' | 'Number';
 /* lexer rules and token definitions*/
@@ -136,25 +136,28 @@ LET: 'let';
 IN: 'in';
 RANGE_NAME: 'Range';
 
-BOOL: TRUE | FALSE;
-
-TRUE: 'true';
-FALSE: 'false';
-
 /* I skipped the negative numbers definition because I found it is never correct to handle this as
  a
  lexer rule,
  we should handle it later in the Visitor class
  */
+//RANGE: CELL_COL CELL_ROW ':' CELL_COL CELL_ROW;
+
 NUMBER: [0-9]+ | [0-9]+ '.' [0-9]+;
+CELL_ADDRESS: [A-Z]+ [1-9]+[0-9]*;
+//CELL_COL: [A-Z]+;
+//CELL_ROW: [1-9]+[0-9]*;
 
 ID: [a-z_]+ [a-z_0-9]*;
 
-CELL_COL: [A-Z]+;
-CELL_ROW: [1-9] [0-9]*;
 // CELL_ID: [A-Z]+ [1-9] [0-9]*;
 
 STRING: PAR CHARACTER* PAR;
+
+BOOL: TRUE | FALSE;
+
+TRUE: 'True';
+FALSE: 'False';
 
 CHARACTER: [a-zA-Z_0-9];
 

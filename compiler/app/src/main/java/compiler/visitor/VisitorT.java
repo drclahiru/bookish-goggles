@@ -34,7 +34,9 @@ public abstract class VisitorT<T> {
         } else if (n instanceof StringNode) {
             return visitString((StringNode)n);
         } else if (n instanceof RangeNode) {
-            return visitRange((RangeNode)n);   
+            return visitRange((RangeNode)n);  
+        } else if (n instanceof RangeNodeExpression) {
+            return visitRangeNodeExpression((RangeNodeExpression)n);  
         } else if (n instanceof LetExpressionNode) {
             return visitLetExpression((LetExpressionNode)n);
         } else {
@@ -53,4 +55,5 @@ public abstract class VisitorT<T> {
     protected abstract T visitProgram(ProgramNode n)  throws VisitorException;
     protected abstract T visitString(StringNode n)  throws VisitorException;
     protected abstract T visitRange(RangeNode n)  throws VisitorException;
+    protected abstract T visitRangeNodeExpression(RangeNodeExpression n)  throws VisitorException;
 }
