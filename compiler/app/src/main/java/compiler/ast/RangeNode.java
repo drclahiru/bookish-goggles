@@ -1,6 +1,7 @@
 package compiler.ast;
 
 import java.util.stream.*;
+import java.util.ArrayList;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RangeNode extends ExpressionNode {
