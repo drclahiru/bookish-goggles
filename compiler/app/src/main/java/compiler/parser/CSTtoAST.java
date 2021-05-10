@@ -181,13 +181,9 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     }
     @Override
 	public RangeNode visitRange(gParser.RangeContext ctx) {
-        //System.out.println(ctx.CELL_ADDRESS(0).getText());
-
         Pattern pattern = Pattern.compile("([A-Z]+)(\\d+)");
         Matcher start = pattern.matcher(ctx.CELL_ADDRESS(0).getText());
         Matcher end = pattern.matcher(ctx.CELL_ADDRESS(1).getText());
-
-
 
         if(start.find() && end.find()) {
             var col1 = start.group(1);
