@@ -108,6 +108,9 @@ public class LambdaLifter extends VisitorT<ExpressionNode> {
     protected ExpressionNode visitRange(RangeNode n) throws VisitorException {
         return n;
     }
+    protected ExpressionNode visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
+        return n;
+    }
     protected ExpressionNode visitLetBinding(LetBindingNode n) throws VisitorException {
         var let = n.clone();
         let.expr = visit(n.expr);

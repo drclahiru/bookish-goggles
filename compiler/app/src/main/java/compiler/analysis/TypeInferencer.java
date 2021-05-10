@@ -167,7 +167,17 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitRange(RangeNode n) throws VisitorException {
-            throw new Error("Not implemented yet");
+            throw new Error("Shouldn't be visited");
+        }
+        @Override
+        protected TypeNode visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
+            var branch1 = varGen.next();
+            for (var arg : n.value) {
+                var branch2 = visit(arg);
+                subst.unify(branch1, branch2);
+            }
+            var smth = subst.apply(branch1);
+            return new RangeTypeNode(n.source,smth);
         }
     }
 

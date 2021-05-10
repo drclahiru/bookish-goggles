@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RangeNodeExpression extends ExpressionNode {
-
-    public final RangeNode rangeNode;
     public final ArrayList<ExpressionNode> value;
 
-    public RangeNodeExpression(ParserRuleContext source, RangeNode rangeNode, ArrayList<ExpressionNode> value) {
+    public RangeNodeExpression(ParserRuleContext source, ArrayList<ExpressionNode> value) {
         super(source);
-        this.rangeNode = rangeNode;
         this.value = value;
     }
 
@@ -21,7 +18,7 @@ public class RangeNodeExpression extends ExpressionNode {
 
     @Override
     public RangeNodeExpression clone() {
-        var n = new RangeNodeExpression (source, rangeNode, value);
+        var n = new RangeNodeExpression (source, value);
         n.type = type;
         return n;
     }
