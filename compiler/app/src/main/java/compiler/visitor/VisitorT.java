@@ -56,4 +56,5 @@ public abstract class VisitorT<T> {
     protected abstract T visitString(StringNode n)  throws VisitorException;
     protected abstract T visitRange(RangeNode n)  throws VisitorException;
     protected abstract T visitRangeNodeExpression(RangeNodeExpression n)  throws VisitorException;
+   // protected abstract T visitRangeBinding(RangeBindingNode n) throws VisitorException;
 }

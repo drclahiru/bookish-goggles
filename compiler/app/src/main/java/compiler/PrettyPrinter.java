@@ -7,7 +7,7 @@ import compiler.visitor.VisitorVoid;
 import java.util.function.Consumer;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-
+// correcto ;)
 public class PrettyPrinter extends VisitorVoid {
     public class Options {
         public boolean printScopeNumber = false;
@@ -191,6 +191,15 @@ public class PrettyPrinter extends VisitorVoid {
 
     @Override
     protected void visitProgram(ProgramNode node) throws VisitorException {
+    	
+    	  for (var x : (Iterable<RangeBindingNode>) node.rangeBindings.stream().limit(1)::iterator) {
+              visit(x);
+          }
+          for (var x : (Iterable<RangeBindingNode>) node.rangeBindings.stream().skip(1)::iterator) {
+              print("\n");
+              isNewline = true;
+              visit(x);
+          }
         for (var x : (Iterable<LetBindingNode>) node.bindings.stream().limit(1)::iterator) {
             visit(x);
         }
@@ -199,6 +208,7 @@ public class PrettyPrinter extends VisitorVoid {
             isNewline = true;
             visit(x);
         }
+      
     }
 
     @Override
@@ -208,6 +218,25 @@ public class PrettyPrinter extends VisitorVoid {
         print(":");
         print(node.endCol);
         print(Integer.toString(node.endRow));
+    }
+    @Override
+    protected void visitRangeBinding(RangeBindingNode n) throws VisitorException{
+    	visit(n.range);
+    	print("=");
+    	visit(n.expr);
+    	println();
+    }
+    @Override
+    protected void visitRangeNodeExpression(RangeNodeExpression node) throws VisitorException {
+        print("{");
+        Boolean first = true;
+        for(var args: node.value) {
+        	
+        if(!first)print(", ");
+        visit(args);
+        first =false;
+        }
+        print("}");
     }
 
     protected void print(String text) {

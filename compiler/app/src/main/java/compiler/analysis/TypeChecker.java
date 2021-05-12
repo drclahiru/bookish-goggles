@@ -14,7 +14,19 @@ public class TypeChecker extends VisitorVoid {
             } catch (VisitorException ex) {
                 exceptions.add(ex);
             }
+            
+            
         }
+        for (var bind : pn.rangeBindings) {
+            try {
+                visit(bind);
+            } catch (VisitorException ex) {
+                exceptions.add(ex);
+            }
+            
+            
+        }
+        
         if (exceptions.size() > 0) {
             throw new VisitorExceptionAggregate(exceptions);
         }
@@ -82,9 +94,25 @@ public class TypeChecker extends VisitorVoid {
 
     @Override
     protected void visitRange(RangeNode n) throws VisitorException {
-        throw new Error("todo: implement");
+        throw new Error("shouldn't be visited");
     }
-
+	@Override
+    protected void visitRangeBinding(RangeBindingNode n) throws VisitorException {
+		if(!n.validate()) {throw new Error("length mismatch");}
+		System.out.print("go");
+    	visitRangeNodeExpression(n.expr);    
+    }
+    @Override
+    protected void visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
+       // super.visitRangeNodeExpression(n);
+    	var z = n.type;
+    	//ssSystem.out.print("OPAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    	for(var arg:n.value) {
+    		
+    		if(!typesUnify(z, arg.type)) {throw new VisitorException(n, "type mismatch");}
+        	
+        }
+    }
     boolean typesUnify(TypeNode t1, TypeNode t2) {
         // TODO: type variables need to be tracked. if there is a type 
         //   (a, a) -> b

@@ -151,6 +151,14 @@ public class CodeGenPretty extends VisitorVoid {
             println();
             visit(x);
         }
+        
+        for (var x : (Iterable<RangeBindingNode>) node.rangeBindings.stream().limit(1)::iterator) {
+            visit(x);
+        }
+        for (var x : (Iterable<RangeBindingNode>) node.rangeBindings.stream().skip(1)::iterator) {
+            println();
+            visit(x);
+        }
     }
 
     @Override
@@ -160,6 +168,19 @@ public class CodeGenPretty extends VisitorVoid {
         print(":");
         print(node.endCol);
         print(Integer.toString(node.endRow));
+    }
+    @Override
+    protected void visitRangeNodeExpression(RangeNodeExpression node) throws VisitorException {
+        print("[");
+        Boolean first = true;
+        for(var args: node.value) {
+        	
+        if(!first)print(", ");
+        visit(args);
+        first =false;
+        }
+        print("]");
+    
     }
 
     protected void print(String text) {

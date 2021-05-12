@@ -3,7 +3,7 @@ package compiler.codegen;
 import java.io.*;
 import compiler.ast.*;
 import compiler.visitor.*;
-
+// righto
 public class CodeGen  extends VisitorVoid  {
     public static String stringify(AbstractNode n) {
         try {
@@ -117,7 +117,8 @@ public class CodeGen  extends VisitorVoid  {
 
     @Override
     protected void visitFunctionInvocation(FunctionInvocationNode node) throws VisitorException {
-        if (node.isOperator()) {
+        
+    	if (node.isOperator()) {
         	print("(");
             visit(node.arguments.get(0));
             print(" ");
@@ -173,7 +174,20 @@ public class CodeGen  extends VisitorVoid  {
         print(node.endCol);
         print(Integer.toString(node.endRow));
     }
-
+// real one :)
+    @Override
+    protected void visitRangeNodeExpression(RangeNodeExpression node) throws VisitorException {
+        print("[");
+        Boolean first = true;
+        for(var args: node.value) {
+        	
+        if(!first)print(", ");
+        visit(args);
+        first =false;
+        }
+        print("]");
+    
+    }
     protected void print(String text) {
         try {
             if (isNewline) {

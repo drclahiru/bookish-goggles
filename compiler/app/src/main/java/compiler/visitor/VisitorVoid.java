@@ -20,7 +20,9 @@ public abstract class VisitorVoid {
             visitIdentifierDeclaration((IdentifierDeclarationNode)n);
         } else if (n instanceof ProgramNode) {
             visitProgram((ProgramNode)n);
-        } else {
+        }else if (n instanceof RangeBindingNode) {
+            visitRangeBinding((RangeBindingNode)n);}
+        else {
             throw new Error("Unexpected type: " + n);
         }
     }
@@ -88,6 +90,7 @@ public abstract class VisitorVoid {
     protected void visitString(StringNode n) throws VisitorException {
         defaultVisit(n);
     }
+    
     protected void visitType(TypeNode n) throws VisitorException {
         if (n == null) {
         } else if (n instanceof SimpleTypeNode) {
@@ -96,7 +99,10 @@ public abstract class VisitorVoid {
             visitFunctionType((FunctionTypeNode)n);
         } else if (n instanceof VariableTypeNode) {
             visitVariableType((VariableTypeNode)n);
-        } else {
+        } else if (n instanceof RangeTypeNode) {
+        	var k = ((RangeTypeNode) n).innerType;
+        	visitType(k);
+        }else {
             throw new Error("Unexpected type: " + n);
         }
     }
@@ -104,9 +110,14 @@ public abstract class VisitorVoid {
         defaultVisit(n);
     }
     protected void visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
-        defaultVisit(n);
+        //System.out.print("VISIT RANGE NODE :)");
+    	defaultVisit(n);
     }
     protected void visitVariableType(VariableTypeNode n) throws VisitorException {
         defaultVisit(n);
     }
+	protected void visitRangeBinding(RangeBindingNode n) throws VisitorException {
+         System.out.print("VISIT RANGE NODE :)");
+		 defaultVisit(n);
+	}
 }

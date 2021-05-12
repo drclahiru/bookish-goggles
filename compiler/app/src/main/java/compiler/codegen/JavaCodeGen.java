@@ -73,6 +73,18 @@ public class JavaCodeGen {
             throw new Error("todo");
         }
         @Override
+        protected void visitRangeNodeExpression(RangeNodeExpression node) throws VisitorException {
+            print("[");
+            Boolean first = true;
+            for(var args: node.value) {
+            	
+            if(!first)print(", ");
+            visit(args);
+            first =false;
+            }
+            print("]");
+        }
+        @Override
         protected void visitIdentifier(IdentifierNode n) throws VisitorException {
             var name = operatorNameMap.get(n.value.name);
             if (name == null) {
@@ -269,6 +281,20 @@ public class JavaCodeGen {
                 break;
                 case String:
                 print("String");
+                break;
+            }
+        } if (ty instanceof RangeTypeNode) {
+            var t = ((RangeTypeNode)ty).innerType;
+            var x =(SimpleTypeNode)t;
+            switch (x.type) {
+                case Bool:
+                print("Boolean[]");
+                break;
+                case Number: 
+                print("Double[]");
+                break;
+                case String:
+                print("String[]");
                 break;
             }
         } else if (ty instanceof FunctionTypeNode) {

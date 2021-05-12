@@ -15,6 +15,12 @@ public class RangeBindingNode extends AbstractNode {
     public Stream<AbstractNode> children() {
         return Stream.of(this.range, this.expr);
     }
+    public boolean validate() {
+    	var length = range.endRow-range.startRow;
+    	var ln = expr.value.size();
+    	
+    	return length+1 == ln;
+    }
 
     @Override
     public RangeBindingNode clone() {

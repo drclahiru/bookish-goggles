@@ -13,7 +13,7 @@ public class RangeNodeExpression extends ExpressionNode {
     }
 
     public Stream<AbstractNode> children() {
-        return Stream.empty();
+        return value.stream().map(x->x);
     }
 
     @Override

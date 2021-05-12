@@ -123,6 +123,15 @@ public class CodeGenVisitor extends VisitorVoid {
 			case Bool: return "Bool";
 			case Number: return "Double";
 			case String: return "String";
+			
+			}
+		}
+		if(ty instanceof RangeTypeNode) {
+			var t = (RangeTypeNode) ty;
+			switch(((SimpleTypeNode)t.innerType).type) {
+			case Bool: return "Bool[]";
+			case Number: return "Double[]";
+			case String: return "String[]";
 			}
 		}
 		if (ty instanceof FunctionTypeNode) {

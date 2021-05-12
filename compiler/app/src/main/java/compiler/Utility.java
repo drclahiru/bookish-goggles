@@ -9,7 +9,9 @@ public class Utility {
         var n = new SimpleTypeNode(null, SimpleType.Number);
         var b = new SimpleTypeNode(null, SimpleType.Bool);
         var x = new VariableTypeNode("x");
-
+        
+        var rn = new RangeTypeNode(null, n);
+        
         var nnn = new FunctionTypeNode(null);
         nnn.parameters.add(n);
         nnn.parameters.add(n);
@@ -29,11 +31,21 @@ public class Utility {
         xxb.parameters.add(x);
         xxb.parameters.add(x);
         xxb.return_ = b;
-
+        
+        
+        var rhn = new FunctionTypeNode(null);
+        rhn.parameters.add(rn);
+        rhn.return_  = n;
+        
+        var rtn = new FunctionTypeNode(null);
+        rtn.parameters.add(rn);
+        rtn.return_  = rn;
+        
         var nnnTs = new TypeScheme(nnn);
         var nnbTs = new TypeScheme(nnb);
         var bbbTs = new TypeScheme(bbb);
         var xxbTs = new TypeScheme(xxb);
+        var rtnTs = new TypeScheme(rtn);
         xxbTs.vars.add(x);
 
         map.put(new Identifier("+"), nnnTs);
@@ -49,6 +61,7 @@ public class Utility {
         map.put(new Identifier("=="), xxbTs);
         map.put(new Identifier("&&"), bbbTs);
         map.put(new Identifier("||"), bbbTs);
+        map.put(new Identifier("head"), rtnTs);
 
         return map;
     }
