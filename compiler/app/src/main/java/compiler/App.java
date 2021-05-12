@@ -36,7 +36,7 @@ class App {
 
     public static void main(String[] args) {
         try {
-            var fileName = "lift_lambda";
+            var fileName = "factorial";
             var ast = readAndParse("./examples/" + fileName + ".puff");
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
@@ -45,17 +45,11 @@ class App {
             new PrettyPrinter(System.out, x -> x.printScopeNumber = false).run(ast);
             // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
-            var file = new File("./examples/" + fileName + ".tmp.java");
-            var fOut = new FileOutputStream(file);
             var idGen = new IdentifierGenerator();
             new LetExpressionDesugarer(idMap, idGen).run(ast);
             new LambdaLifter(idMap, idGen).run(ast);
             new PrettyPrinter(System.out).run(ast);
-            new JavaCodeGen(fOut, idMap).run(ast);
-            // System.out.println("\n\n--------CODE GEN--------------------\n\n");
-            // new CodeGenVisitor(System.out).run(ast);
-            // System.out.println("\n\n-------- Haskell --------\n\n");
-            // new CodeGen(System.out).run(ast);
+            new JVM_CodeGen(idMap).run(ast);
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");

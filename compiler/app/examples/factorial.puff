@@ -1,0 +1,10 @@
+
+let fact = (n) {
+    if n == 0 {
+        1
+     } else {
+        n * fact(n - 1)
+     }
+}
+
+let main = fact(4)
