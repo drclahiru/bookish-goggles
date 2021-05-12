@@ -66,10 +66,6 @@ public class TypeInferencer {
             ctx = Utility.createPrelude();
             subst = new Substitution();
         }
-        InferenceVisitor(IdentifierContext ctx, Substitution subst) {
-            this.ctx = ctx;
-            this.subst = subst;
-        }
 
         public TypeNode run(ExpressionNode n) throws VisitorException {
             var typeResult = visit(n);
@@ -103,22 +99,14 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitFunction(FunctionNode n) throws VisitorException {
-            var visitor = new InferenceVisitor(ctx.clone(), subst);
-            var t = visitor.visitFunctionInner(n);
-            addFromCtx(visitor.ctx);
-            return t;
-        }
-        protected TypeNode visitFunctionInner(FunctionNode n) throws VisitorException {
-            var params = new ArrayList<TypeNode>();
             for (var p : n.parameters) {
                 var scheme = new TypeScheme(varGen.next());
                 ctx.put(p.identifier.value, scheme);
-                params.add(scheme.type);
             }
             var t = new FunctionTypeNode(n.source);
             t.return_ = visit(n.return_);
-            for (var p : params) {
-                t.parameters.add(subst.apply(p));
+            for (var p : n.parameters) {
+                t.parameters.add(subst.apply(ctx.get(p.identifier.value).type));
             }
             return t;
         }
@@ -137,8 +125,7 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitIfElse(IfElseNode n) throws VisitorException {
-            var conditionT = visit(n.boolExpr);
-            subst.unify(new SimpleTypeNode(null, SimpleType.Bool), conditionT);
+            subst.unify(new SimpleTypeNode(null, SimpleType.Bool), visit(n.boolExpr));
 
             var branch1 = visit(n.trueCase);
             var branch2 = visit(n.elseCase);
@@ -148,13 +135,7 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
-            var visitor = new InferenceVisitor(ctx.clone(), subst);
-            var t = visitor.visitLetBindingInner(n);
-            addFromCtx(visitor.ctx);
-            return t;
-        }
-        protected TypeNode visitLetBindingInner(LetBindingNode n) throws VisitorException {
-            ctx.put(n.declaration.identifier.value, generalize(ctx, varGen.next()));
+            ctx.put(n.declaration.identifier.value, new TypeScheme(varGen.next()));
             var t = visit(n.expr);
             if (n.declaration.typeScheme != null) {
                 ctx.put(n.declaration.identifier.value, n.declaration.typeScheme);
@@ -166,14 +147,8 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitLetExpression(LetExpressionNode n) throws VisitorException {
-            var t = visit(n.expr);
-            var tyVar = varGen.next();
-            ctx.put(n.declaration.identifier.value, new TypeScheme(tyVar));
-            subst.unify(t, tyVar);
-            var visitor = new InferenceVisitor(subst.apply(ctx), subst);
-            var tNext = visitor.visit(n.next);
-            addFromCtx(visitor.ctx);
-            return tNext;
+            ctx.put(n.declaration.identifier.value, new TypeScheme(visit(n.expr)));
+            return visit(n.next);
         }
         @Override
         protected TypeNode visitProgram(ProgramNode n) throws VisitorException {
@@ -185,16 +160,15 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitRange(RangeNode n) throws VisitorException {
-            throw new Error("Not implemented yet");
+            throw new Error("Shouldn't be visited");
         }
-
-        /**
-         * add keys that only exist in {@code other} to {@code this.ctx}
-         */
-        void addFromCtx(IdentifierContext other) {
-            for (var k : except(other.keySet(), ctx.keySet())) {
-                ctx.put(k, other.get(k));
+        @Override
+        protected TypeNode visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
+            var t = varGen.next();
+            for (var arg : n.value) {
+                subst.unify(t, visit(arg));
             }
+            return new RangeTypeNode(n.source, subst.apply(t));
         }
     }
 
@@ -359,18 +333,6 @@ public class TypeInferencer {
             s.addAll(freeTypeVarsScheme(sch));
         }
         return s;
-    }
-
-    static<T> Set<T> difference(Set<T> s1, Set<T> s2) {
-        var s3 = new HashSet<T>(s1);
-        for (var val : s2) {
-            if (s3.contains(val)) {
-                s3.remove(val);
-            } else {
-                s3.add(val);
-            }
-        }
-        return s3;
     }
 
     /**

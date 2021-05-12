@@ -16,7 +16,7 @@
 
 # Generated java code
 /app/examples/*.tmp.java
-/app/examples/jvmInstructions
+/app/examples/jasmine
 /app/examples/disassemblies
 /app/examples/classes
 /app/examples/java

@@ -34,15 +34,10 @@ class App {
     }
 
 
-    public static void codeGen(ProgramNode ast) throws VisitorException {
-        new CodeGenVisitor(System.out).run(ast);
-        System.out.println("\n\n-------- Haskell --------\n\n");
-        new CodeGen(System.out).run(ast);
-    }
-
     public static void main(String[] args) {
         try {
-            var ast = readAndParse("./examples/example2.bg");
+            var fileName = "factorial";
+            var ast = readAndParse("./examples/" + fileName + ".puff");
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
@@ -50,7 +45,6 @@ class App {
             new PrettyPrinter(System.out, x -> x.printScopeNumber = false).run(ast);
             // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
-            
             var idGen = new IdentifierGenerator();
             new LetExpressionDesugarer(idMap, idGen).run(ast);
             new LambdaLifter(idMap, idGen).run(ast);

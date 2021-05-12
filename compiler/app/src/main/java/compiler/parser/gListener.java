@@ -120,18 +120,6 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitExpr_if_else(gParser.Expr_if_elseContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code expr_range}
-	 * labeled alternative in {@link gParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpr_range(gParser.Expr_rangeContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code expr_range}
-	 * labeled alternative in {@link gParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpr_range(gParser.Expr_rangeContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code id}
 	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
@@ -143,6 +131,18 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitId(gParser.IdContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code expr_range}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpr_range(gParser.Expr_rangeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code expr_range}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpr_range(gParser.Expr_rangeContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code operator}
 	 * labeled alternative in {@link gParser#expr}.
@@ -195,6 +195,16 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitRange_type(gParser.Range_typeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link gParser#range_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterRange_expr(gParser.Range_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link gParser#range_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitRange_expr(gParser.Range_exprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#lambda}.
 	 * @param ctx the parse tree

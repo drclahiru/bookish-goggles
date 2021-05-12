@@ -16,14 +16,16 @@ tasks.register('jasmin') {
 
         def files = []
 
-        (new File("app/examples/jvmInstructions")).traverse(type: FileType.FILES, maxDepth: 0) { file ->
+        (new File("app/examples/jasmine")).traverse(type: FileType.FILES, maxDepth: 0) { file ->
             if (file.path.endsWith(".j")) {
                 files << file
             }
         }
 
         files.each {
-            def proc = ('java -jar ../../../libs/jasmin.jar ../jvmInstructions/' + it.name).execute(null, new File("app/examples/classes"))
+            def classDir = new File("app/examples/classes")
+            classDir.mkdir()
+            def proc = ('java -jar ../../../libs/jasmin.jar ../jasmine/' + it.name).execute(null, classDir)
             proc.consumeProcessOutput(sout, serr)
             proc.waitForOrKill(1000)
         }

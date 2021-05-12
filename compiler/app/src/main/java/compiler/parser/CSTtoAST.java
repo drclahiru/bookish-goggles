@@ -1,6 +1,9 @@
 package compiler.parser;
 
 import compiler.ast.*;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements gVisitor<AbstractNode> {
@@ -9,8 +12,11 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         var x = new ProgramNode(ctx);
         for (var statementCtx : ctx.statements()) {
             var statement = visit(statementCtx);
-            // TODO: handle rangeBinding
-            x.bindings.add((LetBindingNode)statement);
+            if (statement instanceof LetBindingNode) {
+                x.bindings.add((LetBindingNode)statement);
+            } else if (statement instanceof RangeBindingNode) {
+                x.rangeBindings.add((RangeBindingNode)statement);
+            }
         }
         return x;
     }
@@ -20,7 +26,9 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     }
     @Override
 	public AbstractNode visitRange_binding(gParser.Range_bindingContext ctx) {
-        return visitChildren(ctx);
+        var rangeBinding = new RangeBindingNode(ctx, visitRange(ctx.range()));
+        rangeBinding.expr = visitRange_expr(ctx.range_expr());
+        return rangeBinding;
     }
     @Override
 	public LetBindingNode visitLet_binding(gParser.Let_bindingContext ctx) {
@@ -56,7 +64,15 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     }
     @Override
 	public ExpressionNode visitExpr_range(gParser.Expr_rangeContext ctx) {
-        return visitRange(ctx.range());
+        return visitRange_expr(ctx.range_expr());
+    }
+    @Override
+    public RangeNodeExpression visitRange_expr(gParser.Range_exprContext ctx) {
+        var smth = new ArrayList<ExpressionNode>();
+        for (var arg : ctx.value()) {
+            smth.add((ExpressionNode)visit(arg));
+        }
+        return new RangeNodeExpression(ctx, smth);
     }
     @Override
 	public ExpressionNode visitExpr_if_else(gParser.Expr_if_elseContext ctx) {
@@ -81,6 +97,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         return x;
     }
 	public ExpressionNode visitExpr(gParser.ExprContext ctx) {
+
         return (ExpressionNode)visit(ctx);
     }
     @Override
@@ -163,12 +180,19 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         return new StringNode(ctx, s.getText());
     }
     @Override
-	public ExpressionNode visitRange(gParser.RangeContext ctx) {
-        return new RangeNode(ctx,
-            ctx.CELL_COL(0).getText(),
-            Integer.parseInt(ctx.CELL_ROW(0).getText()),
-            ctx.CELL_COL(1).getText(),
-            Integer.parseInt(ctx.CELL_ROW(1).getText())
-        );
+	public RangeNode visitRange(gParser.RangeContext ctx) {
+        Pattern pattern = Pattern.compile("([A-Z]+)(\\d+)");
+        Matcher start = pattern.matcher(ctx.CELL_ADDRESS(0).getText());
+        Matcher end = pattern.matcher(ctx.CELL_ADDRESS(1).getText());
+
+        if(start.find() && end.find()) {
+            var col1 = start.group(1);
+            var row1 = start.group(2);
+            var col2 = end.group(1);
+            var row2 = end.group(2);
+            return new RangeNode(ctx,col1, Integer.parseInt(row1), col2, Integer.parseInt(row2));
+        } else {
+            throw new Error("The range for the type 'Range' is not provided correctly");
+        }
     }
 }

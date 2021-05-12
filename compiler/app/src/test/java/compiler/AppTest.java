@@ -16,21 +16,14 @@ import compiler.visitor.*;
 public class AppTest {
     @Test
     public void typeCheckExample1() throws Exception {
-        var ast = App.readAndParse("./examples/example1.bg");
-        App.infer(ast);
-        new TypeChecker().run(ast);
-    }
-
-    @Test
-    public void typeCheckExample2() throws Exception {
-        var ast = App.readAndParse("./examples/example2.bg");
+        var ast = App.readAndParse("./examples/example1.puff");
         App.infer(ast);
         new TypeChecker().run(ast);
     }
 
     @Test
     public void typeCheckError() throws IOException {
-        var ast = App.readAndParse("./examples/type_error.bg");
+        var ast = App.readAndParse("./examples/type_error.puff");
         Assert.assertThrows(VisitorExceptionAggregate.class, () -> {
             App.infer(ast);
             new TypeChecker().run(ast);
@@ -40,9 +33,10 @@ public class AppTest {
     @Test
     public void printParsePrint() throws Exception {
         var paths = new ArrayList<String>();
-        paths.add("./examples/type_error.bg");
-        paths.add("./examples/example1.bg");
-        paths.add("./examples/example2.bg");
+        paths.add("./examples/type_error.puff");
+        paths.add("./examples/example1.puff");
+        paths.add("./examples/desugar_let.puff");
+        paths.add("./examples/lift_lambda.puff");
 
         for (var path : paths) {
             var ast = App.readAndParse(path);
