@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import compiler.IdentifierContext;
 import compiler.Utility;
@@ -46,16 +47,26 @@ public class JVM_CodeGen {
 		println();
 		println(".method public <init>()V");
 		helper.indentLevel++;
-		stackAndLocals();
+		var nonFunctions = node.bindings
+			.stream()
+			.filter(x -> !(x.expr instanceof FunctionNode))
+			.collect(Collectors.toList());
+		println(".limit locals " + nonFunctions.size());
+		{
+			var stack = 1;
+			for (var i = 0; i < nonFunctions.size(); i++) {
+				var expr = nonFunctions.get(i).expr;
+				var exprStack = new StackSizeCalculator().run(expr);
+				stack = Math.max(stack, i + 1 + exprStack);
+			}
+			println(".limit stack " + stack);
+		}
 		println("aload_0");
 		println("invokenonvirtual java/lang/Object/<init>()V");
-		for (var x : node.bindings) {
-			var ident = x.declaration.identifier.value;
-			if (!(x.expr instanceof FunctionNode)) {
-				println("aload_0");
-				new ExpressionGenerator(new HashMap<>()).visit(x.expr);
-				println("putfield Program/" + ident.name + " Ljava/lang/Object;");
-			}
+		for (var x : nonFunctions) {
+			println("aload_0");
+			new ExpressionGenerator(new HashMap<>()).visit(x.expr);
+			println("putfield Program/" + x.declaration.identifier.value.name + " Ljava/lang/Object;");
 		}
 		println("return");
 		helper.indentLevel--;
@@ -78,8 +89,8 @@ public class JVM_CodeGen {
 
 		println(".method public static main([Ljava/lang/String;)V");
 		helper.indentLevel++;
-		
-		stackAndLocals();
+		println(".limit locals 1");
+		println(".limit stack 3");
 		println("getstatic java/lang/System/out Ljava/io/PrintStream;");
 		println("new Program");
 		println("dup");
@@ -175,12 +186,13 @@ public class JVM_CodeGen {
 		println(".end method");
 		println();
 		print(".method public eval(");
-		helper.indentLevel++;
 		for (var i = 0; i < f.parameters.size(); i++) {
 			print("Ljava/lang/Object;");
 		}
 		println(")Ljava/lang/Object;");
-		stackAndLocals();
+		helper.indentLevel++;
+		println(".limit locals " + (f.parameters.size() + 1));
+		println(".limit stack " + new StackSizeCalculator().run(f.return_));
 		var argMap  = new HashMap<Identifier, Integer>();
 		for (var i = 0; i < f.parameters.size(); i++) {
 			argMap.put(f.parameters.get(i).identifier.value, i+1);
@@ -234,8 +246,8 @@ public class JVM_CodeGen {
 				println("new " + name);
 				println("dup");
 				println("invokespecial " +  name + "/<init>()V");
-			} else { 	  
-				println("aload_" + map.get(n.value));
+			} else {
+				println(aload(map.get(n.value)));
 				print("checkcast ");
 				if (type instanceof SimpleTypeNode) {
 					var t = (SimpleTypeNode)type;
@@ -260,7 +272,7 @@ public class JVM_CodeGen {
 				} else {
 					println("java/lang/Object");
 				}
-			}        
+			}
 		}	
 		
 		@Override
@@ -270,7 +282,6 @@ public class JVM_CodeGen {
 			visit(n.boolExpr);
 			println("checkcast java/lang/Boolean");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
-			// TODO: is this correct?
 			println("ifeq " + labelFalse);
 			helper.indentLevel++;
 			visit(n.trueCase);
@@ -348,7 +359,8 @@ public class JVM_CodeGen {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
-			stackAndLocals();
+			println(".limit locals 3");
+			println(".limit stack 4");
 			println("aload_1");
 			println("checkcast java/lang/Double");
 			println("invokevirtual java/lang/Double.doubleValue()D");
@@ -378,7 +390,8 @@ public class JVM_CodeGen {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
-			stackAndLocals();
+			println(".limit locals 3");
+			println(".limit stack 2");
 			println("aload_1");
 			println("checkcast java/lang/Boolean");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
@@ -398,10 +411,92 @@ public class JVM_CodeGen {
 			println(".end method");
 		});
 	}
+	
+	String aload(int n) {
+		if (n < 4) {
+			return "aload_" + n;
+		} else {
+			return "aload " + n;
+		}
+	}
 
-	void stackAndLocals() {
-		// TODO: we should dynamically calculate what the maximum stack size and local count would be for any given expression
-		println(".limit locals 10");
-		println(".limit stack 10");
+	
+	class StackSizeCalculator extends VisitorVoid {
+		int current = 0;
+		int max = 0;
+
+		void incr(int n) {
+			current += n;
+			if (current > max) {
+				max = current;
+			}
+		}
+
+		public Integer run(ExpressionNode n) throws VisitorException {
+			current = 0;
+			max = 0;
+			visit(n);
+			if (current != 1) {
+				throw new Error("Invariant violation: Expressions must result in exactly 1 thing on the stack");
+			}
+			return max;
+		}
+		
+		@Override
+		protected void visitBool(BoolNode n) {
+			incr(1);
+		}
+		@Override
+		protected void visitFunction(FunctionNode n) throws VisitorException {
+			visit(n.return_);
+		}
+		@Override
+		protected void visitFunctionInvocation(FunctionInvocationNode n) throws VisitorException {
+			visit(n.identifier);
+			for (var arg : n.arguments) {
+				visit(arg);
+			}
+			incr(-n.arguments.size());
+		}
+		@Override
+		protected void visitIdentifier(IdentifierNode n) {
+			var type = idCtx.get(n.value).type;
+			var construct = globalIds.contains(n.value) && type instanceof FunctionTypeNode;
+			
+			// if the identifier needs to be constructed it takes 2 stack cels, otherwise 1
+			if (construct) {
+				incr(2);
+				incr(-1);
+			} else {
+				incr(1);
+			}
+		}
+		@Override
+		protected void visitIfElse(IfElseNode n) throws VisitorException {
+			visit(n.boolExpr);
+			incr(-1);
+			var preTrue = current;
+			visit(n.trueCase);
+			var currentTrue = current;
+			current = preTrue;
+			visit(n.elseCase);
+			if (current != currentTrue) {
+				throw new Error("Invariant violation: both branches should result in the same stack count\n  true:  " + currentTrue + "\n  false: " + current);
+			}
+		}
+		@Override
+		protected void visitNumber(NumberNode n) {
+			incr(2);
+			incr(-1);
+		}
+		@Override
+		protected void visitString(StringNode n) {
+			throw new Error("todo");
+		}
+		@Override
+		protected void visitRangeNodeExpression(RangeNodeExpression n) {
+			throw new Error("todo");
+		}
+
 	}
 }
