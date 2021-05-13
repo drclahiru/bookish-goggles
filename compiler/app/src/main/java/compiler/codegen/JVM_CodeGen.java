@@ -41,7 +41,7 @@ public class JVM_CodeGen {
 		println();
 		for (var x : node.bindings) {
 			if (!(x.expr instanceof FunctionNode)) {
-				println(".field public " + x.declaration.identifier.value.name + " Ljava/lang/Object;");
+				println(".field public static " + x.declaration.identifier.value.name + " Ljava/lang/Object;");
 			}
 		}
 		println();
@@ -64,9 +64,8 @@ public class JVM_CodeGen {
 		println("aload_0");
 		println("invokenonvirtual java/lang/Object/<init>()V");
 		for (var x : nonFunctions) {
-			println("aload_0");
 			new ExpressionGenerator(new HashMap<>()).visit(x.expr);
-			println("putfield Program/" + x.declaration.identifier.value.name + " Ljava/lang/Object;");
+			println("putstatic Program/" + x.declaration.identifier.value.name + " Ljava/lang/Object;");
 		}
 		println("return");
 		helper.indentLevel--;
@@ -93,9 +92,8 @@ public class JVM_CodeGen {
 		println(".limit stack 3");
 		println("getstatic java/lang/System/out Ljava/io/PrintStream;");
 		println("new Program");
-		println("dup");
 		println("invokespecial Program/<init>()V");
-		println("getfield Program/main Ljava/lang/Object;");
+		println("getstatic Program/main Ljava/lang/Object;");
 		println("invokevirtual java/lang/Object/toString()Ljava/lang/String;");
 		println("invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V");
 		println("return");
@@ -236,7 +234,8 @@ public class JVM_CodeGen {
 		@Override
 		protected void visitIdentifier(IdentifierNode n) throws VisitorException {
 			var type = idCtx.get(n.value).type;
-			var construct = globalIds.contains(n.value) && type instanceof FunctionTypeNode;
+			var isGlobal = globalIds.contains(n.value);
+			var construct = isGlobal && type instanceof FunctionTypeNode;
 			
 			if(construct) {
 				var name = getOperatorNameMap().get(n.value.name);
@@ -247,7 +246,11 @@ public class JVM_CodeGen {
 				println("dup");
 				println("invokespecial " +  name + "/<init>()V");
 			} else {
-				println(aload(map.get(n.value)));
+				if (isGlobal) {
+					println("getstatic Program/" + n.value.name + " Ljava/lang/Object;");
+				} else {
+					println(aload(map.get(n.value)));
+				}
 				print("checkcast ");
 				if (type instanceof SimpleTypeNode) {
 					var t = (SimpleTypeNode)type;
