@@ -36,7 +36,7 @@ class App {
 
     public static void main(String[] args) {
         try {
-            var fileName = "factorial";
+            var fileName = "example1";
             var ast = readAndParse("./examples/" + fileName + ".puff");
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);

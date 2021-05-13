@@ -120,16 +120,33 @@ public class TypeInferencer {
                 tf.parameters.add(visit(a));
             }
             tf.return_ = tyRes;
-            subst.unify(identifierT, tf);
+            if (!subst.unify(identifierT, tf)) {
+                var t = new UnificationErrorType(n.source);
+                t.types.add(identifierT);
+                t.types.add(tf);
+                return t;
+            };
             return subst.apply(tyRes);
         }
         @Override
         protected TypeNode visitIfElse(IfElseNode n) throws VisitorException {
-            subst.unify(new SimpleTypeNode(null, SimpleType.Bool), visit(n.boolExpr));
+            var condition = visit(n.boolExpr);
+            var bool = new SimpleTypeNode(null, SimpleType.Bool);
+            if (!subst.unify(bool, condition)) {
+                var t = new UnificationErrorType(condition.source);
+                t.types.add(condition);
+                t.types.add(bool);
+                return t;
+            };
 
             var branch1 = visit(n.trueCase);
             var branch2 = visit(n.elseCase);
-            subst.unify(branch1, branch2);
+            if (!subst.unify(branch1, branch2)) {
+                var t = new UnificationErrorType(n.source);
+                t.types.add(branch1);
+                t.types.add(branch2);
+                return t;
+            };
             
             return subst.apply(branch1);
         }
@@ -139,7 +156,12 @@ public class TypeInferencer {
             var t = visit(n.expr);
             if (n.declaration.typeScheme != null) {
                 ctx.put(n.declaration.identifier.value, n.declaration.typeScheme);
-                subst.unify(t, n.declaration.typeScheme.type);
+                if (!subst.unify(t, n.declaration.typeScheme.type)) {
+                    var t2 = new UnificationErrorType(n.source);
+                    t2.types.add(t);
+                    t2.types.add(n.declaration.typeScheme.type);
+                    n.declaration.typeScheme = generalize(ctx, t2);
+                };
             } else {
                 ctx.put(n.declaration.identifier.value, generalize(ctx, t));
             }
@@ -166,7 +188,13 @@ public class TypeInferencer {
         protected TypeNode visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
             var t = varGen.next();
             for (var arg : n.value) {
-                subst.unify(t, visit(arg));
+                var argT = visit(arg);
+                if (!subst.unify(t, argT)) {
+                    var t2 = new UnificationErrorType(n.source);
+                    t2.types.add(t);
+                    t2.types.add(argT);
+                    return t2;
+                };
             }
             return new RangeTypeNode(n.source, subst.apply(t));
         }
@@ -211,6 +239,16 @@ public class TypeInferencer {
                 }
                 tf.return_ = apply(t.return_);
                 return tf;
+            } else if (ty instanceof RangeTypeNode) {
+                var t = (RangeTypeNode)ty;
+                return new RangeTypeNode(t.source, apply(t.innerType));
+            } else if (ty instanceof UnificationErrorType) {
+                var t = (UnificationErrorType)ty;
+                var tErr = new UnificationErrorType(t.source);
+                for (var t2: t.types) {
+                    tErr.types.add(apply(t2));
+                }
+                return tErr;
             }
             return ty;
         }
@@ -232,33 +270,41 @@ public class TypeInferencer {
             return nextCtx;
         }
 
-        void bindIdent(VariableTypeNode v, TypeNode ty) {
+
+        
+        boolean bindIdent(VariableTypeNode v, TypeNode ty) {
             if (freeTypeVars(ty).contains(v)) {
-                throw new Error("occurs check failed");
+                System.out.println("occurs check failed");
+                return false;
             }
             put(v, ty);
+            return true;
         }
-        public void unify(TypeNode t1, TypeNode t2) {
+        public boolean unify(TypeNode t1, TypeNode t2) {
             t1 = apply(t1);
             t2 = apply(t2);
             if (t1.equals(t2)) {
-                // do nothing
+                return true;
             } else if (t1 instanceof VariableTypeNode) {
-                bindIdent((VariableTypeNode)t1, t2);
+                return bindIdent((VariableTypeNode)t1, t2);
             } else if (t2 instanceof VariableTypeNode) {
-                bindIdent((VariableTypeNode)t2, t1);
+                return bindIdent((VariableTypeNode)t2, t1);
             } else if (t1 instanceof FunctionTypeNode && t2 instanceof FunctionTypeNode) {
                 var t1t = (FunctionTypeNode)t1;
                 var t2t = (FunctionTypeNode)t2;
                 if (t1t.parameters.size() != t2t.parameters.size()) {
                     System.out.println("arity mismatch between " + t1t + " and " + t2t);
+                    return false;
                 }
                 for (var i = 0; i < Math.min(t1t.parameters.size(), t2t.parameters.size()); i++) {
-                    unify(t1t.parameters.get(i), t2t.parameters.get(i));
+                    if (!unify(t1t.parameters.get(i), t2t.parameters.get(i))) {
+                        return false;
+                    };
                 }
-                unify(apply(t1t.return_), apply(t2t.return_));
+                return unify(apply(t1t.return_), apply(t2t.return_));
             } else {
                 System.out.println("types do not unify: " + t1 + " and " + t2);
+                return false;
             }
         }
 
@@ -319,6 +365,19 @@ public class TypeInferencer {
                 freeTypeVars(p, s);
             }
             freeTypeVars(tf.return_, s);
+        } else if (t instanceof UnificationErrorType) {
+            var tu = (UnificationErrorType)t;
+            for (var p : tu.types) {
+                freeTypeVars(p, s);
+            }
+        } else if (t instanceof RangeTypeNode) {
+            var tr = (RangeTypeNode)t;
+            freeTypeVars(tr.innerType, s);
+        } else if (t instanceof UnificationErrorType) {
+            var tErr = (UnificationErrorType)t;
+            for (var e : tErr.types) {
+                freeTypeVars(e, s);
+            }
         }
     }
 

@@ -28,6 +28,18 @@ public class TypeVariableRenamer {
             ftNext.return_ = renameVar(ft.return_, from, to);
             return ftNext;
         }
+        if (t instanceof RangeTypeNode) {
+            var rt = (RangeTypeNode)t;
+            return new RangeTypeNode(rt.source, renameVar(rt.innerType, from, to));
+        }
+        if (t instanceof UnificationErrorType) {
+            var ut = (UnificationErrorType)t;
+            var utNext = new UnificationErrorType(ut.source);
+            for (var t2 : ut.types) {
+                utNext.types.add(renameVar(t2, from, to));
+            }
+            return utNext;
+        }
         return t;
     }
 

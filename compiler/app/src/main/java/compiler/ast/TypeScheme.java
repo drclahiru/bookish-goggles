@@ -48,7 +48,7 @@ public class TypeScheme {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof VariableTypeNode)) {
+        if (!(o instanceof TypeScheme)) {
             return false;
         }
 

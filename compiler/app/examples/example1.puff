@@ -12,22 +12,13 @@ let square = (x) {
     x * x
 }
 
-let b = apply(square, a)
+let b = apply(square, id)
 
 let c = apply(id, square)
 
-let fact = (n) {
-    let mul = id((x) { n * x }) in
-    let prev_n = n - 1 in
-    if n == 0 {
-        1
-     } else {
-        mul(fact(prev_n))
-     }
-}
 
-let f = let y = id(a) in (x) {
+let f = (x) {
     a + x
 }
 
-let main = fact(4)
+let main = f(4)
