@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import compiler.IdentifierContext;
 import compiler.Utility;
@@ -38,24 +39,25 @@ public class JVM_CodeGen {
 		println(".class public Program");
 		println(".super java/lang/Object");
 		println();
-		for (var x : node.bindings) {
-			if (!(x.expr instanceof FunctionNode)) {
-				println(".field public " + x.declaration.identifier.value.name + " Ljava/lang/Object;");
-			}
+		var nonFunctions = node.bindings
+			.stream()
+			.filter(x -> !(x.expr instanceof FunctionNode))
+			.collect(Collectors.toList());
+		for (var x : nonFunctions) {
+			println(".field public " + x.declaration.identifier.value.name + " Ljava/lang/Object;");
 		}
 		println();
 		println(".method public <init>()V");
 		helper.indentLevel++;
-		stackAndLocals();
+		stack(nonFunctions.stream().map(x -> new JVM_StackSize(idCtx, globalIds).run(x.expr) + 1).reduce(0, Math::max));
+		locals(1);
 		println("aload_0");
 		println("invokenonvirtual java/lang/Object/<init>()V");
-		for (var x : node.bindings) {
+		for (var x : nonFunctions) {
 			var ident = x.declaration.identifier.value;
-			if (!(x.expr instanceof FunctionNode)) {
-				println("aload_0");
-				new ExpressionGenerator(new HashMap<>()).visit(x.expr);
-				println("putfield Program/" + ident.name + " Ljava/lang/Object;");
-			}
+			println("aload_0");
+			new ExpressionGenerator(new HashMap<>()).visit(x.expr);
+			println("putfield Program/" + ident.name + " Ljava/lang/Object;");
 		}
 		println("return");
 		helper.indentLevel--;
@@ -79,7 +81,8 @@ public class JVM_CodeGen {
 		println(".method public static main([Ljava/lang/String;)V");
 		helper.indentLevel++;
 		
-		stackAndLocals();
+		stack(3);
+		locals(1);
 		println("getstatic java/lang/System/out Ljava/io/PrintStream;");
 		println("new Program");
 		println("dup");
@@ -180,7 +183,8 @@ public class JVM_CodeGen {
 			print("Ljava/lang/Object;");
 		}
 		println(")Ljava/lang/Object;");
-		stackAndLocals();
+		locals(f.parameters.size() + 1);
+		stack(new JVM_StackSize(idCtx, globalIds).run(f.return_));
 		var argMap  = new HashMap<Identifier, Integer>();
 		for (var i = 0; i < f.parameters.size(); i++) {
 			argMap.put(f.parameters.get(i).identifier.value, i+1);
@@ -235,7 +239,7 @@ public class JVM_CodeGen {
 				println("dup");
 				println("invokespecial " +  name + "/<init>()V");
 			} else { 	  
-				println("aload_" + map.get(n.value));
+				println(aload(map.get(n.value)));
 				print("checkcast ");
 				if (type instanceof SimpleTypeNode) {
 					var t = (SimpleTypeNode)type;
@@ -260,8 +264,15 @@ public class JVM_CodeGen {
 				} else {
 					println("java/lang/Object");
 				}
-			}        
-		}	
+			}
+		}
+
+		String aload(Integer n) {
+			if (n < 4) {
+				return "aload_" + n;
+			}
+			return "aload " + n;
+		}
 		
 		@Override
 		protected void visitIfElse(IfElseNode n) throws VisitorException {
@@ -270,7 +281,6 @@ public class JVM_CodeGen {
 			visit(n.boolExpr);
 			println("checkcast java/lang/Boolean");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
-			// TODO: is this correct?
 			println("ifeq " + labelFalse);
 			helper.indentLevel++;
 			visit(n.trueCase);
@@ -348,7 +358,8 @@ public class JVM_CodeGen {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
-			stackAndLocals();
+			locals(3);
+			stack(4);
 			println("aload_1");
 			println("checkcast java/lang/Double");
 			println("invokevirtual java/lang/Double.doubleValue()D");
@@ -378,7 +389,8 @@ public class JVM_CodeGen {
 			println();
 			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 			helper.indentLevel++;
-			stackAndLocals();
+			locals(3);
+			stack(2);
 			println("aload_1");
 			println("checkcast java/lang/Boolean");
 			println("invokevirtual java/lang/Boolean.booleanValue()Z");
@@ -399,9 +411,10 @@ public class JVM_CodeGen {
 		});
 	}
 
-	void stackAndLocals() {
-		// TODO: we should dynamically calculate what the maximum stack size and local count would be for any given expression
-		println(".limit locals 10");
-		println(".limit stack 10");
+	void locals(int n) {
+		println(".limit locals " + n);
+	}
+	void stack(int n) {
+		println(".limit stack " + n);
 	}
 }
