@@ -41,10 +41,7 @@ expr:
 	| let_expr										# expr_let
 	| range_expr									# expr_range;
 
-/* example use:
- if x==3 {4/2 } else {7 }
- */
-if_else: IF expr OBRACE expr CBRACE ELSE OBRACE expr CBRACE;
+if_else: IF expr OBRACE expr ELSE expr CBRACE;
 
 type: range_type | basic_type | lambda_type;
 

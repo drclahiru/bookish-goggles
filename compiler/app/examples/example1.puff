@@ -21,9 +21,9 @@ let fact = (n) {
     let prev_n = n - 1 in
     if n == 0 {
         1
-     } else {
+    else
         mul(fact(prev_n))
-     }
+    }
 }
 
 let f = let y = id(a) in (x) {

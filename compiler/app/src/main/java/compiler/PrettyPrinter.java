@@ -180,7 +180,7 @@ public class PrettyPrinter extends VisitorVoid {
         visit(node.trueCase);
         indentLevel--;
         println();
-        print("} else { ");
+        print("else");
         println();
         indentLevel++;
         visit(node.elseCase);
