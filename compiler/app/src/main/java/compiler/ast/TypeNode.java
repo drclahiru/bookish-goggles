@@ -21,6 +21,10 @@ public abstract class TypeNode extends AbstractNode {
             return ((VariableTypeNode)this).equals((VariableTypeNode)o);
         }
 
+        if (this instanceof ListTypeNode && o instanceof ListTypeNode) {
+            return ((ListTypeNode)this).equals((ListTypeNode)o);
+        }
+
         return false;
     }
 

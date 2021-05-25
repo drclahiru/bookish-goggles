@@ -168,7 +168,7 @@ public class TypeInferencer {
             for (var arg : n.exprs) {
                 subst.unify(t, visit(arg));
             }
-            return new RangeTypeNode(n.source, subst.apply(t));
+            return new ListTypeNode(n.source, subst.apply(t));
         }
     }
 
@@ -211,6 +211,9 @@ public class TypeInferencer {
                 }
                 tf.return_ = apply(t.return_);
                 return tf;
+            } else if (ty instanceof ListTypeNode) {
+                var t = (ListTypeNode)ty;
+                return new ListTypeNode(ty.source, apply(t.innerType));
             }
             return ty;
         }
@@ -257,6 +260,8 @@ public class TypeInferencer {
                     unify(t1t.parameters.get(i), t2t.parameters.get(i));
                 }
                 unify(apply(t1t.return_), apply(t2t.return_));
+            } else if (t1 instanceof ListTypeNode && t2 instanceof ListTypeNode) {
+                unify(((ListTypeNode)t1).innerType, ((ListTypeNode)t2).innerType);
             } else {
                 System.out.println("types do not unify: " + t1 + " and " + t2);
             }
@@ -319,6 +324,8 @@ public class TypeInferencer {
                 freeTypeVars(p, s);
             }
             freeTypeVars(tf.return_, s);
+        } else if (t instanceof ListTypeNode) {
+            freeTypeVars(((ListTypeNode)t).innerType, s);
         }
     }
 

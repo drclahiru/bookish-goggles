@@ -96,6 +96,8 @@ public abstract class VisitorVoid {
             visitFunctionType((FunctionTypeNode)n);
         } else if (n instanceof VariableTypeNode) {
             visitVariableType((VariableTypeNode)n);
+        } else if (n instanceof ListTypeNode) {
+            visitListType((ListTypeNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
@@ -107,6 +109,9 @@ public abstract class VisitorVoid {
         defaultVisit(n);
     }
     protected void visitVariableType(VariableTypeNode n) throws VisitorException {
+        defaultVisit(n);
+    }
+    protected void visitListType(ListTypeNode n) throws VisitorException {
         defaultVisit(n);
     }
 }

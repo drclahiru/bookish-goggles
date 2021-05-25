@@ -69,6 +69,20 @@ public class TypeChecker extends VisitorVoid {
     }
 
     @Override
+    public void visitList(ListNode n) throws VisitorException {
+        super.visitList(n);
+        if (n.exprs.isEmpty()) {
+            return;
+        }
+        var t = n.exprs.get(0).type;
+        for (var e : n.exprs) {
+            if (!typesUnify(e.type, t)) {
+                throw new VisitorException(n, "type mismatch");
+            }
+        }
+    }
+
+    @Override
     protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
     	if (!typesUnify(n.identifier.type, n.typeScheme.type)) {
             throw new VisitorException(n, "type mismatch");
@@ -82,7 +96,7 @@ public class TypeChecker extends VisitorVoid {
 
     @Override
     protected void visitRange(RangeNode n) throws VisitorException {
-        throw new Error("todo: implement");
+        throw new Error("should not be visited");
     }
 
     boolean typesUnify(TypeNode t1, TypeNode t2) {
@@ -104,6 +118,11 @@ public class TypeChecker extends VisitorVoid {
                 }
             }
             return typesUnify(tf1.return_, tf2.return_);
+        }
+        if (t1 instanceof ListTypeNode && t2 instanceof ListTypeNode) {
+            var tf1 = (ListTypeNode)t1;
+            var tf2 = (ListTypeNode)t2;
+            return typesUnify(tf1, tf2);
         }
         return t1.equals(t2);
     }

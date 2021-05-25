@@ -134,17 +134,7 @@ public class PrettyPrinter extends VisitorVoid {
     };
 
     @Override
-    protected void visitSimpleType(SimpleTypeNode node) {
-        print(node.toString());
-    }
-
-    @Override
-    protected void visitFunctionType(FunctionTypeNode node) {
-        print(node.toString());
-    }
-
-    @Override
-    protected void visitVariableType(VariableTypeNode node) {
+    protected void visitType(TypeNode node) {
         print(node.toString());
     }
 

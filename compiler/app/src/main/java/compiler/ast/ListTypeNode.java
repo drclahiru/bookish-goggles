@@ -5,10 +5,10 @@ import java.util.stream.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
-public class RangeTypeNode extends TypeNode {
+public class ListTypeNode extends TypeNode {
     public final TypeNode innerType;
 
-    public RangeTypeNode(ParserRuleContext source, TypeNode innerType) {
+    public ListTypeNode(ParserRuleContext source, TypeNode innerType) {
         super(source);
         this.innerType = innerType;
     }
@@ -19,17 +19,17 @@ public class RangeTypeNode extends TypeNode {
 
     @Override
     public String toString() {
-        return "[" + innerType.toString() + "]";
+        return "List(" + innerType.toString() + ")";
     }
     
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof RangeTypeNode)) {
+        if (!(o instanceof ListTypeNode)) {
             return false;
         }
 
-        var other = (RangeTypeNode)o;
-        return this.innerType == other.innerType;
+        var other = (ListTypeNode)o;
+        return this.innerType.equals(other.innerType);
     }
     
     @Override
@@ -38,8 +38,7 @@ public class RangeTypeNode extends TypeNode {
     }
 
     @Override
-    public RangeTypeNode clone() {
-        var n = new RangeTypeNode(source, innerType);
-        return n;
+    public ListTypeNode clone() {
+        return new ListTypeNode(source, innerType.clone());
     }
 }
