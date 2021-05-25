@@ -57,6 +57,13 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpr_invoke(gParser.Expr_invokeContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code expr_list}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr_list(gParser.Expr_listContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code expr_let}
 	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
@@ -85,13 +92,6 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitId(gParser.IdContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code expr_range}
-	 * labeled alternative in {@link gParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExpr_range(gParser.Expr_rangeContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code operator}
 	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
@@ -117,17 +117,17 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBasic_type(gParser.Basic_typeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#range_type}.
+	 * Visit a parse tree produced by {@link gParser#list_type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRange_type(gParser.Range_typeContext ctx);
+	T visitList_type(gParser.List_typeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link gParser#range_expr}.
+	 * Visit a parse tree produced by {@link gParser#list_expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRange_expr(gParser.Range_exprContext ctx);
+	T visitList_expr(gParser.List_exprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#lambda}.
 	 * @param ctx the parse tree

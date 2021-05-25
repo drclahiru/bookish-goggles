@@ -22,18 +22,18 @@ public class gParser extends Parser {
 		T__0=1, BASIC_TYPE=2, OR=3, AND=4, EQ=5, NEQ=6, GT=7, LT=8, GTEQ=9, LTEQ=10, 
 		PLUS=11, MINUS=12, MULT=13, DIV=14, MOD=15, OPERATOR=16, ASSIGN=17, OPAR=18, 
 		CPAR=19, OBRACE=20, CBRACE=21, NULL=22, IF=23, ELSE=24, PAR=25, COMMA=26, 
-		ARROW=27, LET=28, IN=29, RANGE_NAME=30, NUMBER=31, CELL_ADDRESS=32, ID=33, 
+		ARROW=27, LET=28, IN=29, LIST_NAME=30, NUMBER=31, CELL_ADDRESS=32, ID=33, 
 		STRING=34, BOOL=35, TRUE=36, FALSE=37, CHARACTER=38, NEWLINE=39, WS=40;
 	public static final int
 		RULE_global_scope = 0, RULE_statements = 1, RULE_range_binding = 2, RULE_let_binding = 3, 
 		RULE_let_expr = 4, RULE_expr = 5, RULE_if_else = 6, RULE_type = 7, RULE_basic_type = 8, 
-		RULE_range_type = 9, RULE_range_expr = 10, RULE_lambda = 11, RULE_lambda_type = 12, 
+		RULE_list_type = 9, RULE_list_expr = 10, RULE_lambda = 11, RULE_lambda_type = 12, 
 		RULE_lambda_invocation = 13, RULE_value = 14, RULE_range = 15;
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"global_scope", "statements", "range_binding", "let_binding", "let_expr", 
-			"expr", "if_else", "type", "basic_type", "range_type", "range_expr", 
-			"lambda", "lambda_type", "lambda_invocation", "value", "range"
+			"expr", "if_else", "type", "basic_type", "list_type", "list_expr", "lambda", 
+			"lambda_type", "lambda_invocation", "value", "range"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -43,7 +43,7 @@ public class gParser extends Parser {
 			null, "':'", null, "'||'", "'&&'", "'=='", "'!='", "'>'", "'<'", "'>='", 
 			"'<='", "'+'", "'-'", "'*'", "'/'", "'%'", null, "'='", "'('", "')'", 
 			"'{'", "'}'", "'null'", "'if'", "'else'", "'\"'", "','", "'->'", "'let'", 
-			"'in'", "'Range'", null, null, null, null, null, "'True'", "'False'", 
+			"'in'", "'List'", null, null, null, null, null, "'True'", "'False'", 
 			null, "'\r?\n'"
 		};
 	}
@@ -53,7 +53,7 @@ public class gParser extends Parser {
 			null, null, "BASIC_TYPE", "OR", "AND", "EQ", "NEQ", "GT", "LT", "GTEQ", 
 			"LTEQ", "PLUS", "MINUS", "MULT", "DIV", "MOD", "OPERATOR", "ASSIGN", 
 			"OPAR", "CPAR", "OBRACE", "CBRACE", "NULL", "IF", "ELSE", "PAR", "COMMA", 
-			"ARROW", "LET", "IN", "RANGE_NAME", "NUMBER", "CELL_ADDRESS", "ID", "STRING", 
+			"ARROW", "LET", "IN", "LIST_NAME", "NUMBER", "CELL_ADDRESS", "ID", "STRING", 
 			"BOOL", "TRUE", "FALSE", "CHARACTER", "NEWLINE", "WS"
 		};
 	}
@@ -271,8 +271,8 @@ public class gParser extends Parser {
 			return getRuleContext(RangeContext.class,0);
 		}
 		public TerminalNode ASSIGN() { return getToken(gParser.ASSIGN, 0); }
-		public Range_exprContext range_expr() {
-			return getRuleContext(Range_exprContext.class,0);
+		public List_exprContext list_expr() {
+			return getRuleContext(List_exprContext.class,0);
 		}
 		public Range_bindingContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -304,7 +304,7 @@ public class gParser extends Parser {
 			setState(57);
 			match(ASSIGN);
 			setState(58);
-			range_expr();
+			list_expr();
 			}
 		}
 		catch (RecognitionException re) {
@@ -361,7 +361,7 @@ public class gParser extends Parser {
 			setState(63);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BASIC_TYPE) | (1L << OPAR) | (1L << RANGE_NAME))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BASIC_TYPE) | (1L << OPAR) | (1L << LIST_NAME))) != 0)) {
 				{
 				setState(62);
 				type();
@@ -495,6 +495,25 @@ public class gParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	public static class Expr_listContext extends ExprContext {
+		public List_exprContext list_expr() {
+			return getRuleContext(List_exprContext.class,0);
+		}
+		public Expr_listContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof gListener ) ((gListener)listener).enterExpr_list(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof gListener ) ((gListener)listener).exitExpr_list(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof gVisitor ) return ((gVisitor<? extends T>)visitor).visitExpr_list(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 	public static class Expr_letContext extends ExprContext {
 		public Let_exprContext let_expr() {
 			return getRuleContext(Let_exprContext.class,0);
@@ -566,25 +585,6 @@ public class gParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof gVisitor ) return ((gVisitor<? extends T>)visitor).visitId(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class Expr_rangeContext extends ExprContext {
-		public Range_exprContext range_expr() {
-			return getRuleContext(Range_exprContext.class,0);
-		}
-		public Expr_rangeContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof gListener ) ((gListener)listener).enterExpr_range(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof gListener ) ((gListener)listener).exitExpr_range(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof gVisitor ) return ((gVisitor<? extends T>)visitor).visitExpr_range(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -700,11 +700,11 @@ public class gParser extends Parser {
 				break;
 			case 7:
 				{
-				_localctx = new Expr_rangeContext(_localctx);
+				_localctx = new Expr_listContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(82);
-				range_expr();
+				list_expr();
 				}
 				break;
 			}
@@ -884,8 +884,8 @@ public class gParser extends Parser {
 	}
 
 	public static class TypeContext extends ParserRuleContext {
-		public Range_typeContext range_type() {
-			return getRuleContext(Range_typeContext.class,0);
+		public List_typeContext list_type() {
+			return getRuleContext(List_typeContext.class,0);
 		}
 		public Basic_typeContext basic_type() {
 			return getRuleContext(Basic_typeContext.class,0);
@@ -919,11 +919,11 @@ public class gParser extends Parser {
 			setState(113);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case RANGE_NAME:
+			case LIST_NAME:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(110);
-				range_type();
+				list_type();
 				}
 				break;
 			case BASIC_TYPE:
@@ -997,40 +997,40 @@ public class gParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Range_typeContext extends ParserRuleContext {
-		public TerminalNode RANGE_NAME() { return getToken(gParser.RANGE_NAME, 0); }
+	public static class List_typeContext extends ParserRuleContext {
+		public TerminalNode LIST_NAME() { return getToken(gParser.LIST_NAME, 0); }
 		public TerminalNode OPAR() { return getToken(gParser.OPAR, 0); }
 		public TypeContext type() {
 			return getRuleContext(TypeContext.class,0);
 		}
 		public TerminalNode CPAR() { return getToken(gParser.CPAR, 0); }
-		public Range_typeContext(ParserRuleContext parent, int invokingState) {
+		public List_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_range_type; }
+		@Override public int getRuleIndex() { return RULE_list_type; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof gListener ) ((gListener)listener).enterRange_type(this);
+			if ( listener instanceof gListener ) ((gListener)listener).enterList_type(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof gListener ) ((gListener)listener).exitRange_type(this);
+			if ( listener instanceof gListener ) ((gListener)listener).exitList_type(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof gVisitor ) return ((gVisitor<? extends T>)visitor).visitRange_type(this);
+			if ( visitor instanceof gVisitor ) return ((gVisitor<? extends T>)visitor).visitList_type(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Range_typeContext range_type() throws RecognitionException {
-		Range_typeContext _localctx = new Range_typeContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_range_type);
+	public final List_typeContext list_type() throws RecognitionException {
+		List_typeContext _localctx = new List_typeContext(_ctx, getState());
+		enterRule(_localctx, 18, RULE_list_type);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(117);
-			match(RANGE_NAME);
+			match(LIST_NAME);
 			setState(118);
 			match(OPAR);
 			setState(119);
@@ -1050,7 +1050,7 @@ public class gParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Range_exprContext extends ParserRuleContext {
+	public static class List_exprContext extends ParserRuleContext {
 		public TerminalNode OBRACE() { return getToken(gParser.OBRACE, 0); }
 		public TerminalNode CBRACE() { return getToken(gParser.CBRACE, 0); }
 		public List<ValueContext> value() {
@@ -1063,28 +1063,28 @@ public class gParser extends Parser {
 		public TerminalNode COMMA(int i) {
 			return getToken(gParser.COMMA, i);
 		}
-		public Range_exprContext(ParserRuleContext parent, int invokingState) {
+		public List_exprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_range_expr; }
+		@Override public int getRuleIndex() { return RULE_list_expr; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof gListener ) ((gListener)listener).enterRange_expr(this);
+			if ( listener instanceof gListener ) ((gListener)listener).enterList_expr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof gListener ) ((gListener)listener).exitRange_expr(this);
+			if ( listener instanceof gListener ) ((gListener)listener).exitList_expr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof gVisitor ) return ((gVisitor<? extends T>)visitor).visitRange_expr(this);
+			if ( visitor instanceof gVisitor ) return ((gVisitor<? extends T>)visitor).visitList_expr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final Range_exprContext range_expr() throws RecognitionException {
-		Range_exprContext _localctx = new Range_exprContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_range_expr);
+	public final List_exprContext list_expr() throws RecognitionException {
+		List_exprContext _localctx = new List_exprContext(_ctx, getState());
+		enterRule(_localctx, 20, RULE_list_expr);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
@@ -1299,7 +1299,7 @@ public class gParser extends Parser {
 			setState(168);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BASIC_TYPE) | (1L << OPAR) | (1L << RANGE_NAME))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BASIC_TYPE) | (1L << OPAR) | (1L << LIST_NAME))) != 0)) {
 				{
 				setState(160);
 				type();

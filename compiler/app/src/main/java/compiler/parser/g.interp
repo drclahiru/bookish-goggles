@@ -29,7 +29,7 @@ null
 '->'
 'let'
 'in'
-'Range'
+'List'
 null
 null
 null
@@ -72,7 +72,7 @@ COMMA
 ARROW
 LET
 IN
-RANGE_NAME
+LIST_NAME
 NUMBER
 CELL_ADDRESS
 ID
@@ -94,8 +94,8 @@ expr
 if_else
 type
 basic_type
-range_type
-range_expr
+list_type
+list_expr
 lambda
 lambda_type
 lambda_invocation
