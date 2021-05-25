@@ -67,12 +67,12 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         return visitList_expr(ctx.list_expr());
     }
     @Override
-    public RangeNodeExpression visitList_expr(gParser.List_exprContext ctx) {
+    public ListNode visitList_expr(gParser.List_exprContext ctx) {
         var smth = new ArrayList<ExpressionNode>();
         for (var arg : ctx.value()) {
             smth.add((ExpressionNode)visit(arg));
         }
-        return new RangeNodeExpression(ctx, smth);
+        return new ListNode(ctx, smth);
     }
     @Override
 	public ExpressionNode visitExpr_if_else(gParser.Expr_if_elseContext ctx) {

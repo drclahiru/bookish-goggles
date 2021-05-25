@@ -50,8 +50,8 @@ public abstract class VisitorVoid {
             visitString((StringNode)n);
         } else if (n instanceof RangeNode) {
             visitRange((RangeNode)n);   
-        } else if (n instanceof RangeNodeExpression) {
-            visitRangeNodeExpression((RangeNodeExpression)n); 
+        } else if (n instanceof ListNode) {
+            visitList((ListNode)n); 
         } else if (n instanceof LetExpressionNode) {
             visitLetExpression((LetExpressionNode)n);
         } else {
@@ -103,7 +103,7 @@ public abstract class VisitorVoid {
     protected void visitRange(RangeNode n) throws VisitorException {
         defaultVisit(n);
     }
-    protected void visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
+    protected void visitList(ListNode n) throws VisitorException {
         defaultVisit(n);
     }
     protected void visitVariableType(VariableTypeNode n) throws VisitorException {

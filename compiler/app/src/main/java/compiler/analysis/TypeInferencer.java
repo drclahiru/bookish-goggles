@@ -163,9 +163,9 @@ public class TypeInferencer {
             throw new Error("Shouldn't be visited");
         }
         @Override
-        protected TypeNode visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
+        protected TypeNode visitList(ListNode n) throws VisitorException {
             var t = varGen.next();
-            for (var arg : n.value) {
+            for (var arg : n.exprs) {
                 subst.unify(t, visit(arg));
             }
             return new RangeTypeNode(n.source, subst.apply(t));

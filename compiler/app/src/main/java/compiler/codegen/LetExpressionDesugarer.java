@@ -175,10 +175,10 @@ public class LetExpressionDesugarer extends VisitorT<ExpressionNode> {
         return n;
     }
     @Override
-    protected ExpressionNode visitRangeNodeExpression(RangeNodeExpression n) throws VisitorException {
+    protected ExpressionNode visitList(ListNode n) throws VisitorException {
         var next = n.clone();
-        for (var i = 0; i < n.value.size(); i++) {
-            next.value.set(i, visit(next.value.get(i)));
+        for (var i = 0; i < n.exprs.size(); i++) {
+            next.exprs.set(i, visit(next.exprs.get(i)));
         }
         return next;
     }
