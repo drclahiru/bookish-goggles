@@ -24,6 +24,7 @@ expr:
 	| expr (EQ | NEQ | LT | GT | LTEQ | GTEQ) expr	# operator
 	| expr (AND) expr							    # operator
 	| expr (OR) expr							    # operator
+	| expr (CONS) expr								# operator
 	| lambda										# expr_lambda
 	| if_else										# expr_if_else
 	| value											# expr_value
@@ -75,21 +76,7 @@ MINUS: '-';
 MULT: '*';
 DIV: '/';
 MOD: '%';
-
-OPERATOR:
-	PLUS
-	| MINUS
-	| MULT
-	| DIV
-	| MOD
-	| AND
-	| OR
-	| EQ
-	| LT
-	| LTEQ
-	| GTEQ
-	| GT;
-
+CONS: '::';
 ASSIGN: '=';
 OPAR: '(';
 CPAR: ')';
