@@ -33,18 +33,48 @@ public class AppTest {
     @Test
     public void printParsePrint() throws Exception {
         var paths = new ArrayList<String>();
-        paths.add("./examples/type_error.puff");
-        paths.add("./examples/example1.puff");
-        paths.add("./examples/desugar_let.puff");
-        paths.add("./examples/lift_lambda.puff");
-
+        paths.add("./examples/example5.puff");
+        String test = "./examples/example5.puff";
+        String cs = CharStreams.fromFileName(test).toString();
         for (var path : paths) {
             var ast = App.readAndParse(path);
-            var astTxt = PrettyPrinter.stringify(ast);
-            var cs = CharStreams.fromReader(new StringReader(astTxt));
-            var ast2 = App.parse(cs);
-
-            Assert.assertEquals(astTxt, PrettyPrinter.stringify(ast2));
+            var astTxt = PrettyPrinter.stringify(ast);         
+         astTxt = astTxt.replaceAll("\n", "").replaceAll("\r", "").replaceAll(" ", "").replaceAll("\t", "");
+         cs = cs.replaceAll("\n", "").replaceAll("\r", "").replaceAll(" ", "").replaceAll("\t", "");         
+         
+         Assert.assertEquals(astTxt, cs);
         }
     }
-}
+    
+    @Test
+    public void checkASTCorectness() throws Exception {
+        var paths = new ArrayList<String>();
+    //    paths.add("./examples/type_error.puff");
+        paths.add("./examples/example5.puff");
+    //    paths.add("./examples/desugar_let.puff");
+    //    paths.add("./examples/lift_lambda.puff");
+        String test = "./examples/example5.puff";
+        String cs = CharStreams.fromFileName(test).toString();
+        for (var path : paths) {
+            var ast = App.readAndParse(path);
+            var astTxt = PrettyPrinter.stringify(ast);         
+       //     var cs = CharStreams.fromReader(new StringReader(astTxt));
+      //      var ast2 = App.parse(cs);
+         astTxt = astTxt.replaceAll("\n", "").replaceAll("\r", "").replaceAll(" ", "").replaceAll("\t", "");
+         cs = cs.replaceAll("\n", "").replaceAll("\r", "").replaceAll(" ", "").replaceAll("\t", "");
+            
+            Assert.assertEquals(astTxt, cs);
+        }
+    }}
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    

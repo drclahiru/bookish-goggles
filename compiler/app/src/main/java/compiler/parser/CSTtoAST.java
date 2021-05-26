@@ -27,7 +27,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     @Override
 	public AbstractNode visitRange_binding(gParser.Range_bindingContext ctx) {
         var rangeBinding = new RangeBindingNode(ctx, visitRange(ctx.range()));
-        rangeBinding.expr = visitRange_expr(ctx.range_expr());
+        rangeBinding.expr = visitList_expr(ctx.list_expr());
         return rangeBinding;
     }
     @Override
@@ -63,16 +63,16 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         return (ExpressionNode)visit(ctx.value());
     }
     @Override
-	public ExpressionNode visitExpr_range(gParser.Expr_rangeContext ctx) {
-        return visitRange_expr(ctx.range_expr());
+	public ExpressionNode visitExpr_list(gParser.Expr_listContext ctx) {
+        return visitList_expr(ctx.list_expr());
     }
     @Override
-    public RangeNodeExpression visitRange_expr(gParser.Range_exprContext ctx) {
+    public ListNode visitList_expr(gParser.List_exprContext ctx) {
         var smth = new ArrayList<ExpressionNode>();
         for (var arg : ctx.value()) {
             smth.add((ExpressionNode)visit(arg));
         }
-        return new RangeNodeExpression(ctx, smth);
+        return new ListNode(ctx, smth);
     }
     @Override
 	public ExpressionNode visitExpr_if_else(gParser.Expr_if_elseContext ctx) {
@@ -127,9 +127,8 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         }
     }
     @Override
-	public AbstractNode visitRange_type(gParser.Range_typeContext ctx) {
-        // TODO: implement
-        return visitChildren(ctx);
+	public AbstractNode visitList_type(gParser.List_typeContext ctx) {
+        throw new Error("todo");
     }
     @Override
 	public FunctionNode visitLambda(gParser.LambdaContext ctx) {

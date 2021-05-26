@@ -1,6 +1,10 @@
-A1:A5 = {True, 5, True, 8}
+let apply = (f, x) { f(x) }
+ 
+let a = apply((x) { x }, 9)
 
-let f = () {
-    {True, 5, True, 8}
+let b = (x) { 
+    let y = x in 
+    apply((z) { y + z }, x)
 }
 
+let main = b(a)

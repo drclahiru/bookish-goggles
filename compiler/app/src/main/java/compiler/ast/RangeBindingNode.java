@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RangeBindingNode extends AbstractNode {
     public RangeNode range;
-    public RangeNodeExpression expr;
+    public ListNode expr;
 
     public RangeBindingNode(ParserRuleContext source, RangeNode range) {
         super(source);
