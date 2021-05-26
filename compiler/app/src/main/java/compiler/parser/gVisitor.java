@@ -148,21 +148,21 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	T visitLambda_invocation(gParser.Lambda_invocationContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code number}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNumber(gParser.NumberContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code bool}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitBool(gParser.BoolContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code string}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */

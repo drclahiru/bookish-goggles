@@ -237,37 +237,37 @@ public interface gListener extends ParseTreeListener {
 	void exitLambda_invocation(gParser.Lambda_invocationContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code number}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 */
 	void enterNumber(gParser.NumberContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code number}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 */
 	void exitNumber(gParser.NumberContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code bool}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 */
 	void enterBool(gParser.BoolContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code bool}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 */
 	void exitBool(gParser.BoolContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code string}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 */
 	void enterString(gParser.StringContext ctx);
 	/**
 	 * Exit a parse tree produced by the {@code string}
-	 * labeled alternative in {@link gParser#exprs}.
+	 * labeled alternative in {@link gParser#value}.
 	 * @param ctx the parse tree
 	 */
 	void exitString(gParser.StringContext ctx);

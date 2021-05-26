@@ -8,7 +8,7 @@ global_scope: statements* EOF;
 
 statements:
 	range_binding NEWLINE*
-	| let_binding NEWLINE*
+	| let_binding NEWLINE*;
 
 range_binding: range ASSIGN list_expr;
 
@@ -21,8 +21,9 @@ let_expr: LET ID ASSIGN expr IN expr;
 expr:
 	expr (MULT | DIV | MOD) expr					# operator
 	| expr (PLUS | MINUS) expr						# operator
-	| expr (AND | OR) expr							# operator
 	| expr (EQ | NEQ | LT | GT | LTEQ | GTEQ) expr	# operator
+	| expr (AND) expr							    # operator
+	| expr (OR) expr							    # operator
 	| lambda										# expr_lambda
 	| if_else										# expr_if_else
 	| value											# expr_value
