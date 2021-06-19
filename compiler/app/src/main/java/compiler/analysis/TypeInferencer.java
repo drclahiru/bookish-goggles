@@ -1,6 +1,7 @@
 package compiler.analysis;
 
 import compiler.IdentifierContext;
+import compiler.TypeVarGenerator;
 import compiler.Utility;
 import compiler.ast.*;
 import compiler.visitor.VisitorException;
@@ -83,7 +84,11 @@ public class TypeInferencer {
             if (scheme == null) {
                 throw new Error("unbound variable: " + n.value);
             }
-            return instantiate(scheme);
+            // scopeId 1 is globalScope, and the prelude is defined with scope null
+            if (n.value.scopeId == null || n.value.scopeId == 1) {
+                return scheme.instantiate(varGen);
+            }
+            return scheme.type;
         }
         @Override
         protected TypeNode visitBool(BoolNode n) {
@@ -106,7 +111,8 @@ public class TypeInferencer {
             var t = new FunctionTypeNode(n.source);
             t.return_ = visit(n.return_);
             for (var p : n.parameters) {
-                t.parameters.add(subst.apply(ctx.get(p.identifier.value).type));
+                var pt = ctx.get(p.identifier.value).type;
+                t.parameters.add(subst.apply(pt));
             }
             return t;
         }
@@ -135,13 +141,21 @@ public class TypeInferencer {
         }
         @Override
         protected TypeNode visitLetBinding(LetBindingNode n) throws VisitorException {
-            ctx.put(n.declaration.identifier.value, new TypeScheme(varGen.next()));
+            var tempT = varGen.next();
+            ctx.put(n.declaration.identifier.value, new TypeScheme(tempT));
             var t = visit(n.expr);
+            subst.unify(t, tempT);
             if (n.declaration.typeScheme != null) {
-                ctx.put(n.declaration.identifier.value, n.declaration.typeScheme);
                 subst.unify(t, n.declaration.typeScheme.type);
+                ctx.put(
+                    n.declaration.identifier.value,
+                    n.declaration.typeScheme
+                );
             } else {
-                ctx.put(n.declaration.identifier.value, generalize(ctx, t));
+                ctx.put(
+                    n.declaration.identifier.value,
+                    t.generalize(varGen)
+                );
             }
             return null;
         }
@@ -180,7 +194,7 @@ public class TypeInferencer {
         public Substitution(Substitution sub) {
             super(sub);
         }
-
+    
         @Override
         public TypeNode put(VariableTypeNode key, TypeNode value) {
             var out = super.put(key, value);
@@ -195,7 +209,7 @@ public class TypeInferencer {
             }
             return out;
         }
-
+    
         public TypeNode apply(TypeNode ty) {
             if (ty instanceof VariableTypeNode) {
                 var t = (VariableTypeNode)ty;
@@ -220,13 +234,13 @@ public class TypeInferencer {
     
         public TypeScheme apply(TypeScheme scheme) {
             var nextSubst = new Substitution(this);
-            for (var v : scheme.vars) {
+            for (var v : scheme.getTypeVars()) {
                 nextSubst.remove(v);
             }
             var t = nextSubst.apply(scheme.type);
-            return new TypeScheme(scheme.vars, t);
+            return new TypeScheme(t);
         }
-
+    
         public IdentifierContext apply(IdentifierContext ctx) {
             var nextCtx = ctx.clone();
             for (var x : ctx.entrySet()) {
@@ -234,9 +248,9 @@ public class TypeInferencer {
             }
             return nextCtx;
         }
-
+    
         void bindIdent(VariableTypeNode v, TypeNode ty) {
-            if (freeTypeVars(ty).contains(v)) {
+            if (ty.getTypeVars().contains(v)) {
                 throw new Error("occurs check failed");
             }
             put(v, ty);
@@ -266,7 +280,7 @@ public class TypeInferencer {
                 System.out.println("types do not unify: " + t1 + " and " + t2);
             }
         }
-
+    
         @Override
         public String toString() {
             var s = new StringBuilder();
@@ -285,75 +299,5 @@ public class TypeInferencer {
             s.append("}");
             return s.toString();
         }
-    }
-
-    class TypeVarGenerator {
-        int nextTypeVarId = 1;
-
-        public VariableTypeNode next() {
-            return new VariableTypeNode(Integer.toString(nextTypeVarId++));
-        }
-    }
-
-    TypeNode instantiate(TypeScheme scheme) {
-        var subst = new Substitution();
-        for (var v : scheme.vars) {
-            subst.put(v, varGen.next());
-        }
-        return subst.apply(scheme.type);
-    }
-
-    static TypeScheme generalize(IdentifierContext ctx, TypeNode t) {
-        var vars = except(freeTypeVars(t), freeTypeVarsCtx(ctx));
-        var sch = new TypeScheme(vars, t);
-        return sch;
-    }
-    
-    static Set<VariableTypeNode> freeTypeVars(TypeNode t) {
-        var s = new HashSet<VariableTypeNode>();
-        freeTypeVars(t, s);
-        return s;
-    }
-    
-    static void freeTypeVars(TypeNode t, Set<VariableTypeNode> s) {
-        if (t instanceof VariableTypeNode) {
-            s.add((VariableTypeNode)t);
-        } else if (t instanceof FunctionTypeNode) {
-            var tf = (FunctionTypeNode)t;
-            for (var p : tf.parameters) {
-                freeTypeVars(p, s);
-            }
-            freeTypeVars(tf.return_, s);
-        } else if (t instanceof ListTypeNode) {
-            freeTypeVars(((ListTypeNode)t).innerType, s);
-        }
-    }
-
-    static Set<VariableTypeNode> freeTypeVarsScheme(TypeScheme scheme) {
-        return except(scheme.vars, freeTypeVars(scheme.type));
-    }
-
-    static Set<VariableTypeNode> freeTypeVarsCtx(IdentifierContext ctx) {
-        Set<VariableTypeNode> s = new HashSet<VariableTypeNode>();
-        var vals = ctx.values();
-        for (var sch : vals) {
-            s.addAll(freeTypeVarsScheme(sch));
-        }
-        return s;
-    }
-
-    /**
-     * returns the set of elements that appear in {@code s1}, but not in {@code s2}.
-     * 
-     * @param s1 
-     * @param s2 
-     * @param <T> type of elements in the set
-     */
-    static<T> Set<T> except(Set<T> s1, Set<T> s2) {
-        var s3 = new HashSet<T>(s1);
-        for (var val : s2) {
-            s3.remove(val);
-        }
-        return s3;
     }
 }

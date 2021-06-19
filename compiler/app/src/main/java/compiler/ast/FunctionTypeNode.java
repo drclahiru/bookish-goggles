@@ -70,4 +70,12 @@ public class FunctionTypeNode extends TypeNode {
         }
         return n;
     }
+
+    @Override
+    public void addTypeVars(Set<VariableTypeNode> s) {
+        for (var x : parameters) {
+            x.addTypeVars(s);
+        }
+        return_.addTypeVars(s);
+    }
 }

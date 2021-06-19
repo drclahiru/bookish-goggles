@@ -42,4 +42,8 @@ public class SimpleTypeNode extends TypeNode {
         var n = new SimpleTypeNode(source, type);
         return n;
     }
+
+    @Override
+    public void addTypeVars(Set<VariableTypeNode> s) {
+    }
 }

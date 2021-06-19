@@ -41,4 +41,9 @@ public class ListTypeNode extends TypeNode {
     public ListTypeNode clone() {
         return new ListTypeNode(source, innerType.clone());
     }
+
+    @Override
+    public void addTypeVars(Set<VariableTypeNode> s) {
+        innerType.addTypeVars(s);
+    }
 }

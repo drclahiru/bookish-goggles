@@ -1,6 +1,12 @@
 package compiler.ast;
 
+import compiler.TypeVarGenerator;
+import compiler.TypeVariableRenamer;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.ParserRuleContext;
+
 
 public abstract class TypeNode extends AbstractNode {
     public TypeNode(ParserRuleContext source) {
@@ -30,4 +36,21 @@ public abstract class TypeNode extends AbstractNode {
 
     @Override
     public abstract TypeNode clone();
+    
+
+    public abstract void addTypeVars(Set<VariableTypeNode> s);
+
+    public Set<VariableTypeNode> getTypeVars() {
+        var s = new HashSet<VariableTypeNode>();
+        addTypeVars(s);
+        return s;
+    };
+
+    public TypeScheme generalize(TypeVarGenerator varGen) {
+        var vars = getTypeVars()
+            .stream()
+            .collect(Collectors.toMap(x -> x, x -> varGen.next().id));
+        var renamer = new TypeVariableRenamer(vars);
+        return new TypeScheme(renamer.rename(this));
+    }
 }

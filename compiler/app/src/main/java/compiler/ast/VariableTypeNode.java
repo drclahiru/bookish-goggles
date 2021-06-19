@@ -41,4 +41,9 @@ public class VariableTypeNode extends TypeNode {
         n.type = type;
         return n;
     }
+
+    @Override
+    public void addTypeVars(Set<VariableTypeNode> s) {
+        s.add(this);
+    }
 }

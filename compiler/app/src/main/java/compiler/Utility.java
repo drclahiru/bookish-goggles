@@ -10,45 +10,56 @@ public class Utility {
         var b = new SimpleTypeNode(null, SimpleType.Bool);
         var x = new VariableTypeNode("x");
 
-        var nnn = new FunctionTypeNode(null);
-        nnn.parameters.add(n);
-        nnn.parameters.add(n);
-        nnn.return_ = n;
+        {
+            var nnn = new FunctionTypeNode(null);
+            nnn.parameters.add(n);
+            nnn.parameters.add(n);
+            nnn.return_ = n;
 
-        var bbb = new FunctionTypeNode(null);
-        bbb.parameters.add(b);
-        bbb.parameters.add(b);
-        bbb.return_ = b;
-
-        var nnb = new FunctionTypeNode(null);
-        nnb.parameters.add(n);
-        nnb.parameters.add(n);
-        nnb.return_ = b;
-
-        var xxb = new FunctionTypeNode(null);
-        xxb.parameters.add(x);
-        xxb.parameters.add(x);
-        xxb.return_ = b;
-
-        var nnnTs = new TypeScheme(nnn);
-        var nnbTs = new TypeScheme(nnb);
-        var bbbTs = new TypeScheme(bbb);
-        var xxbTs = new TypeScheme(xxb);
-        xxbTs.vars.add(x);
-
-        map.put(new Identifier("+"), nnnTs);
-        map.put(new Identifier("-"), nnnTs);
-        map.put(new Identifier("*"), nnnTs);
-        map.put(new Identifier("/"), nnnTs);
-        map.put(new Identifier("%"), nnnTs);
-        map.put(new Identifier("<"), nnbTs);
-        map.put(new Identifier(">"), nnbTs);
-        map.put(new Identifier("<="), nnbTs);
-        map.put(new Identifier(">="), nnbTs);
-        map.put(new Identifier("!="), xxbTs);
-        map.put(new Identifier("=="), xxbTs);
-        map.put(new Identifier("&&"), bbbTs);
-        map.put(new Identifier("||"), bbbTs);
+            var nnnTs = new TypeScheme(nnn);
+            map.put(new Identifier("+"), nnnTs);
+            map.put(new Identifier("-"), nnnTs);
+            map.put(new Identifier("*"), nnnTs);
+            map.put(new Identifier("/"), nnnTs);
+            map.put(new Identifier("%"), nnnTs);
+        }
+        {
+            var nnb = new FunctionTypeNode(null);
+            nnb.parameters.add(n);
+            nnb.parameters.add(n);
+            nnb.return_ = b;
+            var nnbTs = new TypeScheme(nnb);
+            map.put(new Identifier("<"), nnbTs);
+            map.put(new Identifier(">"), nnbTs);
+            map.put(new Identifier("<="), nnbTs);
+            map.put(new Identifier(">="), nnbTs);
+        }
+        {
+            var xxb = new FunctionTypeNode(null);
+            xxb.parameters.add(x);
+            xxb.parameters.add(x);
+            xxb.return_ = b;
+            var xxbTs = new TypeScheme(xxb);
+            map.put(new Identifier("!="), xxbTs);
+            map.put(new Identifier("=="), xxbTs);
+        }
+        {
+            var bbb = new FunctionTypeNode(null);
+            bbb.parameters.add(b);
+            bbb.parameters.add(b);
+            bbb.return_ = b;
+            var bbbTs = new TypeScheme(bbb);
+            map.put(new Identifier("&&"), bbbTs);
+            map.put(new Identifier("||"), bbbTs);
+        }
+        {
+            var listX = new ListTypeNode(null, x);
+            var cons = new FunctionTypeNode(null);
+            cons.parameters.add(x);
+            cons.parameters.add(listX);
+            cons.return_ = listX;
+            map.put(new Identifier("::"), new TypeScheme(cons));
+        }
 
         return map;
     }

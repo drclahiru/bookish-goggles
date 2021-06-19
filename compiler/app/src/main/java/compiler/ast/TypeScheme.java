@@ -1,18 +1,16 @@
 package compiler.ast;
 
+import compiler.TypeVarGenerator;
 import compiler.TypeVariableRenamer;
 import compiler.Utility;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TypeScheme {
-    public final Set<VariableTypeNode> vars;
     public final TypeNode type;
 
     public TypeScheme(TypeNode type) {
-        this(new HashSet<>(), type);
-    }
-    public TypeScheme(Set<VariableTypeNode> vars, TypeNode type) {
-        this.vars = vars;
         this.type = type;
     }
 
@@ -21,6 +19,7 @@ public class TypeScheme {
         var b = new StringBuilder();
 
         var renamer = createRenamer();
+        var vars = type.getTypeVars();
         for (var e : vars) {
             b.append(e);
             b.append(" ");
@@ -36,6 +35,7 @@ public class TypeScheme {
 
     public TypeVariableRenamer createRenamer() {
         var varMap = new HashMap<VariableTypeNode, String>();
+        var vars = type.getTypeVars();
         if (!vars.isEmpty()) {
             var i = 0;
             for (var v : vars) {
@@ -46,6 +46,10 @@ public class TypeScheme {
         return new TypeVariableRenamer(varMap);
     }
 
+    public Set<VariableTypeNode> getTypeVars() {
+        return type.getTypeVars();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof VariableTypeNode)) {
@@ -53,11 +57,21 @@ public class TypeScheme {
         }
 
         var other = (TypeScheme)o;
-        return this.type.equals(other.type) && this.vars.equals(other.vars);
+        return this.type.equals(other.type);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(vars, type);
+        return Objects.hash(type);
+    }
+
+    public TypeNode instantiate(TypeVarGenerator varGen) {
+        var vars = type
+            .getTypeVars()
+            .stream()
+            .collect(Collectors.toMap(x -> x, x -> varGen.next().id));
+
+        var renamer = new TypeVariableRenamer(vars);
+        return renamer.rename(type);
     }
 }

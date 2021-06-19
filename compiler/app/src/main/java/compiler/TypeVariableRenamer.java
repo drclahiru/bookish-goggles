@@ -4,8 +4,8 @@ import java.util.*;
 import compiler.ast.*;
 
 public class TypeVariableRenamer {
-    HashMap<VariableTypeNode, String> map;
-    public TypeVariableRenamer(HashMap<VariableTypeNode, String> map) {
+    Map<VariableTypeNode, String> map;
+    public TypeVariableRenamer(Map<VariableTypeNode, String> map) {
         this.map = map;
     }
     public TypeNode rename(TypeNode t) {
@@ -27,6 +27,11 @@ public class TypeVariableRenamer {
             }
             ftNext.return_ = renameVar(ft.return_, from, to);
             return ftNext;
+        }
+        if (t instanceof ListTypeNode) {
+            var lt = (ListTypeNode)t;
+            var innerT = lt.innerType;
+            return new ListTypeNode(null, renameVar(innerT, from, to));
         }
         return t;
     }
