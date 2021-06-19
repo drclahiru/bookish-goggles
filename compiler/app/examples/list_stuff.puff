@@ -1,0 +1,25 @@
+
+let range = (start, end) {
+    if start > end {
+        {}
+    else
+        if start == end {
+            {end}
+        else
+            start :: range(start + 1, end)
+        }
+    }
+}
+
+let fold = (list, f, base) {
+    match list {
+        {} -> base,
+        next :: rest -> f(fold(rest, f, base), next)
+    }
+}
+
+let sum = (list) {
+    fold(list, (l, r) {l + r}, 0)
+}
+
+let sum_one_to_n = (n) { sum(range(1, n)) }

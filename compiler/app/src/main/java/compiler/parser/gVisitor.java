@@ -85,6 +85,13 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpr_if_else(gParser.Expr_if_elseContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code expr_match}
+	 * labeled alternative in {@link gParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpr_match(gParser.Expr_matchContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code id}
 	 * labeled alternative in {@link gParser#expr}.
 	 * @param ctx the parse tree
@@ -128,6 +135,39 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitList_expr(gParser.List_exprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#match_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMatch_expr(gParser.Match_exprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link gParser#match_expr_branch}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMatch_expr_branch(gParser.Match_expr_branchContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code pattern_main_id}
+	 * labeled alternative in {@link gParser#pattern}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPattern_main_id(gParser.Pattern_main_idContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code pattern_main_list_cons}
+	 * labeled alternative in {@link gParser#pattern}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPattern_main_list_cons(gParser.Pattern_main_list_consContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code pattern_main_list_empty}
+	 * labeled alternative in {@link gParser#pattern}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPattern_main_list_empty(gParser.Pattern_main_list_emptyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#lambda}.
 	 * @param ctx the parse tree

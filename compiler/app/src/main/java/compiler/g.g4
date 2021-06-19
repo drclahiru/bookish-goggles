@@ -31,7 +31,8 @@ expr:
 	| ID											# id
 	| lambda_invocation                             # expr_invoke
 	| let_expr										# expr_let
-	| list_expr									    # expr_list;
+	| list_expr									    # expr_list
+	| match_expr									# expr_match;
 
 if_else: IF expr OBRACE expr ELSE expr CBRACE;
 
@@ -41,7 +42,18 @@ basic_type: BASIC_TYPE;
 
 list_type: LIST_NAME OPAR type CPAR;
 
-list_expr : OBRACE (value (COMMA value)*)? CBRACE;
+list_expr : OBRACE (expr (COMMA expr)*)? CBRACE;
+
+match_expr : MATCH expr OBRACE match_expr_branch (COMMA match_expr_branch)* CBRACE;
+
+match_expr_branch : pattern ARROW expr;
+
+pattern :
+	pattern CONS pattern		#pattern_main_list_cons
+	| OBRACE CBRACE 			#pattern_main_list_empty
+	| ID					    #pattern_main_id
+	;
+
 
 /* (x) { x } */
 lambda:
@@ -93,6 +105,7 @@ ARROW: '->';
 LET: 'let';
 IN: 'in';
 LIST_NAME: 'List';
+MATCH: 'match';
 
 NUMBER: [0-9]+ | [0-9]+ '.' [0-9]+;
 

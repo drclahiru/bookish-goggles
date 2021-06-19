@@ -14,12 +14,16 @@ public abstract class VisitorVoid {
             visitExpression((ExpressionNode)n);
         } else if (n instanceof TypeNode) {
             visitType((TypeNode)n);
+        } else if (n instanceof PatternNode) {
+            visitPattern((PatternNode)n);
         } else if (n instanceof LetBindingNode) {
             visitLetBinding((LetBindingNode)n);
         } else if (n instanceof IdentifierDeclarationNode) {
             visitIdentifierDeclaration((IdentifierDeclarationNode)n);
         } else if (n instanceof ProgramNode) {
             visitProgram((ProgramNode)n);
+        } else if (n instanceof MatchBranchNode) {
+            visitMatchBranchExpr((MatchBranchNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
@@ -54,6 +58,8 @@ public abstract class VisitorVoid {
             visitList((ListNode)n); 
         } else if (n instanceof LetExpressionNode) {
             visitLetExpression((LetExpressionNode)n);
+        } else if (n instanceof MatchNode) {
+            visitMatch((MatchNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
@@ -108,10 +114,36 @@ public abstract class VisitorVoid {
     protected void visitList(ListNode n) throws VisitorException {
         defaultVisit(n);
     }
+    protected void visitMatch(MatchNode n) throws VisitorException {
+        defaultVisit(n);
+    }
     protected void visitVariableType(VariableTypeNode n) throws VisitorException {
         defaultVisit(n);
     }
     protected void visitListType(ListTypeNode n) throws VisitorException {
+        defaultVisit(n);
+    }
+    protected void visitPattern(PatternNode n) throws VisitorException {
+        if (n instanceof PatternVarNode) {
+            visitPatternVar((PatternVarNode)n);
+        } else if (n instanceof PatternListCons) {
+            visitPatternListCons((PatternListCons)n);
+        } else if (n instanceof PatternListEmpty) {
+            visitPatternListEmpty((PatternListEmpty)n);
+        } else {
+            throw new Error("Unexpected pattern: " + n);
+        }
+    }
+    protected void visitMatchBranchExpr(MatchBranchNode n) throws VisitorException {
+        defaultVisit(n);
+    }
+    protected void visitPatternVar(PatternVarNode n) throws VisitorException {
+        defaultVisit(n);
+    }
+    protected void visitPatternListEmpty(PatternListEmpty n) throws VisitorException {
+        defaultVisit(n);
+    }
+    protected void visitPatternListCons(PatternListCons n) throws VisitorException {
         defaultVisit(n);
     }
 }

@@ -1,6 +1,7 @@
 package compiler.parser;
 
 import compiler.ast.*;
+
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -69,7 +70,7 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     @Override
     public ListNode visitList_expr(gParser.List_exprContext ctx) {
         var smth = new ArrayList<ExpressionNode>();
-        for (var arg : ctx.value()) {
+        for (var arg : ctx.expr()) {
             smth.add((ExpressionNode)visit(arg));
         }
         return new ListNode(ctx, smth);
@@ -193,5 +194,51 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
         } else {
             throw new Error("The range for the type 'Range' is not provided correctly");
         }
+    }
+    @Override
+    public MatchNode visitExpr_match(gParser.Expr_matchContext ctx) {
+        return visitMatch_expr(ctx.match_expr());
+    }
+    @Override
+    public MatchNode visitMatch_expr(gParser.Match_exprContext ctx) {
+        var node = new MatchNode(ctx);
+        node.expr = visitExpr(ctx.expr());
+        for (var branch : ctx.match_expr_branch()) {
+            node.patterns.add(visitMatch_expr_branch(branch));
+        }
+        return node;
+    }
+    @Override
+    public MatchBranchNode visitMatch_expr_branch(gParser.Match_expr_branchContext ctx) {
+        var node = new MatchBranchNode(ctx);
+        node.pattern = visitPattern(ctx.pattern());
+        node.expr = visitExpr(ctx.expr());
+        return node;
+    }
+	public PatternNode visitPattern(gParser.PatternContext ctx) {
+        var node = visit(ctx);
+        if (node instanceof IdentifierNode) {
+            return new PatternVarNode(ctx, (IdentifierNode)node);
+        }  else if (node instanceof PatternNode) {
+            return (PatternNode)node;
+        } else {
+            throw new Error("Unexpected node: " + node);
+        }
+    }
+    @Override
+    public IdentifierNode visitPattern_main_id(gParser.Pattern_main_idContext ctx) {
+        return new IdentifierNode(ctx, ctx.getText());
+    }
+    @Override
+    public PatternListCons visitPattern_main_list_cons(gParser.Pattern_main_list_consContext ctx) {
+        return new PatternListCons(
+            ctx,
+            visitPattern(ctx.pattern(0)),
+            visitPattern(ctx.pattern(1))
+        );
+    }
+    @Override
+    public PatternListEmpty visitPattern_main_list_empty(gParser.Pattern_main_list_emptyContext ctx) {
+        return new PatternListEmpty(ctx);
     }
 }

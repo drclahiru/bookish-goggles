@@ -199,6 +199,62 @@ public class PrettyPrinter extends VisitorVoid {
         print(node.endCol);
         print(Integer.toString(node.endRow));
     }
+    
+    @Override
+    protected void visitList(ListNode node) throws VisitorException {
+        print("{");
+        if (node.exprs.size() > 0) {
+            visit(node.exprs.get(0));
+        }
+        for (var i = 1; i < node.exprs.size(); i++) {
+            print(", ");
+            visit(node.exprs.get(i));
+        }
+        print("}");
+    }
+
+    @Override
+    protected void visitMatch(MatchNode n) throws VisitorException {
+        print("match ");
+        visit(n.expr);
+        print(" {");
+        println();
+        indentLevel++;
+        for (var i = 0; i < n.patterns.size() - 1; i++) {
+            var p = n.patterns.get(i);
+            visit(p);
+            print(",");
+            println();
+        }
+        visit(n.patterns.get(n.patterns.size() - 1));
+        println();
+        indentLevel--;
+        print("}");
+    }
+
+    @Override
+    protected void visitMatchBranchExpr(MatchBranchNode n) throws VisitorException {
+        visit(n.pattern);
+        print(" -> ");
+        visit(n.expr);
+    }
+    
+    @Override
+    protected void visitPatternVar(PatternVarNode n) throws VisitorException {
+        visit(n.ident);
+    }
+
+    @Override
+    protected void visitPatternListEmpty(PatternListEmpty n) throws VisitorException {
+        print("{}");
+    }
+
+    @Override
+    protected void visitPatternListCons(PatternListCons n) throws VisitorException {
+        visit(n.left);
+        print(" :: ");
+        visit(n.right);
+    }
 
     protected void print(String text) {
         try {
