@@ -72,6 +72,23 @@ public class JavaCodeGen {
         protected void visitRange(RangeNode n) throws VisitorException {
             throw new Error("todo");
         }
+        
+        @Override
+        protected void visitList(ListNode n) throws VisitorException {
+         	   	
+        		print("new ArrayList<Object>();");
+        		println();	
+        		
+        		for (var arg : n.exprs) {
+        			  print("((ArrayList)" + "x" + ").add(" );
+        			  visit(arg);
+        			  print(");");
+        			  println();
+        		  }
+        }
+        
+    
+        
         @Override
         protected void visitIdentifier(IdentifierNode n) throws VisitorException {
             var name = operatorNameMap.get(n.value.name);
@@ -142,6 +159,8 @@ public class JavaCodeGen {
             }
         }
     }
+    
+  
 
     class ClassGenerator extends VisitorVoid {
         void printLet(IdentifierDeclarationNode decl, ExpressionNode expr, ExpressionNode next) throws VisitorException {
