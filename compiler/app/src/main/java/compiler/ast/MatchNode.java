@@ -19,13 +19,13 @@ public class MatchNode extends ExpressionNode {
     }
 
     @Override
-    public ExpressionNode clone() {
+    public MatchNode clone() {
         var n = new MatchNode(source);
         n.expr = expr.clone();
         for (var p : patterns) {
             n.patterns.add(p.clone());
         }
-        n.type = type.clone();
+        n.type = type;
         return n;
     }
 }

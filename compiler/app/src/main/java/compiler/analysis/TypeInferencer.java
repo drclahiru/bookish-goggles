@@ -4,6 +4,7 @@ import compiler.IdentifierContext;
 import compiler.TypeVarGenerator;
 import compiler.Utility;
 import compiler.ast.*;
+import compiler.visitor.PatternVisitorT;
 import compiler.visitor.VisitorException;
 import compiler.visitor.VisitorExceptionAggregate;
 import compiler.visitor.VisitorT;
@@ -154,7 +155,7 @@ public class TypeInferencer {
             } else {
                 ctx.put(
                     n.declaration.identifier.value,
-                    t.generalize(varGen)
+                    subst.apply(t).generalize(varGen)
                 );
             }
             return null;
@@ -184,6 +185,52 @@ public class TypeInferencer {
             }
             return new ListTypeNode(n.source, subst.apply(t));
         }
+
+        @Override
+        protected TypeNode visitMatch(MatchNode n) throws VisitorException {
+            var patVisitor = new InferencePatternVisitor(subst, ctx);
+
+            var exprT = visit(n.expr);
+            var returnT = varGen.next();
+
+            for (var pat : n.patterns) {
+                subst.unify(exprT, patVisitor.visit(pat.pattern));
+                subst.unify(returnT, visit(pat.expr));
+                System.out.println("  t1  = " + subst.apply(exprT));
+                System.out.println("  t2  = " + subst.apply(returnT));
+            }
+            System.out.println(" t1  = " + subst.apply(exprT));
+            System.out.println(" t2  = " + subst.apply(returnT));
+            return subst.apply(returnT);
+        }
+    }
+
+    class InferencePatternVisitor extends PatternVisitorT<TypeNode> {
+        final Substitution subst;
+        final IdentifierContext ctx;
+        public InferencePatternVisitor(Substitution subst, IdentifierContext ctx) {
+            this.subst = subst;
+            this.ctx = ctx;
+        }
+
+        @Override
+        protected TypeNode visitPatternVar(PatternVarNode n) throws VisitorException {
+            var t = varGen.next();
+            ctx.put(n.decl.identifier.value, new TypeScheme(t));
+            return t;
+        }
+        @Override
+        protected TypeNode visitPatternListEmpty(PatternListEmpty n) throws VisitorException {
+            return new ListTypeNode(n.source, varGen.next());
+        }
+        @Override
+        protected TypeNode visitPatternListCons(PatternListCons n) throws VisitorException {
+            var headT = visit(n.head);
+            var tailT = visit(n.tail);
+            var t = new ListTypeNode(n.source, headT);
+            subst.unify(t, tailT);
+            return subst.apply(t);
+        }
     }
 
     class Substitution extends HashMap<VariableTypeNode, TypeNode> {
@@ -197,7 +244,6 @@ public class TypeInferencer {
     
         @Override
         public TypeNode put(VariableTypeNode key, TypeNode value) {
-            var out = super.put(key, value);
             var keyToUpdate = new Vector<VariableTypeNode>();
             super.forEach((k, v) -> {
                 if (v == key) {
@@ -207,7 +253,7 @@ public class TypeInferencer {
             for (var k : keyToUpdate) {
                 super.put(k, value);
             }
-            return out;
+            return super.put(key, value);
         }
     
         public TypeNode apply(TypeNode ty) {
@@ -253,7 +299,15 @@ public class TypeInferencer {
             if (ty.getTypeVars().contains(v)) {
                 throw new Error("occurs check failed");
             }
-            put(v, ty);
+
+            var oldTy = get(v);
+            if (oldTy != null) {
+                unify(ty, oldTy);
+                put(v, apply(ty));
+            } else {
+                put(v, ty);
+            }
+
         }
         public void unify(TypeNode t1, TypeNode t2) {
             t1 = apply(t1);

@@ -36,19 +36,21 @@ class App {
 
     public static void main(String[] args) {
         try {
-            var fileName = "factorial";
+            var fileName = "list_stuff";
             var ast = readAndParse("./examples/" + fileName + ".puff");
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
             System.out.println("\n\n-------- Inferred --------\n\n");
-            new PrettyPrinter(System.out, x -> x.printScopeNumber = false).run(ast);
+            new PrettyPrinter(System.out).run(ast);
             // new TypeChecker().run(ast);
             System.out.println("\n\n----------------------------------\n\n");
             var idGen = new IdentifierGenerator();
+            new MatchToIfElse(idGen).visit(ast);
+            // new PrettyPrinter(System.out).run(ast);
             new LetExpressionDesugarer(idMap, idGen).run(ast);
             new LambdaLifter(idMap, idGen).run(ast);
-            new PrettyPrinter(System.out).run(ast);
+            //new PrettyPrinter(System.out).run(ast);
             new JVM_CodeGen(idMap).run(ast);
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");

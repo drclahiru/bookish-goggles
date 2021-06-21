@@ -78,6 +78,9 @@ class JVM_StackSize extends VisitorVoid {
     protected void visitList(ListNode n) throws VisitorException {
         throw new Error("todo");
     }
+    protected void visitMatch(MatchNode n) throws VisitorException {
+        throw new Error("todo");
+    }
     protected void visitIdentifierDeclaration(IdentifierDeclarationNode n) throws VisitorException {
         throw new Error("shouldn't be visited");
     }

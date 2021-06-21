@@ -182,4 +182,16 @@ public class LetExpressionDesugarer extends VisitorT<ExpressionNode> {
         }
         return next;
     }
+
+    @Override
+    protected ExpressionNode visitMatch(MatchNode n) throws VisitorException {
+        var next = n.clone();
+        next.expr = visit(next.expr);
+        for (var i = 0; i < next.patterns.size(); i++) {
+            var pat = next.patterns.get(i);
+            pat.expr = visit(pat.expr);
+            next.patterns.set(i, pat);
+        }
+        return next;
+    }
 }

@@ -9,6 +9,7 @@ public class Utility {
         var n = new SimpleTypeNode(null, SimpleType.Number);
         var b = new SimpleTypeNode(null, SimpleType.Bool);
         var x = new VariableTypeNode("x");
+        var y = new VariableTypeNode("y");
 
         {
             var nnn = new FunctionTypeNode(null);
@@ -59,6 +60,39 @@ public class Utility {
             cons.parameters.add(listX);
             cons.return_ = listX;
             map.put(new Identifier("::"), new TypeScheme(cons));
+        }
+        {
+            var head = new FunctionTypeNode(null);
+            head.parameters.add(b);
+            head.return_ = b;
+            map.put(new Identifier("not"), new TypeScheme(head));
+        }
+        {
+            var head = new FunctionTypeNode(null);
+            head.parameters.add(x);
+            head.return_ = y;
+            map.put(new Identifier("$$unreachable"), new TypeScheme(head));
+        }
+        {
+            var listX = new ListTypeNode(null, x);
+            var head = new FunctionTypeNode(null);
+            head.parameters.add(listX);
+            head.return_ = b;
+            map.put(new Identifier("$$list_is_empty"), new TypeScheme(head));
+        }
+        {
+            var listX = new ListTypeNode(null, x);
+            var head = new FunctionTypeNode(null);
+            head.parameters.add(listX);
+            head.return_ = x;
+            map.put(new Identifier("$$list_head"), new TypeScheme(head));
+        }
+        {
+            var listX = new ListTypeNode(null, x);
+            var tail = new FunctionTypeNode(null);
+            tail.parameters.add(listX);
+            tail.return_ = listX;
+            map.put(new Identifier("$$list_tail"), new TypeScheme(tail));
         }
 
         return map;

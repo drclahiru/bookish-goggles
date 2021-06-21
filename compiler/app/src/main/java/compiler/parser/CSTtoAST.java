@@ -233,8 +233,8 @@ public class CSTtoAST extends AbstractParseTreeVisitor<AbstractNode> implements 
     public PatternListCons visitPattern_main_list_cons(gParser.Pattern_main_list_consContext ctx) {
         return new PatternListCons(
             ctx,
-            visitPattern(ctx.pattern(0)),
-            visitPattern(ctx.pattern(1))
+            new PatternVarNode(ctx, new IdentifierNode(ctx, ctx.ID().getText())),
+            visitPattern(ctx.pattern())
         );
     }
     @Override

@@ -50,6 +50,20 @@ public class ScopeResolver extends VisitorVoid {
         idTable.exitScope();
     }
     @Override
+    protected void visitMatch(MatchNode n) throws VisitorException {
+        visit(n.expr);
+        for (var pat : n.patterns) {
+            idTable.enterScope();
+            visit(pat);
+            idTable.exitScope();
+        }
+    }
+    @Override
+    protected void visitMatchBranchExpr(MatchBranchNode n) throws VisitorException {
+        visit(n.pattern);
+        visit(n.expr);
+    }
+    @Override
     protected void visitIdentifier(IdentifierNode node) throws VisitorException {
         var decl = idTable.get(node.value.name);
         if (decl != null) {

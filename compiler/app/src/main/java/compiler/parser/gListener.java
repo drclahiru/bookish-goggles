@@ -238,18 +238,6 @@ public interface gListener extends ParseTreeListener {
 	 */
 	void exitMatch_expr_branch(gParser.Match_expr_branchContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code pattern_main_id}
-	 * labeled alternative in {@link gParser#pattern}.
-	 * @param ctx the parse tree
-	 */
-	void enterPattern_main_id(gParser.Pattern_main_idContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code pattern_main_id}
-	 * labeled alternative in {@link gParser#pattern}.
-	 * @param ctx the parse tree
-	 */
-	void exitPattern_main_id(gParser.Pattern_main_idContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code pattern_main_list_cons}
 	 * labeled alternative in {@link gParser#pattern}.
 	 * @param ctx the parse tree
@@ -273,6 +261,18 @@ public interface gListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPattern_main_list_empty(gParser.Pattern_main_list_emptyContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code pattern_main_id}
+	 * labeled alternative in {@link gParser#pattern}.
+	 * @param ctx the parse tree
+	 */
+	void enterPattern_main_id(gParser.Pattern_main_idContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code pattern_main_id}
+	 * labeled alternative in {@link gParser#pattern}.
+	 * @param ctx the parse tree
+	 */
+	void exitPattern_main_id(gParser.Pattern_main_idContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link gParser#lambda}.
 	 * @param ctx the parse tree

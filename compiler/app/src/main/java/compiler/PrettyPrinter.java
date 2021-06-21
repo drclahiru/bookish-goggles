@@ -50,11 +50,11 @@ public class PrettyPrinter extends VisitorVoid {
     protected void visitFunction(FunctionNode node) throws VisitorException {
         print("(");
         for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().limit(1)::iterator) {
-            visit(arg);
+            visit(arg.identifier);
         }
         for (var arg : (Iterable<IdentifierDeclarationNode>) node.parameters.stream().skip(1)::iterator) {
             print(", ");
-            visit(arg);
+            visit(arg.identifier);
         }
         print(") {");
         println();
@@ -241,7 +241,7 @@ public class PrettyPrinter extends VisitorVoid {
     
     @Override
     protected void visitPatternVar(PatternVarNode n) throws VisitorException {
-        visit(n.ident);
+        visit(n.decl.identifier);
     }
 
     @Override
@@ -251,9 +251,9 @@ public class PrettyPrinter extends VisitorVoid {
 
     @Override
     protected void visitPatternListCons(PatternListCons n) throws VisitorException {
-        visit(n.left);
+        visit(n.head);
         print(" :: ");
-        visit(n.right);
+        visit(n.tail);
     }
 
     protected void print(String text) {

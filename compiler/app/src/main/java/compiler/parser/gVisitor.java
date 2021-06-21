@@ -148,13 +148,6 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMatch_expr_branch(gParser.Match_expr_branchContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code pattern_main_id}
-	 * labeled alternative in {@link gParser#pattern}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPattern_main_id(gParser.Pattern_main_idContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code pattern_main_list_cons}
 	 * labeled alternative in {@link gParser#pattern}.
 	 * @param ctx the parse tree
@@ -168,6 +161,13 @@ public interface gVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPattern_main_list_empty(gParser.Pattern_main_list_emptyContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code pattern_main_id}
+	 * labeled alternative in {@link gParser#pattern}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPattern_main_id(gParser.Pattern_main_idContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link gParser#lambda}.
 	 * @param ctx the parse tree

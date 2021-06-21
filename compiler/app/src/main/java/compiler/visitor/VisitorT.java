@@ -39,6 +39,8 @@ public abstract class VisitorT<T> {
             return visitList((ListNode)n);  
         } else if (n instanceof LetExpressionNode) {
             return visitLetExpression((LetExpressionNode)n);
+        } else if (n instanceof MatchNode) {
+            return visitMatch((MatchNode)n);
         } else {
             throw new Error("Unexpected type: " + n);
         }
@@ -56,4 +58,5 @@ public abstract class VisitorT<T> {
     protected abstract T visitString(StringNode n)  throws VisitorException;
     protected abstract T visitRange(RangeNode n)  throws VisitorException;
     protected abstract T visitList(ListNode n)  throws VisitorException;
+    protected abstract T visitMatch(MatchNode n) throws VisitorException;
 }

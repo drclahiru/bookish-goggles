@@ -17,12 +17,12 @@ public class MatchBranchNode extends AbstractNode {
         var node = new MatchBranchNode(source);
         node.pattern = pattern.clone();
         node.expr = expr.clone();
-        node.type = type.clone();
+        node.type = type;
         return node;
     }
 
     @Override
     public Stream<AbstractNode> children() {
-        return Stream.concat(pattern.children(), expr.children());
+        return Stream.of(pattern, expr);
     }
 }

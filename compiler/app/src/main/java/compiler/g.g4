@@ -49,7 +49,7 @@ match_expr : MATCH expr OBRACE match_expr_branch (COMMA match_expr_branch)* CBRA
 match_expr_branch : pattern ARROW expr;
 
 pattern :
-	pattern CONS pattern		#pattern_main_list_cons
+	ID CONS pattern		#pattern_main_list_cons
 	| OBRACE CBRACE 			#pattern_main_list_empty
 	| ID					    #pattern_main_id
 	;
