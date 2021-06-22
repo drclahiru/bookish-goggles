@@ -4,6 +4,8 @@ package compiler.codegen;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -32,6 +34,13 @@ public class JVM_CodeGen {
 	}
 
 	public void run(ProgramNode node) throws VisitorException {
+		codeFile("$$list_cons");
+		codeFile("$$list_empty");
+		codeFile("$$list_head");
+		codeFile("$$list_is_empty");
+		codeFile("$$list_tail");
+		codeFile("PuffinList");
+		codeFile("not");
 		for (var b : node.bindings) {
 			globalIds.add(b.declaration.identifier.value);
 		}
@@ -49,7 +58,12 @@ public class JVM_CodeGen {
 		println();
 		println(".method public <init>()V");
 		helper.indentLevel++;
-		stack(nonFunctions.stream().map(x -> new JVM_StackSize(idCtx, globalIds).run(x.expr) + 1).reduce(0, Math::max));
+		stack(
+			nonFunctions
+			.stream()
+			.map(x -> new JVM_StackSize(idCtx, globalIds).run(x.expr) + 1)
+			.reduce(1, Math::max)
+		);
 		locals(1);
 		println("aload_0");
 		println("invokenonvirtual java/lang/Object/<init>()V");
@@ -118,15 +132,16 @@ public class JVM_CodeGen {
 			println("dsub");
 			println("invokestatic java/lang/Double.valueOf(D)Ljava/lang/Double;");
 		});
-		classBoolBool("$lt", "iflt");
-		classBoolBool("$gt", "ifgt");
-		classBoolBool("$gte", "ifge");
-		classBoolBool("$lte", "ifle");
+		classNumberBool("$lt", "iflt");
+		classNumberBool("$gt", "ifgt");
+		classNumberBool("$gte", "ifge");
+		classNumberBool("$lte", "ifle");
 		newFile("$eq", a->helper.eq());
 		newFile("$neq", a->helper.neq());
 		evalInterface(0);
 		evalInterface(1);
 		evalInterface(2);
+		evalInterface(3);
 	}
 
 	protected void print(String text) {
@@ -310,11 +325,29 @@ public class JVM_CodeGen {
 			// the interface takes an instance of itself as the implicit first argument, hence +1
 			println(")Ljava/lang/Object; " + (args + 1));
 		}
+
+		@Override
+		protected void visitList(ListNode n) throws VisitorException {
+			println("new $$list_empty");
+			println("dup");
+			println("invokespecial $$list_empty/<init>()V");
+			println("invokevirtual $$list_empty/eval()Ljava/lang/Object;");
+			
+			for (var i = n.exprs.size() - 1; i >= 0; i--) {
+				println("new $$list_cons");
+				println("dup");
+				println("invokespecial $$list_cons/<init>()V");
+				println("swap");
+				visit(n.exprs.get(i));
+				println("swap");
+				println("invokevirtual $$list_cons/eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+			}
+		}
 	}
 
 	Map<String, String> getOperatorNameMap() {
 		var map = new HashMap<String, String>();
-		map.put("+", "$eq");
+		map.put("+", "$add");
 		map.put("-", "$sub");
 		map.put("*", "$mul");
 		map.put("/", "$div");
@@ -325,6 +358,7 @@ public class JVM_CodeGen {
 		map.put("<=", "$lte");
 		map.put("==", "$eq");
 		map.put("!=", "$neq");
+		map.put("::", "$$list_cons");
 		return map;
 	}
 
@@ -408,6 +442,57 @@ public class JVM_CodeGen {
 			println("areturn"); 
 			helper.indentLevel--;
 			println(".end method");
+		});
+	}
+
+	void classNumberBool(String opName, String eqType) {
+		newFile(opName, a -> {
+			println(".class public " + opName);
+			println(".super java/lang/Object");
+			println(".implements Eval2");
+			println();
+			println(".method public <init>()V");
+			helper.indentLevel++;
+			println("aload_0");
+			println("invokenonvirtual java/lang/Object/<init>()V");
+			println("return");
+			helper.indentLevel--;
+			println(".end method");
+			println();
+			println(".method public eval(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+			helper.indentLevel++;
+			locals(3);
+			stack(4);
+			println("aload_1");
+			println("checkcast java/lang/Double");
+			println("invokevirtual java/lang/Double.doubleValue()D");
+			println("aload_2");
+			println("checkcast java/lang/Double");
+			println("invokevirtual java/lang/Double.doubleValue()D");
+			println("dcmpl");
+			println(eqType + " LabelFalse");
+			println("iconst_0");
+			println("goto LabelEnd");
+			println("LabelFalse:");
+			println("iconst_1");
+			println("LabelEnd:");
+			println("invokestatic java/lang/Boolean.valueOf(Z)Ljava/lang/Boolean;");
+			println("areturn"); 
+			helper.indentLevel--;
+			println(".end method");
+		});
+	}
+
+	void codeFile(String name) {
+		newFile(name, a-> {
+			var path = Paths.get("./src/main/java/compiler/codegen/Jasmin/" + name + ".j");
+			String txt;
+			try {
+				txt = Files.readString(path);
+			} catch (Exception ex) {
+				throw new Error(ex);
+			}
+			print(txt);
 		});
 	}
 

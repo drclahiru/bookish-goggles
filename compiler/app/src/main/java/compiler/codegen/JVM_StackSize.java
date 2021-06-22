@@ -76,7 +76,13 @@ class JVM_StackSize extends VisitorVoid {
         throw new Error("todo");
     }
     protected void visitList(ListNode n) throws VisitorException {
-        throw new Error("todo");
+        stackSize(+2);
+        stackSize(-1);
+        for (var e : n.exprs) {
+            visit(e);
+            stackSize(+2);
+            stackSize(-1);
+        }
     }
     protected void visitMatch(MatchNode n) throws VisitorException {
         throw new Error("todo");

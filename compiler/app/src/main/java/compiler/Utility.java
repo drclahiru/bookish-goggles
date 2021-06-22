@@ -60,6 +60,7 @@ public class Utility {
             cons.parameters.add(listX);
             cons.return_ = listX;
             map.put(new Identifier("::"), new TypeScheme(cons));
+            map.put(new Identifier("$$list_cons"), new TypeScheme(cons));
         }
         {
             var head = new FunctionTypeNode(null);
@@ -74,16 +75,19 @@ public class Utility {
             map.put(new Identifier("$$unreachable"), new TypeScheme(head));
         }
         {
-            var listX = new ListTypeNode(null, x);
             var head = new FunctionTypeNode(null);
-            head.parameters.add(listX);
+            head.return_ = new ListTypeNode(null, x);
+            map.put(new Identifier("$$list_empty"), new TypeScheme(head));
+        }
+        {
+            var head = new FunctionTypeNode(null);
+            head.parameters.add(new ListTypeNode(null, x));
             head.return_ = b;
             map.put(new Identifier("$$list_is_empty"), new TypeScheme(head));
         }
         {
-            var listX = new ListTypeNode(null, x);
             var head = new FunctionTypeNode(null);
-            head.parameters.add(listX);
+            head.parameters.add(new ListTypeNode(null, x));
             head.return_ = x;
             map.put(new Identifier("$$list_head"), new TypeScheme(head));
         }
