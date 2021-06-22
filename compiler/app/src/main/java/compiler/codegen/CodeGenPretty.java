@@ -4,6 +4,7 @@ import compiler.ast.*;
 import compiler.visitor.*;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 public class CodeGenPretty extends VisitorVoid {
     Integer indentLevel = 0;
@@ -154,12 +155,30 @@ public class CodeGenPretty extends VisitorVoid {
     }
 
     @Override
-    protected void visitRange(RangeNode node) {
+    protected void visitRange(RangeNode node) throws VisitorException {
         print(node.startCol);
         print(Integer.toString(node.startRow));
         print(":");
         print(node.endCol);
         print(Integer.toString(node.endRow));
+        
+    }
+    
+    @Override
+    protected void visitList(ListNode node) throws VisitorException {
+    	print("{");
+    	for (var x: node.exprs) {
+    		visit(x);
+    		print(", ");
+    	};  	
+    	print("}");
+    	
+      //  print(node.startCol);
+     //   print(Integer.toString(node.startRow));
+     //   print(":");
+      //  print(node.endCol);
+     //   print(Integer.toString(node.endRow));
+        
     }
 
     protected void print(String text) {
