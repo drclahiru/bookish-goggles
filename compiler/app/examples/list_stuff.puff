@@ -23,4 +23,11 @@ let sum = (list) {
 
 let sum_one_to_n = (n) { sum(range(1, n)) }
 
-let main = sum_one_to_n(5)
+let map = (input, f) {
+    match input {
+        {} -> {},
+        next :: rest -> f(next) :: map(rest, f)
+    }
+}
+
+let main = map({1, 2, 3, 4, 5, 6, 7}, sum_one_to_n)
