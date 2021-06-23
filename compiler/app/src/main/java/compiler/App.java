@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 class App {
+    static String INPUT_FILE = "examples\\list_stuff.puff";
     static String JASMIN_OUTPUT_PATH = "jasmin";
     static String CLASS_OUTPUT_PATH = "output";
 
@@ -44,6 +45,7 @@ class App {
         var processes = new ArrayList<Process>();
         var jasminJar = new File("..\\libs\\jasmin.jar").getAbsoluteFile().toPath().normalize().toFile();
         var programOutput = new File(CLASS_OUTPUT_PATH).getAbsoluteFile();
+        programOutput.mkdir();
         for (var f : jasminOutput.listFiles()) {
             var process = rt.exec("java -jar " + jasminJar + " " + f.getAbsolutePath(), new String[0], programOutput);
             processes.add(process);
@@ -72,25 +74,42 @@ class App {
         }
     }
 
+    public static void runProgram() throws IOException, InterruptedException {
+        var rt = Runtime.getRuntime();
+        var programOutput = new File(CLASS_OUTPUT_PATH).getAbsoluteFile();
+        var p = rt.exec("java Program", new String[0], programOutput);
+        p.waitFor();
+        var output = new BufferedReader(new InputStreamReader(p.getInputStream())).lines().collect(Collectors.joining("\n"));
+        var error = new BufferedReader(new InputStreamReader(p.getErrorStream())).lines().collect(Collectors.joining("\n"));
+
+        System.out.println(output);
+        if (error != "") {
+            System.out.println("\nError:");
+            System.out.println(error);
+        }
+        System.out.println();
+    }
+
     public static void main(String[] args) {
         try {
-            var fileName = "list_stuff";
-            var ast = readAndParse("./examples/" + fileName + ".puff");
+            var ast = readAndParse(INPUT_FILE);
             System.out.println("\n\n-------- Parsed --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             var idMap = infer(ast);
             System.out.println("\n\n-------- Inferred --------\n\n");
             new PrettyPrinter(System.out).run(ast);
             // new TypeChecker().run(ast);
-            System.out.println("\n\n----------------------------------\n\n");
             var idGen = new IdentifierGenerator();
             new MatchToIfElse(idGen).visit(ast);
             // new PrettyPrinter(System.out).run(ast);
             new LetExpressionDesugarer(idMap, idGen).run(ast);
             new LambdaLifter(idMap, idGen).run(ast);
             //new PrettyPrinter(System.out).run(ast);
+            System.out.println("\n\n-------- Codegen --------\n\n");
             new JVM_CodeGen(idMap, JASMIN_OUTPUT_PATH).run(ast);
             runJasmin();
+            System.out.println("\n\n-------- Running --------\n\n");
+            runProgram();
         } catch (VisitorExceptionAggregate ex) {
             System.out.println("--------------------------------------");
             System.out.println("Compilation aborted because of errors:");

@@ -4,7 +4,6 @@ import compiler.ast.*;
 import compiler.visitor.*;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 
 public class CodeGenPretty extends VisitorVoid {
     Integer indentLevel = 0;
