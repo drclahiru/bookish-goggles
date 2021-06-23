@@ -20,12 +20,14 @@ public class JVM_CodeGen {
 	HashSet<Identifier> globalIds = new HashSet<Identifier>(Utility.createPrelude().keySet());
 	HelperClasses helper;
 	int labelCount = 1;
+	final String outputPath;
 
-	public JVM_CodeGen(IdentifierContext idCtx) {
+	public JVM_CodeGen(IdentifierContext idCtx, String outputPath) {
 		super();
 		this.idCtx = idCtx;
-		new File("./examples/jasmine").mkdir();
-		var file = new File("./examples/jasmine/Program.j");
+		this.outputPath = outputPath;
+		new File(outputPath).mkdir();
+		var file = new File(outputPath + "/Program.j");
 		try {
 			this.helper = new HelperClasses(new FileOutputStream(file));
 		} catch (FileNotFoundException e) {
@@ -80,7 +82,7 @@ public class JVM_CodeGen {
 		
 		for (var x : node.bindings) {
 			if (x.expr instanceof FunctionNode) {				
-				var file = new File("./examples/jasmine/" + x.declaration.identifier.value.name + ".j");
+				var file = new File(outputPath + "/" + x.declaration.identifier.value.name + ".j");
 				try {
 					var out = helper.out;
 					helper.out = new FileOutputStream(file);
@@ -167,7 +169,7 @@ public class JVM_CodeGen {
 	}
 
 	void newFile(String name, Consumer<Object> f) {
-		var file = new File("./examples/jasmine/" + name + ".j");
+		var file = new File(outputPath + "/" + name + ".j");
 		try {
 			var out = helper.out;
 			helper.out = new FileOutputStream(file);
