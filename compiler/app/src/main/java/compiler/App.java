@@ -40,7 +40,6 @@ class App {
 
     public static void runJasmin() throws IOException, InterruptedException {
         var rt = Runtime.getRuntime();
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
         var jasminOutput = new File(JASMIN_OUTPUT_PATH).getAbsoluteFile().toPath().normalize().toFile();
         var processes = new ArrayList<Process>();
         var jasminJar = new File("..\\libs\\jasmin.jar").getAbsoluteFile().toPath().normalize().toFile();

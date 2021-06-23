@@ -196,11 +196,7 @@ public class TypeInferencer {
             for (var pat : n.patterns) {
                 subst.unify(exprT, patVisitor.visit(pat.pattern));
                 subst.unify(returnT, visit(pat.expr));
-                System.out.println("  t1  = " + subst.apply(exprT));
-                System.out.println("  t2  = " + subst.apply(returnT));
             }
-            System.out.println(" t1  = " + subst.apply(exprT));
-            System.out.println(" t2  = " + subst.apply(returnT));
             return subst.apply(returnT);
         }
     }
